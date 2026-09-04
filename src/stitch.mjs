@@ -113,8 +113,8 @@ const shellCss = `
 .navdot.show { display: block; animation: bcPulse 1.2s ease-in-out infinite; }
 `;
 
-const out = `<title>ביס לעסקים</title>
-<meta name="description" content="אפליקציית העסק של ביס — פניות מלקוחות ועריכת הפרופיל במקום אחד, עם ניווט תחתון. גרסת דמו." />
+const out = `<title>(מ)טעים לי לעסקים</title>
+<meta name="description" content="אפליקציית העסק של (מ)טעים לי — פניות מלקוחות ועריכת הפרופיל במקום אחד, עם ניווט תחתון. גרסת דמו." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&family=Miriam+Libre:wght@400;700&display=swap" />
@@ -134,7 +134,7 @@ ${shellCss}
             <div class="avatar">ב</div>
             <div class="who">
                 <b>בזלת קפה</b>
-                <span>לב תל אביב · ביס לעסקים</span>
+                <span>לב תל אביב · (מ)טעים לי לעסקים</span>
             </div>
         </div>
         <div class="appbar-slot">

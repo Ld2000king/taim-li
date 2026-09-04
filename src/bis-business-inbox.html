@@ -1,4 +1,4 @@
-<title>ביס · פניות</title>
+<title>(מ)טעים לי · פניות</title>
 <meta name="description" content="תיבת הפניות של העסק — קבלה, אישור וקביעת שעה לפניות מלקוחות. גרסת דמו." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -6,7 +6,7 @@
 
 <style>
 /* ============================================================================
-   ביס · פניות — the business inbox (demo)
+   (מ)טעים לי · פניות — the business inbox (demo)
    Same "יום־יום" language as the editor & the swipe app: warm paper, soft
    rounded surfaces, clay / sage / honey / plum accents, feather shadows.
    ============================================================================ */
@@ -525,7 +525,7 @@ input:focus, textarea:focus, select:focus {
         <button class="live-toggle on tap" id="liveToggle" type="button">
             <i></i><span id="liveLabel">משדר · 4 מקומות</span>
         </button>
-        <div class="wordmark">ביס</div>
+        <div class="wordmark">(מ)טעים לי</div>
     </header>
 
     <div class="scroll" id="scroll">
@@ -583,7 +583,7 @@ input:focus, textarea:focus, select:focus {
         {
             id: 'dana', name: 'דנה פ׳', initials: 'דפ', hue: HUES.dana, ago: 'לפני דקה',
             type: 'table', party: 4, when: 'היום 17:30', today: true, time: '17:30',
-            note: 'שלום! ראינו את הכרטיס בביס, באים 4 מבוגרים וכלב קטן. יש מקום בחוץ?',
+            note: 'שלום! ראינו את הכרטיס ב(מ)טעים לי, באים 4 מבוגרים וכלב קטן. יש מקום בחוץ?',
             liked: ['ישיבה בחוץ', 'כלבים מוזמנים', 'טבעוני-פרנדלי'],
             status: 'pending', proposed: null
         },
@@ -833,7 +833,7 @@ input:focus, textarea:focus, select:focus {
         detailId = id;
         $('#detailHead').innerHTML =
             '<div class="pic" style="background:' + q.hue + '">' + q.initials + '</div>' +
-            '<div class="who"><h3>' + q.name + '</h3><span>' + q.ago + ' · דרך ביס</span></div>' +
+            '<div class="who"><h3>' + q.name + '</h3><span>' + q.ago + ' · דרך (מ)טעים לי</span></div>' +
             '<button class="x tap" id="detailX" type="button" aria-label="סגירה">' + ICONS.x + '</button>';
 
         var reqBig = q.type === 'table' ? q.party + ' סועדים' : 'הבעת עניין כללית';

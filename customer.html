@@ -9,7 +9,7 @@
   img { max-width: 100%; }
   [hidden] { display: none !important; }
 </style>
-<title>ביס · פנוי עכשיו</title>
+<title>(מ)טעים לי · פנוי עכשיו</title>
 <meta name="description" content="צד הלקוח החדש: נכנסים לפי סיטואציה, רואים רק הצעות חיות עם שעון מתקתק, ותופסים מקום. גרסת דמו." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -17,7 +17,7 @@
 
 <style>
 /* ============================================================================
-   ביס · פנוי עכשיו — situation-first, expiring-offer deck.
+   (מ)טעים לי · פנוי עכשיו — situation-first, expiring-offer deck.
    Same "יום־יום" tokens as the rest of the product family.
    ============================================================================ */
 :root {
@@ -497,7 +497,7 @@ input:focus, textarea:focus, select:focus {
     <!-- A: situation picker -->
     <section class="screen active" id="screenPick">
         <div class="pick">
-            <div class="word">ביס</div>
+            <div class="word">(מ)טעים לי</div>
             <h1>מה בא לך עכשיו?</h1>
             <p class="sub">נראה לך רק מה שבאמת פנוי בשעות הקרובות — ומה שעומד להיעלם.</p>
             <div class="sit-grid" id="sitGrid"></div>
@@ -888,7 +888,7 @@ input:focus, textarea:focus, select:focus {
     function takeHold(o) {
         var h = {
             id: 'h' + Date.now(), offer: o,
-            code: 'ביס-' + Math.floor(1000 + Math.random() * 8999),
+            code: 'טעים-' + Math.floor(1000 + Math.random() * 8999),
             until: new Date(Date.now() + 15 * 60000)
         };
         holds.unshift(h);
