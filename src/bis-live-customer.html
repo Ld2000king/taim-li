@@ -1,0 +1,977 @@
+<title>ביס · פנוי עכשיו</title>
+<meta name="description" content="צד הלקוח החדש: נכנסים לפי סיטואציה, רואים רק הצעות חיות עם שעון מתקתק, ותופסים מקום. גרסת דמו." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&family=Miriam+Libre:wght@400;700&display=swap" />
+
+<style>
+/* ============================================================================
+   ביס · פנוי עכשיו — situation-first, expiring-offer deck.
+   Same "יום־יום" tokens as the rest of the product family.
+   ============================================================================ */
+:root {
+    /* ---- "נקי" — warm-neutral ground, never cold grey ---- */
+    --paper: #FCFBF9;
+    --paper-edge: #F2F0EB;
+    --card: #FFFFFF;
+    --card-2: #F5F3EF;
+    --line: #EAE7E1;
+
+    /* ---- ink: every step clears 4.5:1 on white ---- */
+    --ink: #14181A;
+    --ink-soft: #565D61;
+    --ink-faint: #6E7579;
+
+    /* ---- exactly two hues carry the whole app ---- */
+    --teal: #0E7C7B;        /* primary · positive · confirmed */
+    --teal-deep: #0A6160;
+    --teal-tint: #E4F1F0;
+    --pink: #D6246E;        /* urgency · expiring · destructive */
+    --pink-tint: #FCE7EF;
+
+    /* ---- old role names remapped onto the two hues ---- */
+    --sage: var(--teal);
+    --sage-tint: var(--teal-tint);
+    --clay: var(--teal);
+    --clay-deep: var(--teal-deep);
+    --clay-tint: var(--teal-tint);
+    --honey: var(--pink);
+    --honey-tint: var(--pink-tint);
+    --plum: var(--ink-soft);       /* tags go neutral — this is most of the de-cluttering */
+    --plum-tint: var(--card-2);
+    --plum-line: var(--line);
+    --rose: var(--pink);
+    --rose-tint: var(--pink-tint);
+
+    --shadow-soft: 0 1px 2px rgba(20, 24, 26, .04), 0 8px 24px rgba(20, 24, 26, .06);
+    --shadow-lift: 0 2px 6px rgba(20, 24, 26, .05), 0 18px 44px rgba(20, 24, 26, .12);
+    --shadow-depth-sm: var(--shadow-soft);
+    --shadow-depth-md: var(--shadow-soft);
+    --shadow-depth-lg: var(--shadow-lift);
+    --glow-green: var(--shadow-soft);
+    --glow-gold: var(--shadow-soft);
+
+    --radius-sm: 12px;
+    --radius-tile: 16px;
+    --radius-btn: 14px;
+    --radius-card: 22px;
+    --radius-frame: 28px;
+
+    --font-display: 'Miriam Libre', Heebo, Georgia, serif;
+    --font-ui: 'Heebo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+    --app-max-width: 460px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+    font-family: var(--font-ui); background: var(--paper-edge); color: var(--ink);
+    overflow: hidden; -webkit-tap-highlight-color: transparent; line-height: 1.55;
+}
+button { font-family: var(--font-ui); cursor: pointer; }
+#app {
+    position: relative; direction: rtl; height: 100dvh;
+    max-width: var(--app-max-width); margin: 0 auto;
+    background: var(--paper); box-shadow: var(--shadow-soft);
+    border-radius: var(--radius-frame); overflow: hidden;
+    display: flex; flex-direction: column;
+}
+.tap { transition: transform .14s cubic-bezier(.34,1.56,.64,1), filter .14s ease, background .16s ease, border-color .16s ease; }
+.tap:active { transform: scale(.96); filter: brightness(.97); }
+
+.screen { display: none; flex: 1; min-height: 0; flex-direction: column; }
+.screen.active { display: flex; }
+
+/* ---------- screen A: situation picker ---------- */
+.pick { flex: 1; overflow-y: auto; padding: 34px 22px 28px; }
+.pick .word {
+    font-family: var(--font-display); font-weight: 700; font-size: 24px;
+    color: var(--clay-deep); margin-bottom: 26px;
+}
+.pick h1 {
+    font-family: var(--font-display); font-weight: 700; font-size: 30px;
+    line-height: 1.25; margin-bottom: 8px; text-wrap: balance;
+}
+.pick .sub { font-size: 14px; color: var(--ink-soft); margin-bottom: 24px; text-wrap: pretty; }
+.sit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+.sit {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius-tile); padding: 16px 14px;
+    text-align: start; display: flex; flex-direction: column; gap: 8px;
+    min-height: 108px;
+}
+.sit:hover { border-color: var(--clay); }
+.sit svg { width: 24px; height: 24px; color: var(--clay-deep); }
+.sit b { font-size: 15px; font-weight: 700; display: block; }
+.sit span { font-size: 11.5px; color: var(--ink-faint); }
+.pick .foot { margin-top: 22px; font-size: 12px; color: var(--ink-faint); text-align: center; }
+
+/* ---------- screen B: feed ---------- */
+.bar {
+    flex-shrink: 0; display: flex; align-items: center; justify-content: space-between;
+    gap: 10px; padding: 12px 16px 10px; border-bottom: 1px solid var(--line);
+}
+.sit-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--clay-tint); border: 1px solid #E7CDBA;
+    border-radius: 999px; padding: 7px 14px 7px 11px;
+    font-size: 13.5px; font-weight: 600; color: var(--clay-deep);
+}
+.sit-chip svg { width: 15px; height: 15px; }
+.holds-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--card-2); border: 1px solid var(--line);
+    border-radius: 999px; padding: 7px 12px;
+    font-size: 13px; font-weight: 600; color: var(--ink-soft);
+}
+.holds-pill svg { width: 15px; height: 15px; }
+.holds-pill.hot { background: var(--sage-tint); border-color: #D6E4D8; color: var(--sage); }
+
+.when {
+    flex-shrink: 0; display: flex; gap: 8px; padding: 11px 16px;
+}
+.wbtn {
+    flex: 1; background: var(--card); border: 1px solid var(--line);
+    border-radius: 999px; padding: 9px 6px;
+    font-size: 13px; font-weight: 500; color: var(--ink-soft);
+}
+.wbtn[aria-pressed="true"] {
+    background: var(--ink); border-color: var(--ink); color: var(--paper); font-weight: 600;
+}
+
+.stage { flex: 1; position: relative; padding: 6px 16px 4px; min-height: 0; }
+.card {
+    position: absolute; top: 6px; inset-inline: 16px; bottom: 4px;
+    background: var(--card); border-radius: var(--radius-card);
+    overflow: hidden; box-shadow: var(--shadow-lift);
+    will-change: transform; user-select: none; -webkit-user-select: none;
+}
+.card.behind-1 { transform: scale(.955) translateY(10px); }
+.card.behind-2 { transform: scale(.912) translateY(18px); }
+.card.settling { transition: transform .32s cubic-bezier(.22,1,.36,1); }
+.card.top { touch-action: none; cursor: grab; }
+.card.gone { transition: transform .36s ease, opacity .36s ease; opacity: 0; }
+
+.c-media { position: absolute; inset: 0; background: var(--card-2); }
+.c-media svg { width: 100%; height: 100%; display: block; }
+.c-media::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(38,33,27,.94) 0%, rgba(38,33,27,.42) 46%, rgba(38,33,27,0) 66%);
+}
+.c-chips {
+    position: absolute; top: 13px; inset-inline: 14px; z-index: 3;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.t-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--honey); color: var(--ink);
+    font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums;
+    padding: 6px 12px; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(38,33,27,.22);
+}
+.t-chip svg { width: 14px; height: 14px; }
+.t-chip.warn { background: var(--rose); color: #fff; animation: beat 1s ease-in-out infinite; }
+.t-chip.later { background: rgba(251,248,243,.92); color: var(--ink-soft); font-weight: 600; }
+@keyframes beat { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+.s-chip {
+    background: rgba(38,33,27,.55); color: #fff;
+    font-size: 11.5px; font-weight: 600; padding: 6px 11px; border-radius: 999px;
+    backdrop-filter: blur(4px);
+}
+
+.c-body { position: absolute; inset-inline: 0; bottom: 0; z-index: 2; padding: 18px 18px 20px; color: #fff; }
+.c-eyebrow {
+    font-size: 10.5px; font-weight: 700; letter-spacing: 1px;
+    color: #FFD98F; margin-bottom: 5px;
+}
+.c-offer {
+    font-family: var(--font-display); font-weight: 700; font-size: 27px;
+    line-height: 1.2; text-wrap: balance;
+}
+.c-note { font-size: 12.5px; color: #E9E1D3; margin-top: 3px; }
+.c-venue {
+    display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+    margin-top: 13px; font-size: 14px; font-weight: 600;
+}
+.c-venue .dot { opacity: .5; }
+.c-venue .walk { color: #EFE7DA; font-weight: 500; }
+.c-fit {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 10px; font-size: 12px; font-weight: 600;
+    background: rgba(255,255,255,.16); color: #fff;
+    padding: 5px 11px; border-radius: 999px; backdrop-filter: blur(3px);
+}
+.c-fit svg { width: 13px; height: 13px; color: #A9E0B8; flex-shrink: 0; }
+
+.stamp {
+    position: absolute; top: 74px; z-index: 4;
+    font-family: var(--font-display); font-weight: 700; font-size: 25px;
+    padding: 6px 16px; border-radius: 12px; border: 3px solid currentColor;
+    opacity: 0; pointer-events: none;
+}
+.stamp.yes { inset-inline-start: 22px; transform: rotate(-14deg); color: #57C97E; }
+.stamp.no { inset-inline-end: 22px; transform: rotate(14deg); color: #E6E1D6; }
+
+.acts { flex-shrink: 0; display: flex; align-items: center; justify-content: center; gap: 20px; padding: 12px 0 18px; }
+.act { border: none; border-radius: 50%; display: grid; place-items: center; background: var(--card); box-shadow: var(--shadow-lift); }
+.act svg { width: 24px; height: 24px; }
+.act.no { width: 56px; height: 56px; color: var(--rose); }
+.act.info { width: 46px; height: 46px; color: var(--ink-faint); }
+.act.yes { width: 68px; height: 68px; background: var(--sage); color: #fff; }
+.act.yes svg { width: 30px; height: 30px; }
+.act:disabled { opacity: .4; box-shadow: var(--shadow-soft); }
+
+/* ---------- empty ---------- */
+.empty {
+    position: absolute; inset: 6px 16px 4px;
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius-card); box-shadow: var(--shadow-soft);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 28px; gap: 13px;
+}
+.empty svg.big { width: 50px; height: 50px; color: var(--ink-faint); }
+.empty h2 { font-family: var(--font-display); font-weight: 600; font-size: 20px; }
+.empty p { font-size: 13.5px; color: var(--ink-soft); max-width: 270px; text-wrap: pretty; }
+.empty .btn {
+    background: var(--clay-deep); color: #fff; border: none;
+    border-radius: 999px; padding: 12px 22px; font-weight: 700; font-size: 14px;
+}
+.empty .btn.ghost { background: var(--card-2); color: var(--ink-soft); }
+.empty .wait {
+    display: flex; align-items: center; gap: 9px;
+    background: var(--honey-tint); border: 1px solid #EFDFC0;
+    border-radius: 14px; padding: 12px 14px; margin-top: 4px;
+    font-size: 12.5px; color: var(--ink); text-align: start;
+}
+.empty .wait svg { width: 18px; height: 18px; color: var(--clay-deep); flex-shrink: 0; }
+.empty .wait.on { background: var(--sage-tint); border-color: #D6E4D8; }
+.empty .wait.on svg { color: var(--sage); }
+
+/* ---------- hold modal ---------- */
+.modal-wrap {
+    position: fixed; inset: 0; z-index: 80; background: rgba(47,42,35,.5);
+    backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; padding: 24px;
+}
+.modal-wrap.show { display: flex; }
+.modal {
+    background: var(--card); border-radius: var(--radius-card); box-shadow: var(--shadow-lift);
+    padding: 26px 22px 20px; text-align: center; max-width: 340px; width: 100%;
+}
+.modal .spark {
+    width: 62px; height: 62px; margin: 0 auto 15px; border-radius: 50%;
+    background: var(--sage-tint); color: var(--sage); display: grid; place-items: center;
+}
+.modal .spark svg { width: 32px; height: 32px; }
+.modal h2 { font-family: var(--font-display); font-weight: 700; font-size: 21px; }
+.modal .what { font-size: 14px; color: var(--ink); margin-top: 8px; font-weight: 600; }
+.modal .where { font-size: 13px; color: var(--ink-soft); margin-top: 2px; }
+.arrive {
+    background: var(--honey-tint); border: 1px solid #EFDFC0; border-radius: 16px;
+    padding: 14px; margin-top: 16px;
+}
+.arrive .lbl { font-size: 11.5px; font-weight: 600; color: var(--ink-soft); }
+.arrive .num {
+    font-family: var(--font-display); font-weight: 700; font-size: 32px;
+    font-variant-numeric: tabular-nums; color: var(--clay-deep); line-height: 1.1; margin-top: 2px;
+}
+.code {
+    margin-top: 12px; font-size: 13px; color: var(--ink-soft);
+}
+.code b {
+    font-family: var(--font-ui); font-weight: 700; color: var(--ink);
+    background: var(--card-2); border-radius: 8px; padding: 3px 9px;
+    letter-spacing: .5px; margin-inline-start: 4px;
+}
+.modal-btns { display: flex; flex-direction: column; gap: 9px; margin-top: 18px; }
+.modal-btns button { border-radius: 999px; padding: 13px; font-weight: 700; font-size: 14px; border: none; }
+.modal-btns .primary { background: var(--clay-deep); color: #fff; }
+.modal-btns .ghost { background: var(--card-2); color: var(--ink-soft); }
+
+/* ---------- holds tray ---------- */
+.tray-wrap { position: fixed; inset: 0; z-index: 70; background: rgba(47,42,35,.42); display: none; }
+.tray-wrap.show { display: block; }
+.tray {
+    position: absolute; inset-inline: 0; bottom: 0;
+    max-width: var(--app-max-width); margin: 0 auto;
+    background: var(--paper); border-radius: 24px 24px 0 0; max-height: 76%;
+    display: flex; flex-direction: column;
+    transform: translateY(100%); transition: transform .34s cubic-bezier(.22,1,.36,1);
+}
+.tray-wrap.show .tray { transform: translateY(0); }
+.grip { width: 40px; height: 4px; border-radius: 999px; background: var(--line); margin: 10px auto 4px; }
+.tray-head { display: flex; align-items: center; justify-content: space-between; padding: 8px 20px 12px; }
+.tray-head h2 { font-family: var(--font-display); font-weight: 700; font-size: 19px; }
+.tray-head button { background: none; border: none; color: var(--ink-soft); font-size: 14px; font-weight: 600; }
+.tray-list { overflow-y: auto; padding: 4px 16px 24px; display: flex; flex-direction: column; gap: 10px; }
+.hold {
+    display: flex; gap: 12px; align-items: center;
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius-tile); padding: 12px;
+}
+.hold.dead { opacity: .55; }
+.hold .thumb { width: 52px; height: 52px; border-radius: 13px; overflow: hidden; flex-shrink: 0; background: var(--card-2); }
+.hold .thumb svg { width: 100%; height: 100%; display: block; }
+.hold .txt { flex: 1; min-width: 0; }
+.hold .txt h4 { font-size: 14.5px; font-weight: 700; }
+.hold .txt p { font-size: 12.5px; color: var(--ink-soft); margin-top: 2px; }
+.hold .cd {
+    font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums;
+    padding: 6px 10px; border-radius: 999px; white-space: nowrap;
+    background: var(--sage-tint); color: var(--sage);
+}
+.hold .cd.warn { background: var(--rose-tint); color: var(--rose); }
+.hold .cd.dead { background: var(--card-2); color: var(--ink-faint); }
+.tray-empty { text-align: center; color: var(--ink-soft); font-size: 13.5px; padding: 32px 20px; }
+
+/* ---------- toast ---------- */
+.toast {
+    position: fixed; left: 50%; bottom: 22px; transform: translate(-50%,170%);
+    background: var(--ink); color: var(--paper); font-weight: 600; font-size: 13.5px;
+    padding: 12px 20px; border-radius: 999px; box-shadow: var(--shadow-lift);
+    z-index: 120; max-width: 88vw; text-align: center;
+    transition: transform .4s cubic-bezier(.34,1.4,.64,1);
+}
+.toast.show { transform: translate(-50%,0); }
+.toast b { color: #FFD98F; }
+
+@media (prefers-reduced-motion: reduce) {
+    .t-chip.warn { animation: none; }
+    .tap, .card.settling, .card.gone, .tray, .toast { transition: none; }
+}
+
+/* ============================================================================
+   "נקי" pass — structural de-decoration on top of the layout above.
+   Fewer filled pills, hairlines instead of heavy borders, one soft shadow.
+   ============================================================================ */
+
+/* --- countdowns: a quiet white pill that only turns loud near the end --- */
+.t-chip, .card-live, .swipe-live, .inq .stat.pending {
+    background: var(--card) !important;
+    color: var(--ink) !important;
+    box-shadow: 0 1px 3px rgba(20, 24, 26, .12);
+    font-weight: 600;
+}
+.t-chip svg { stroke: var(--pink); color: var(--pink); background: none; }
+.card-live i, .swipe-live i { background: var(--pink); }
+.t-chip.warn {
+    background: var(--pink) !important; color: #fff !important;
+}
+.t-chip.warn svg { stroke: #fff; }
+.t-chip.later { background: var(--card-2) !important; color: var(--ink-soft) !important; box-shadow: none; }
+
+/* --- segmented "when": white pill riding a light track --- */
+.when {
+    background: var(--card-2);
+    border-radius: 999px;
+    padding: 4px;
+    margin: 11px 16px;
+    gap: 4px;
+}
+.wbtn { background: transparent; border: none; color: var(--ink-soft); font-weight: 500; }
+.wbtn[aria-pressed="true"] {
+    background: var(--card); color: var(--ink); font-weight: 600;
+    box-shadow: 0 1px 3px rgba(20, 24, 26, .10);
+}
+
+/* --- chips and tags: neutral, hairline, no colour blocks --- */
+.chip, .fchip, .sit-chip, .holds-pill, .live-toggle {
+    border-color: var(--line);
+    box-shadow: none;
+}
+.chip[aria-pressed="true"] {
+    background: var(--teal-tint); border-color: transparent; color: var(--teal-deep);
+}
+.fchip[aria-pressed="true"] {
+    background: var(--teal-tint); border-color: transparent; color: var(--teal-deep);
+}
+.d-tags span, .inq-liked span {
+    background: var(--card-2); border-color: var(--line); color: var(--ink-soft);
+}
+
+/* --- price segments: solid teal, white label --- */
+.seg[aria-pressed="true"] {
+    background: var(--teal); color: #fff; box-shadow: none;
+}
+
+/* --- primary actions --- */
+.btn.save, .btn-approve, .detail-cta .approve, .empty .btn, .modal-btns .primary, .sheet-cta .send {
+    background: var(--teal); color: #fff; box-shadow: none;
+}
+.act.yes, .circle-btn.like { background: var(--teal); color: #fff; }
+.act.no, .circle-btn.nope { color: var(--ink-soft); }
+.act.info { color: var(--ink-faint); }
+.act, .circle-btn { box-shadow: var(--shadow-soft); }
+
+/* skipping is not destructive — keep it neutral */
+.btn-decline, .sheet-cta .pass { color: var(--ink-soft) !important; }
+
+/* --- cards: one soft shadow, hairline, consistent radius --- */
+.section, .inq, .photo, .booking, .stat, .hold, .empty, .live-card, .d-map, .sit {
+    box-shadow: var(--shadow-soft);
+}
+.card, .swipe-card { box-shadow: var(--shadow-lift); }
+.booking { background: var(--teal-tint); border-color: transparent; }
+.live-card { background: var(--card-2); border-color: var(--line); }
+.live-card.off { opacity: .55; }
+
+/* --- status pills --- */
+.pill.approved, .inq .stat.ok { background: var(--teal-tint); color: var(--teal-deep); }
+.pill.pending { background: var(--pink-tint) !important; color: var(--pink) !important; box-shadow: none; }
+.pill.declined { background: var(--card-2); color: var(--ink-faint); }
+
+/* --- photo scrims: neutral, not warm brown --- */
+.c-media::after {
+    background: linear-gradient(to top, rgba(20, 24, 26, .92) 0%, rgba(20, 24, 26, .40) 46%, rgba(20, 24, 26, 0) 66%);
+}
+.card-media::after, .swipe-media::after {
+    background: linear-gradient(to top, rgba(20, 24, 26, .90) 0%, rgba(20, 24, 26, .34) 44%, rgba(20, 24, 26, 0) 64%);
+}
+.sheet-hero::after { background: linear-gradient(to top, rgba(20, 24, 26, .46), transparent 34%); }
+.c-eyebrow, .swipe-body h3 em, .card-name em, .swipe-meta b, .card-meta b, .toast b { color: #FFFFFF; }
+.c-eyebrow { opacity: .82; }
+.c-fit svg { color: #fff; stroke: #fff; }
+.card-status.open { color: #B7E6D9; }
+.card-status.shut { color: #F3C6D8; }
+
+/* --- the offer line is the one place the display face appears --- */
+.c-offer, .swipe-body h3, .card-name, .modal h2, .pick h1 { font-family: var(--font-display); font-weight: 700; }
+
+/* --- swipe stamps --- */
+.stamp.yes { color: #35C4A8; }
+.stamp.no { color: #E8E5DE; }
+
+/* --- hold sheet --- */
+.arrive { background: var(--card-2); border-color: var(--line); }
+.arrive .num { color: var(--teal-deep); }
+.hold .cd { background: var(--teal-tint); color: var(--teal-deep); }
+.hold .cd.warn { background: var(--pink-tint); color: var(--pink); }
+.hold .cd.dead { background: var(--card-2); color: var(--ink-faint); }
+.empty .wait { background: var(--card-2); border-color: var(--line); }
+.empty .wait svg { color: var(--ink-soft); }
+.empty .wait.on { background: var(--teal-tint); border-color: transparent; }
+.empty .wait.on svg { color: var(--teal); }
+
+/* --- business app bits --- */
+.progress-fill { background: var(--teal); }
+.progress-label b { color: var(--teal-deep); }
+.section-head .idx { color: var(--teal); }
+.add-row { background: var(--teal-tint); color: var(--teal-deep); border-color: transparent; }
+.switch[aria-checked="true"] { background: var(--teal); }
+.dish-price, .swipe-dish span:last-child, .d-dish .p { color: var(--teal-deep) !important; }
+.dish-remove { background: var(--card-2); color: var(--ink-soft); }
+.stat.accent b { color: var(--teal); }
+.inq-kind svg { color: var(--teal); }
+.inq-state.ok { color: var(--teal); }
+.msg.you { background: var(--teal-tint); }
+.live-toggle.on { background: var(--teal-tint); border-color: transparent; color: var(--teal-deep); }
+.live-toggle.on i { background: var(--teal); }
+.day-closed-tag { color: var(--pink); }
+.navbtn.active { color: var(--teal-deep); }
+.navbadge { background: var(--pink); }
+.wordmark { color: var(--teal-deep); }
+.brand .avatar { background: var(--teal-tint); color: var(--teal-deep); }
+.appbar-slot .live-toggle { cursor: default; }
+.sit svg { color: var(--teal); }
+.sit:hover { border-color: var(--teal); }
+input:focus, textarea:focus, select:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(14, 124, 123, .16);
+}
+
+</style>
+
+<div id="app" lang="he" dir="rtl">
+
+    <!-- A: situation picker -->
+    <section class="screen active" id="screenPick">
+        <div class="pick">
+            <div class="word">ביס</div>
+            <h1>מה בא לך עכשיו?</h1>
+            <p class="sub">נראה לך רק מה שבאמת פנוי בשעות הקרובות — ומה שעומד להיעלם.</p>
+            <div class="sit-grid" id="sitGrid"></div>
+            <p class="foot">גרסת דמו · ההצעות והזמנים נוצרים יחסית לשעה הנוכחית</p>
+        </div>
+    </section>
+
+    <!-- B: live feed -->
+    <section class="screen" id="screenFeed">
+        <header class="bar">
+            <button class="sit-chip tap" id="sitChip" type="button"></button>
+            <button class="holds-pill tap" id="holdsPill" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                <span id="holdsCount">0</span>
+            </button>
+        </header>
+        <nav class="when" id="whenRow"></nav>
+        <div class="stage" id="stage"></div>
+        <div class="acts">
+            <button class="act info tap" id="btnInfo" type="button" aria-label="החלפת סיטואציה">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v6h6"/><path d="M4.6 14a8 8 0 1 0 1.3-6.3L4 10"/></svg>
+            </button>
+            <button class="act no tap" id="btnNo" type="button" aria-label="דילוג">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+            </button>
+            <button class="act yes tap" id="btnYes" type="button" aria-label="תפיסת מקום">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            </button>
+        </div>
+    </section>
+</div>
+
+<div class="modal-wrap" id="modalWrap">
+    <div class="modal">
+        <div class="spark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+        <h2>תפסת מקום</h2>
+        <div class="what" id="mWhat"></div>
+        <div class="where" id="mWhere"></div>
+        <div class="arrive">
+            <div class="lbl">השולחן שמור לך עוד</div>
+            <div class="num" id="mCountdown">15:00</div>
+        </div>
+        <div class="code">קוד בכניסה <b id="mCode"></b></div>
+        <div class="modal-btns">
+            <button class="primary tap" id="mNext" type="button">להמשיך לחפש</button>
+            <button class="ghost tap" id="mHolds" type="button">התפיסות שלי</button>
+        </div>
+    </div>
+</div>
+
+<div class="tray-wrap" id="trayWrap">
+    <div class="tray">
+        <div class="grip"></div>
+        <div class="tray-head">
+            <h2>התפיסות שלי</h2>
+            <button id="trayClose" type="button">סגירה</button>
+        </div>
+        <div class="tray-list" id="trayList"></div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+    "use strict";
+
+    var ART = {
+        coffee: '<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="300" fill="#EADFCB"/><rect width="400" height="300" fill="#E3D4BB"/><circle cx="200" cy="150" r="150" fill="#8a6440"/><circle cx="200" cy="150" r="112" fill="#e9ddc7"/><circle cx="200" cy="150" r="100" fill="#c98a4b"/><circle cx="200" cy="150" r="92" fill="#a9682f"/><path d="M200 92c14 20 14 40 0 58-14-18-14-38 0-58zm0 62c10 16 26 22 44 20-6 16-22 24-44 24s-38-8-44-24c18 2 34-4 44-20zm0 0c-10 16-26 22-44 20 2-16 14-28 30-32 6-2 10 4 14 12zm0 0c10 16 26 22 44 20-2-16-14-28-30-32-6-2-10 4-14 12z" fill="#e9ddc7" opacity="0.9"/><ellipse cx="330" cy="150" rx="16" ry="30" fill="none" stroke="#e9ddc7" stroke-width="10"/><filter id="n"><feTurbulence baseFrequency="0.9" numOctaves="2"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope="0.05"/></feComponentTransfer></filter><rect width="400" height="300" filter="url(#n)"/></svg>',
+        shakshuka: '<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="300" fill="#ECE4D2"/><circle cx="200" cy="150" r="150" fill="#DED4BC"/><circle cx="185" cy="150" r="120" fill="#1f1c17"/><circle cx="185" cy="150" r="104" fill="#2e5e3a"/><circle cx="185" cy="150" r="104" fill="#367044" opacity="0.7"/><rect x="300" y="140" width="90" height="22" rx="11" fill="#1f1c17"/><ellipse cx="160" cy="128" rx="34" ry="26" fill="#f3ead0"/><circle cx="160" cy="128" r="14" fill="#e8a13c"/><ellipse cx="214" cy="176" rx="32" ry="24" fill="#f3ead0"/><circle cx="214" cy="176" r="13" fill="#e8a13c"/><path d="M120 96c8 6 8 14 2 20M240 110c8 6 8 14 2 20M150 200c8 6 8 14 2 20" stroke="#8fbf6a" stroke-width="6" fill="none" stroke-linecap="round"/><circle cx="118" cy="170" r="7" fill="#b5401f"/><circle cx="235" cy="140" r="6" fill="#b5401f"/><circle cx="190" cy="112" r="5" fill="#b5401f"/><filter id="n2"><feTurbulence baseFrequency="0.9" numOctaves="2"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope="0.05"/></feComponentTransfer></filter><rect width="400" height="300" filter="url(#n2)"/></svg>',
+        storefront: '<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="300" fill="#b98f5e"/><rect y="150" width="400" height="150" fill="#CDA97F"/><rect x="40" y="70" width="320" height="150" fill="#2c2620"/><rect x="56" y="86" width="130" height="120" fill="#3f6f6a"/><rect x="214" y="86" width="130" height="120" fill="#1f1c17"/><rect x="214" y="86" width="130" height="120" fill="#c68a2e" opacity="0.15"/><rect x="30" y="52" width="340" height="26" fill="#8f4216"/><g fill="#e9ddc7"><rect x="30" y="52" width="42" height="26"/><rect x="114" y="52" width="42" height="26"/><rect x="198" y="52" width="42" height="26"/><rect x="282" y="52" width="42" height="26"/></g><rect x="150" y="120" width="100" height="34" rx="6" fill="#17140f"/><text x="200" y="144" font-family="Georgia, serif" font-size="20" fill="#e7b45c" text-anchor="middle" font-weight="bold">בית קפה</text><circle cx="352" cy="210" r="40" fill="#3c5a34"/><circle cx="322" cy="230" r="34" fill="#4a6f3c"/><circle cx="360" cy="245" r="30" fill="#3c5a34"/><rect x="344" y="240" width="10" height="50" fill="#4a3323"/><rect x="70" y="238" width="70" height="10" rx="5" fill="#2c2620"/><rect x="98" y="238" width="8" height="40" fill="#2c2620"/><filter id="n3"><feTurbulence baseFrequency="0.9" numOctaves="2"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope="0.05"/></feComponentTransfer></filter><rect width="400" height="300" filter="url(#n3)"/></svg>',
+        croissant: '<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="300" fill="#d8cbb0"/><rect width="400" height="300" fill="#cbbd9e"/><ellipse cx="200" cy="165" rx="150" ry="90" fill="#efe7d4"/><ellipse cx="200" cy="160" rx="120" ry="66" fill="#e7dcc2"/><path d="M96 168c22-46 78-64 120-52 30 8 54 30 70 62-24-14-44-16-70-8-32 10-56 34-64 66-30-22-44-56-56-68z" fill="#b5773a"/><path d="M110 164c20-34 62-48 96-40M126 190c18-24 46-38 78-40M150 214c16-18 40-30 66-32" stroke="#8a5628" stroke-width="6" fill="none" stroke-linecap="round"/><g fill="#efe7d4"><ellipse cx="150" cy="150" rx="6" ry="3"/><ellipse cx="190" cy="140" rx="6" ry="3"/><ellipse cx="176" cy="196" rx="6" ry="3"/><ellipse cx="220" cy="176" rx="6" ry="3"/></g><circle cx="330" cy="120" r="34" fill="#a9682f"/><circle cx="330" cy="120" r="26" fill="#c98a4b"/><path d="M364 108c14 2 14 22 0 26" fill="none" stroke="#a9682f" stroke-width="7"/><filter id="n4"><feTurbulence baseFrequency="0.9" numOctaves="2"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope="0.05"/></feComponentTransfer></filter><rect width="400" height="300" filter="url(#n4)"/></svg>',
+        bourekas: '<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="300" fill="#E9E0CD"/><rect x="30" y="70" width="340" height="170" rx="14" fill="#DCD2BB"/><rect x="30" y="70" width="340" height="170" rx="14" fill="none" stroke="#5a5344" stroke-width="4"/><g><path d="M70 190l40-80 40 80z" fill="#d7a44e"/><path d="M160 190l40-80 40 80z" fill="#cf9a44"/><path d="M250 190l40-80 40 80z" fill="#d7a44e"/><path d="M115 210l40-80 40 80z" fill="#c9913c"/><path d="M205 210l40-80 40 80z" fill="#d7a44e"/></g><g fill="#3a3326"><circle cx="90" cy="150" r="2.5"/><circle cx="100" cy="165" r="2.5"/><circle cx="180" cy="150" r="2.5"/><circle cx="195" cy="168" r="2.5"/><circle cx="270" cy="150" r="2.5"/><circle cx="285" cy="162" r="2.5"/><circle cx="235" cy="180" r="2.5"/></g><g fill="#7aa653"><ellipse cx="150" cy="120" rx="7" ry="3"/><ellipse cx="240" cy="128" rx="7" ry="3"/><ellipse cx="120" cy="205" rx="7" ry="3"/></g><filter id="n5"><feTurbulence baseFrequency="0.9" numOctaves="2"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope="0.05"/></feComponentTransfer></filter><rect width="400" height="300" filter="url(#n5)"/></svg>',
+        pasta: '<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="300" fill="#EEE5D1"/><ellipse cx="200" cy="162" rx="150" ry="98" fill="#F7F1E3"/><ellipse cx="200" cy="158" rx="118" ry="72" fill="#EFE6D2"/><g fill="none" stroke="#E0A94B" stroke-width="7" stroke-linecap="round"><path d="M110 150c30-40 150-40 180 0"/><path d="M108 168c26-36 158-36 184 2"/><path d="M120 186c30-30 130-30 160 0"/><path d="M130 138c40-26 100-26 140 0"/><path d="M118 200c40-20 126-20 164 4"/></g><g fill="#C4452E"><circle cx="150" cy="150" r="9"/><circle cx="250" cy="168" r="9"/><circle cx="205" cy="135" r="8"/></g><g fill="#5f8f4a"><path d="M170 178c8-10 18-10 22 0-8 8-16 8-22 0z"/><path d="M232 146c8-10 18-10 22 0-8 8-16 8-22 0z"/></g><g stroke="#9a8a6a" stroke-width="7" fill="none" stroke-linecap="round"><path d="M330 92c5 40 5 118 3 156"/><path d="M320 92v24M330 92v24M340 92v24"/></g><filter id="np"><feTurbulence baseFrequency="0.9" numOctaves="2"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope="0.05"/></feComponentTransfer></filter><rect width="400" height="300" filter="url(#np)"/></svg>',
+        wine: '<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="300" fill="#EFE7D7"/><rect x="72" y="34" width="78" height="214" rx="30" fill="#3a5240"/><rect x="72" y="34" width="78" height="214" rx="30" fill="#2f4535" opacity="0.5"/><rect x="90" y="120" width="60" height="74" fill="#efe7d4"/><rect x="99" y="8" width="24" height="44" rx="6" fill="#6a4a34"/><path d="M232 68h98l-13 74a37 37 0 0 1-72 0z" fill="#f2ecdd"/><path d="M241 90h80l-7 50a30 30 0 0 1-66 0z" fill="#8f2f3a"/><rect x="277" y="176" width="8" height="58" fill="#d8cfbb"/><ellipse cx="281" cy="242" rx="48" ry="12" fill="#e4dcc6"/><g fill="#6a3350"><circle cx="150" cy="212" r="10"/><circle cx="168" cy="222" r="10"/><circle cx="156" cy="234" r="10"/><circle cx="176" cy="240" r="10"/></g><filter id="nw"><feTurbulence baseFrequency="0.9" numOctaves="2"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope="0.05"/></feComponentTransfer></filter><rect width="400" height="300" filter="url(#nw)"/></svg>',
+        bowl: '<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="300" fill="#E7EEDD"/><path d="M66 138a134 92 0 0 0 268 0z" fill="#e8dfc9"/><ellipse cx="200" cy="138" rx="134" ry="54" fill="#d9cdb0"/><ellipse cx="150" cy="130" rx="36" ry="21" fill="#7aa653"/><path d="M122 130c9-13 47-13 56 0-9 11-47 11-56 0z" fill="#5f8f4a"/><g fill="#c4452e"><circle cx="232" cy="124" r="13"/><circle cx="262" cy="140" r="13"/></g><g fill="#d9a94e"><circle cx="196" cy="150" r="8"/><circle cx="213" cy="159" r="8"/><circle cx="179" cy="159" r="8"/></g><path d="M250 114l26-11-7 26z" fill="#e0b83f"/><filter id="nb"><feTurbulence baseFrequency="0.9" numOctaves="2"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope="0.05"/></feComponentTransfer></filter><rect width="400" height="300" filter="url(#nb)"/></svg>',
+        map: '<svg viewBox="0 0 400 160" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="160" fill="#EEE9DE"/><g stroke="#DDD3C2" stroke-width="10" fill="none"><path d="M-10 46h420"/><path d="M-10 120h420"/><path d="M78 -10v180"/><path d="M300 -10v180"/></g><path d="M-10 84h420" stroke="#E4DCCC" stroke-width="20" fill="none"/><circle cx="200" cy="84" r="30" fill="#CB7D55" opacity="0.16"/><path d="M200 60c-12 0-21 9-21 21 0 15 21 35 21 35s21-20 21-35c0-12-9-21-21-21z" fill="#A6572F"/><circle cx="200" cy="80" r="7.5" fill="#fff"/></svg>'
+    };
+
+    var ICON = {
+        clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+        check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+        bell: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6M10 20a2 2 0 0 0 4 0"/></svg>',
+        empty: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
+    };
+
+    /* ---------- situations ---------- */
+    var SITUATIONS = [
+        { id: 'work',   label: 'לעבוד כמה שעות', hint: 'שקע, שקט, בלי למהר', party: 1, needs: ['עבודה מהלפטופ', 'שקט'],
+          icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M2 20h20"/></svg>' },
+        { id: 'date',   label: 'דייט', hint: 'שקט, אינטימי, ערב', party: 2, needs: ['רומנטי', 'אינטימי', 'יין טבעי'],
+          icon: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.7-10-9.1C.4 8.8 2 5.5 5.2 5.5c1.9 0 3.3 1 3.8 2 .5-1 1.9-2 3.8-2 3.2 0 4.8 3.3 3.2 6.4C19.5 16.3 12 21 12 21z"/></svg>' },
+        { id: 'family', label: 'עם המשפחה', hint: 'שולחן, נגיש, לא רועש', party: 4, needs: ['משפחתי', 'ארוחת בוקר', 'מקומי'],
+          icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M2 19c1-3.4 3.4-5 6-5s5 1.6 6 5M15.5 19c.7-2.2 2.2-3.4 4-3.4 1 0 2 .4 2.5 1"/></svg>' },
+        { id: 'quick',  label: 'משהו מהיר', hint: 'לחטוף ולזוז', party: 2, needs: ['מהיר', 'טייק אווי'],
+          icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>' },
+        { id: 'drinks', label: 'לשתות משהו', hint: 'בר, ערב, תוסס', party: 3, needs: ['בר', 'תוסס', 'פתוח מאוחר', 'יין טבעי'],
+          icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10v4.5a5 5 0 0 1-10 0z"/><path d="M12 12.5V19"/><path d="M8.5 19h7"/></svg>' },
+        { id: 'dog',    label: 'עם הכלב', hint: 'חייב ישיבה בחוץ', party: 2, needs: ['ישיבה בחוץ', 'כלבים מוזמנים'],
+          icon: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="7.2" cy="9.4" r="2"/><circle cx="11" cy="7.4" r="2"/><circle cx="15" cy="7.9" r="2"/><circle cx="18" cy="10.8" r="1.9"/><path d="M12.4 12.4c2.7 0 4.8 2 4.8 4.2 0 1.7-1.3 2.7-2.9 2.7-1.1 0-1.5-.4-2.5-.4s-1.4.4-2.5.4c-1.6 0-2.9-1-2.9-2.7 0-2.2 2.1-4.2 4.8-4.2z"/></svg>' }
+    ];
+
+    /* ---------- venues ---------- */
+    var BIZ = {
+        bazelet:  { name: 'בזלת קפה', cat: 'בית קפה', area: 'לב תל אביב', walk: 4,
+                    tags: ['עבודה מהלפטופ', 'שכונתי', 'ישיבה בחוץ', 'כלבים מוזמנים', 'טבעוני-פרנדלי', 'שקט'],
+                    photos: ['storefront', 'coffee', 'shakshuka'] },
+        nonna:    { name: 'טרטוריה נונה', cat: 'מסעדה', area: 'פלורנטין', walk: 9,
+                    tags: ['רומנטי', 'פסטה טרייה', 'יין טבעי', 'אינטימי'],
+                    photos: ['pasta', 'wine'] },
+        hamtzutz: { name: 'חמצוץ יין טבעי', cat: 'בר יין', area: 'נווה צדק', walk: 12,
+                    tags: ['יין טבעי', 'תוסס', 'בר', 'פתוח מאוחר'],
+                    photos: ['wine', 'bowl'] },
+        lehem:    { name: 'לחם של יום', cat: 'מאפייה', area: 'קרליבך', walk: 15,
+                    tags: ['מאפייה', 'בוקר', 'טייק אווי', 'מחמצת', 'מהיר'],
+                    photos: ['croissant', 'bourekas'] },
+        seven:    { name: 'סבן · חומוס ובוקר', cat: 'מסעדה', area: 'שוק הכרמל', walk: 6,
+                    tags: ['משפחתי', 'ארוחת בוקר', 'חומוס', 'מקומי', 'ישיבה בחוץ'],
+                    photos: ['shakshuka', 'bourekas'] },
+        bowls:    { name: 'באולים', cat: 'קערות', area: 'רוטשילד', walk: 8,
+                    tags: ['טבעוני-פרנדלי', 'בריא', 'מהיר', 'עבודה מהלפטופ', 'שקט'],
+                    photos: ['bowl', 'croissant'] }
+    };
+
+    /* ---------- offer seeds (relative to now, so the demo is always live) ---------- */
+    var SEEDS = [
+        { biz: 'bazelet',  startsIn: -12, lasts: 64,  seats: 4, eyebrow: 'הצעה', offer: '20% על כל התפריט', note: 'ישיבה בחוץ מתחת לפיקוסים', photo: 'storefront', fits: ['work', 'dog'] },
+        { biz: 'bazelet',  startsIn: -5,  lasts: 31,  seats: 2, eyebrow: 'על הבית', offer: 'קפה שני על הבית', note: 'שני מקומות בפינת הלפטופ', photo: 'coffee', fits: ['work'] },
+        { biz: 'seven',    startsIn: -20, lasts: 38,  seats: 6, eyebrow: 'מבצע', offer: 'מנת בוקר זוגית ₪79', note: 'במקום ₪92 · כולל שתייה', photo: 'shakshuka', fits: ['family', 'dog'] },
+        { biz: 'bowls',    startsIn: 0,   lasts: 90,  seats: 3, eyebrow: 'על הבית', offer: 'שייק ירוק על הבית', note: 'עם כל קערה · שקע בכל שולחן', photo: 'bowl', fits: ['work', 'quick'] },
+        { biz: 'lehem',    startsIn: -8,  lasts: 43,  seats: 8, eyebrow: 'סוף היום', offer: 'סל מאפים ₪25', note: 'במקום ₪48 · טייק אווי', photo: 'croissant', fits: ['quick'] },
+        { biz: 'nonna',    startsIn: 45,  lasts: 95,  seats: 4, eyebrow: 'הצעה', offer: '15% על כל התפריט', note: 'לשולחנות שמגיעים מוקדם', photo: 'pasta', fits: ['family', 'date'] },
+        { biz: 'nonna',    startsIn: 90,  lasts: 140, seats: 2, eyebrow: 'על הבית', offer: 'מנה ראשונה על הבית', note: 'שני מקומות בבר המטבח', photo: 'wine', fits: ['date'] },
+        { biz: 'hamtzutz', startsIn: 120, lasts: 200, seats: 5, eyebrow: 'האפי האוור', offer: 'כוס יין ₪24', note: 'במקום ₪34 · מוארך עד הסגירה', photo: 'wine', fits: ['drinks', 'date'] }
+    ];
+
+    var WHENS = [
+        { id: 'now',     label: 'עכשיו',    offsetMin: 0 },
+        { id: 'soon',    label: 'בעוד שעה', offsetMin: 60 },
+        { id: 'evening', label: 'הערב',     offsetMin: 180 }
+    ];
+
+    var $ = function (s, r) { return (r || document).querySelector(s); };
+    var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+    var hhmm = function (d) { return pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+
+    /* ---------- state ---------- */
+    var boot = new Date();
+    var offers = SEEDS.map(function (s, i) {
+        var from = new Date(boot.getTime() + s.startsIn * 60000);
+        return {
+            id: 'o' + i, bizId: s.biz, biz: BIZ[s.biz],
+            from: from, until: new Date(from.getTime() + s.lasts * 60000),
+            seats: s.seats, eyebrow: s.eyebrow, offer: s.offer, note: s.note,
+            photo: s.photo, fits: s.fits
+        };
+    });
+
+    var situation = null;
+    var whenId = 'now';
+    var acted = {};
+    var holds = [];
+    var deck = [];
+    var waiting = false;
+    var topCard = null;
+
+    function targetTime() {
+        var w = WHENS.filter(function (x) { return x.id === whenId; })[0];
+        return new Date(Date.now() + w.offsetMin * 60000);
+    }
+    function activeAt(o, t) { return o.from <= t && t < o.until; }
+    function fitReasons(o) {
+        if (!situation) return [];
+        return situation.needs.filter(function (n) { return o.biz.tags.indexOf(n) !== -1; });
+    }
+    function matches(o) {
+        if (!situation) return false;
+        return o.fits.indexOf(situation.id) !== -1 || fitReasons(o).length > 0;
+    }
+    function buildDeck() {
+        var t = targetTime();
+        deck = offers.filter(function (o) {
+            return !acted[o.id] && o.until > new Date() && activeAt(o, t) && matches(o);
+        }).sort(function (a, b) { return a.until - b.until; });
+        renderDeck();
+    }
+    function otherBucketWithOffers() {
+        for (var i = 0; i < WHENS.length; i++) {
+            if (WHENS[i].id === whenId) continue;
+            var t = new Date(Date.now() + WHENS[i].offsetMin * 60000);
+            var any = offers.some(function (o) {
+                return !acted[o.id] && o.until > new Date() && activeAt(o, t) && matches(o);
+            });
+            if (any) return WHENS[i];
+        }
+        return null;
+    }
+
+    /* ---------- screen A ---------- */
+    function renderSituations() {
+        $('#sitGrid').innerHTML = SITUATIONS.map(function (s) {
+            return '<button class="sit tap" type="button" data-sit="' + s.id + '">' +
+                s.icon + '<div><b>' + s.label + '</b><span>' + s.hint + '</span></div></button>';
+        }).join('');
+        Array.prototype.forEach.call($('#sitGrid').querySelectorAll('[data-sit]'), function (b) {
+            b.addEventListener('click', function () { chooseSituation(b.getAttribute('data-sit')); });
+        });
+    }
+    function chooseSituation(id) {
+        situation = SITUATIONS.filter(function (s) { return s.id === id; })[0];
+        waiting = false;
+        whenId = 'now';   // a new situation always starts from "now"
+        $('#sitChip').innerHTML = situation.icon + '<span>' + situation.label + '</span>';
+        $('#screenPick').classList.remove('active');
+        $('#screenFeed').classList.add('active');
+        renderWhen();
+        buildDeck();
+    }
+    function backToPick() {
+        $('#screenFeed').classList.remove('active');
+        $('#screenPick').classList.add('active');
+    }
+    $('#sitChip').addEventListener('click', backToPick);
+    $('#btnInfo').addEventListener('click', backToPick);
+
+    /* ---------- when strip ---------- */
+    function renderWhen() {
+        $('#whenRow').innerHTML = WHENS.map(function (w) {
+            return '<button class="wbtn tap" type="button" data-w="' + w.id + '" aria-pressed="' + (w.id === whenId) + '">' + w.label + '</button>';
+        }).join('');
+        Array.prototype.forEach.call($('#whenRow').querySelectorAll('[data-w]'), function (b) {
+            b.addEventListener('click', function () {
+                whenId = b.getAttribute('data-w');
+                waiting = false;
+                renderWhen();
+                buildDeck();
+            });
+        });
+    }
+
+    /* ---------- timers ---------- */
+    function leftText(o) {
+        var n = Date.now();
+        if (o.from > n) return { cls: 'later', txt: 'נפתח ' + hhmm(o.from) };
+        var s = Math.max(0, Math.floor((o.until - n) / 1000));
+        var m = Math.floor(s / 60);
+        if (m >= 60) return { cls: '', txt: 'עד ' + hhmm(o.until) };
+        return { cls: m < 10 ? 'warn' : '', txt: pad(m) + ':' + pad(s % 60) };
+    }
+
+    /* ---------- deck ---------- */
+    function cardHtml(o) {
+        var lt = leftText(o);
+        var reasons = fitReasons(o).slice(0, 2);
+        var fit = reasons.length
+            ? '<div class="c-fit">' + ICON.check + reasons.join(' · ') + '</div>' : '';
+        return '' +
+            '<div class="c-media">' + ART[o.photo] + '</div>' +
+            '<div class="c-chips">' +
+                '<div class="t-chip ' + lt.cls + '" data-timer="' + o.id + '">' + ICON.clock + '<span>' + lt.txt + '</span></div>' +
+                '<div class="s-chip">' + o.seats + ' מקומות</div>' +
+            '</div>' +
+            '<div class="stamp yes">תופס!</div>' +
+            '<div class="stamp no">לא עכשיו</div>' +
+            '<div class="c-body">' +
+                '<div class="c-eyebrow">' + o.eyebrow + '</div>' +
+                '<div class="c-offer">' + o.offer + '</div>' +
+                '<div class="c-note">' + o.note + '</div>' +
+                '<div class="c-venue">' + o.biz.name + '<span class="dot">·</span><span class="walk">' + o.biz.walk + ' דק׳ הליכה</span></div>' +
+                fit +
+            '</div>';
+    }
+    function renderDeck() {
+        var stage = $('#stage');
+        stage.innerHTML = '';
+        if (!deck.length) { renderEmpty(); syncActs(); return; }
+        var shown = deck.slice(0, 3);
+        for (var i = shown.length - 1; i >= 0; i--) {
+            var el = document.createElement('div');
+            el.className = 'card' + (i === 0 ? ' top' : i === 1 ? ' behind-1' : ' behind-2');
+            el.innerHTML = cardHtml(shown[i]);
+            stage.appendChild(el);
+        }
+        topCard = stage.querySelector('.card.top');
+        attachDrag(topCard);
+        syncActs();
+    }
+    function renderEmpty() {
+        var alt = otherBucketWithOffers();
+        var el = document.createElement('div');
+        el.className = 'empty';
+        el.innerHTML =
+            '<svg class="big" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>' +
+            '<h2>אין כרגע מה לתפוס</h2>' +
+            '<p>לא נפתחו הצעות ל״' + situation.label + '״ בזמן הזה. זה משתנה כל כמה דקות.</p>' +
+            (alt ? '<button class="btn tap" id="jumpAlt" type="button">יש הצעות ' + alt.label + ' →</button>' : '') +
+            '<div class="wait' + (waiting ? ' on' : '') + '" id="waitBox">' + ICON.bell +
+                '<span>' + (waiting
+                    ? 'מצב המתנה פעיל — נודיע לך ברגע שמשהו מתאים ייפתח.'
+                    : 'להפעיל מצב המתנה? נודיע לך ברגע שמשהו מתאים ייפתח.') + '</span>' +
+            '</div>' +
+            '<button class="btn ghost tap" id="changeSit" type="button">החלפת סיטואציה</button>';
+        $('#stage').appendChild(el);
+        if (alt) $('#jumpAlt').addEventListener('click', function () {
+            whenId = alt.id; renderWhen(); buildDeck();
+        });
+        $('#waitBox').addEventListener('click', function () {
+            waiting = !waiting;
+            renderDeck();
+            flash(waiting ? 'מצב המתנה פעיל · נודיע לך' : 'מצב המתנה כובה');
+        });
+        $('#changeSit').addEventListener('click', backToPick);
+    }
+    function syncActs() {
+        var has = deck.length > 0;
+        $('#btnNo').disabled = !has;
+        $('#btnYes').disabled = !has;
+    }
+
+    /* ---------- drag ---------- */
+    var drag = null;
+    function attachDrag(card) {
+        if (!card) return;
+        card.addEventListener('pointerdown', function (e) {
+            if (e.button != null && e.button !== 0) return;
+            drag = { x: e.clientX, y: e.clientY, dx: 0, dy: 0, t: Date.now(), moved: false };
+            card.style.transition = 'none';
+            try { card.setPointerCapture(e.pointerId); } catch (err) {}
+        });
+        card.addEventListener('pointermove', function (e) {
+            if (!drag) return;
+            drag.dx = e.clientX - drag.x;
+            drag.dy = e.clientY - drag.y;
+            if (Math.abs(drag.dx) + Math.abs(drag.dy) > 8) drag.moved = true;
+            card.style.transform = 'translate(' + drag.dx + 'px,' + drag.dy + 'px) rotate(' + (drag.dx * .055) + 'deg)';
+            setStamp(card, drag.dx);
+        });
+        function end() {
+            if (!drag) return;
+            var d = drag; drag = null;
+            card.style.transition = '';
+            if (d.dx > 108) { fling('yes'); }
+            else if (d.dx < -108) { fling('no'); }
+            else { snapBack(card); }
+        }
+        card.addEventListener('pointerup', end);
+        card.addEventListener('pointercancel', end);
+    }
+    function setStamp(card, dx) {
+        var y = card.querySelector('.stamp.yes'), n = card.querySelector('.stamp.no');
+        var t = Math.min(1, Math.abs(dx) / 90);
+        if (dx > 0) { y.style.opacity = t; n.style.opacity = 0; }
+        else if (dx < 0) { n.style.opacity = t; y.style.opacity = 0; }
+        else { y.style.opacity = 0; n.style.opacity = 0; }
+    }
+    function snapBack(card) {
+        card.classList.add('settling');
+        card.style.transform = '';
+        setStamp(card, 0);
+        setTimeout(function () { card.classList.remove('settling'); }, 340);
+    }
+
+    /* ---------- actions ---------- */
+    function fling(action) {
+        if (!topCard || !deck.length) return;
+        var card = topCard, o = deck[0];
+        topCard = null;
+        var dir = action === 'yes' ? 1 : -1;
+        card.classList.add('gone');
+        card.style.transform = 'translate(' + (dir * 140) + '%, 40px) rotate(' + (dir * 22) + 'deg)';
+        acted[o.id] = action;
+        deck = deck.filter(function (x) { return x.id !== o.id; });
+        if (action === 'yes') takeHold(o);
+        setTimeout(renderDeck, 300);
+    }
+    $('#btnNo').addEventListener('click', function () { if (deck.length) fling('no'); });
+    $('#btnYes').addEventListener('click', function () { if (deck.length) fling('yes'); });
+    document.addEventListener('keydown', function (e) {
+        if ($('#modalWrap').classList.contains('show') || $('#trayWrap').classList.contains('show')) return;
+        if (!$('#screenFeed').classList.contains('active')) return;
+        if (e.key === 'ArrowRight' && deck.length) fling('yes');
+        else if (e.key === 'ArrowLeft' && deck.length) fling('no');
+    });
+
+    /* ---------- holds ---------- */
+    function takeHold(o) {
+        var h = {
+            id: 'h' + Date.now(), offer: o,
+            code: 'ביס-' + Math.floor(1000 + Math.random() * 8999),
+            until: new Date(Date.now() + 15 * 60000)
+        };
+        holds.unshift(h);
+        refreshHolds();
+        $('#mWhat').textContent = o.offer;
+        $('#mWhere').textContent = o.biz.name + ' · ' + o.biz.walk + ' דק׳ הליכה · ' + o.seats + ' מקומות';
+        $('#mCode').textContent = h.code;
+        $('#mCountdown').textContent = '15:00';
+        $('#modalWrap').classList.add('show');
+    }
+    function refreshHolds() {
+        var live = holds.filter(function (h) { return h.until > new Date(); }).length;
+        $('#holdsCount').textContent = live;
+        $('#holdsPill').classList.toggle('hot', live > 0);
+    }
+    function holdLeft(h) {
+        var s = Math.max(0, Math.floor((h.until - Date.now()) / 1000));
+        return { s: s, txt: pad(Math.floor(s / 60)) + ':' + pad(s % 60) };
+    }
+    function renderTray() {
+        var list = $('#trayList');
+        if (!holds.length) {
+            list.innerHTML = '<div class="tray-empty">עדיין לא תפסת מקום. החליקו ימינה על הצעה כדי לשמור אותה ל־15 דקות.</div>';
+            return;
+        }
+        list.innerHTML = holds.map(function (h) {
+            var l = holdLeft(h);
+            var dead = l.s === 0;
+            return '<div class="hold' + (dead ? ' dead' : '') + '">' +
+                '<div class="thumb">' + ART[h.offer.photo] + '</div>' +
+                '<div class="txt"><h4>' + h.offer.biz.name + '</h4>' +
+                    '<p>' + h.offer.offer + ' · קוד ' + h.code + '</p></div>' +
+                '<div class="cd ' + (dead ? 'dead' : l.s < 300 ? 'warn' : '') + '" data-hold="' + h.id + '">' +
+                    (dead ? 'פג' : l.txt) + '</div>' +
+            '</div>';
+        }).join('');
+    }
+    $('#holdsPill').addEventListener('click', function () { renderTray(); $('#trayWrap').classList.add('show'); });
+    $('#trayClose').addEventListener('click', function () { $('#trayWrap').classList.remove('show'); });
+    $('#trayWrap').addEventListener('click', function (e) {
+        if (e.target === $('#trayWrap')) $('#trayWrap').classList.remove('show');
+    });
+    $('#mNext').addEventListener('click', function () { $('#modalWrap').classList.remove('show'); });
+    $('#mHolds').addEventListener('click', function () {
+        $('#modalWrap').classList.remove('show');
+        renderTray(); $('#trayWrap').classList.add('show');
+    });
+
+    /* ---------- one ticker drives every countdown ---------- */
+    setInterval(function () {
+        var n = Date.now();
+
+        // card timers + prune expired offers out of the deck
+        var expired = false;
+        deck.forEach(function (o) {
+            if (o.until <= n) { expired = true; return; }
+            var el = document.querySelector('[data-timer="' + o.id + '"]');
+            if (!el) return;
+            var lt = leftText(o);
+            el.className = 't-chip ' + lt.cls;
+            el.querySelector('span').textContent = lt.txt;
+        });
+        if (expired) {
+            deck = deck.filter(function (o) { return o.until > n; });
+            flash('הצעה אחת פגה ויצאה מהרשימה');
+            renderDeck();
+        }
+
+        // hold countdowns
+        if (holds.length) {
+            holds.forEach(function (h) {
+                var el = document.querySelector('[data-hold="' + h.id + '"]');
+                var l = holdLeft(h);
+                if (el) {
+                    el.className = 'cd ' + (l.s === 0 ? 'dead' : l.s < 300 ? 'warn' : '');
+                    el.textContent = l.s === 0 ? 'פג' : l.txt;
+                }
+            });
+            if ($('#modalWrap').classList.contains('show') && holds[0]) {
+                $('#mCountdown').textContent = holdLeft(holds[0]).txt;
+            }
+            refreshHolds();
+        }
+    }, 1000);
+
+    /* ---------- toast ---------- */
+    var tt;
+    function flash(msg) {
+        var t = $('#toast');
+        t.innerHTML = msg;
+        t.classList.add('show');
+        clearTimeout(tt);
+        tt = setTimeout(function () { t.classList.remove('show'); }, 2800);
+    }
+
+    renderSituations();
+})();
+</script>

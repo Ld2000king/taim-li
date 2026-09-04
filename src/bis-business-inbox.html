@@ -1,0 +1,919 @@
+<title>ביס · פניות</title>
+<meta name="description" content="תיבת הפניות של העסק — קבלה, אישור וקביעת שעה לפניות מלקוחות. גרסת דמו." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&family=Miriam+Libre:wght@400;700&display=swap" />
+
+<style>
+/* ============================================================================
+   ביס · פניות — the business inbox (demo)
+   Same "יום־יום" language as the editor & the swipe app: warm paper, soft
+   rounded surfaces, clay / sage / honey / plum accents, feather shadows.
+   ============================================================================ */
+:root {
+    /* ---- "נקי" — warm-neutral ground, never cold grey ---- */
+    --paper: #FCFBF9;
+    --paper-edge: #F2F0EB;
+    --card: #FFFFFF;
+    --card-2: #F5F3EF;
+    --line: #EAE7E1;
+
+    /* ---- ink: every step clears 4.5:1 on white ---- */
+    --ink: #14181A;
+    --ink-soft: #565D61;
+    --ink-faint: #6E7579;
+
+    /* ---- exactly two hues carry the whole app ---- */
+    --teal: #0E7C7B;        /* primary · positive · confirmed */
+    --teal-deep: #0A6160;
+    --teal-tint: #E4F1F0;
+    --pink: #D6246E;        /* urgency · expiring · destructive */
+    --pink-tint: #FCE7EF;
+
+    /* ---- old role names remapped onto the two hues ---- */
+    --sage: var(--teal);
+    --sage-tint: var(--teal-tint);
+    --clay: var(--teal);
+    --clay-deep: var(--teal-deep);
+    --clay-tint: var(--teal-tint);
+    --honey: var(--pink);
+    --honey-tint: var(--pink-tint);
+    --plum: var(--ink-soft);       /* tags go neutral — this is most of the de-cluttering */
+    --plum-tint: var(--card-2);
+    --plum-line: var(--line);
+    --rose: var(--pink);
+    --rose-tint: var(--pink-tint);
+
+    --shadow-soft: 0 1px 2px rgba(20, 24, 26, .04), 0 8px 24px rgba(20, 24, 26, .06);
+    --shadow-lift: 0 2px 6px rgba(20, 24, 26, .05), 0 18px 44px rgba(20, 24, 26, .12);
+    --shadow-depth-sm: var(--shadow-soft);
+    --shadow-depth-md: var(--shadow-soft);
+    --shadow-depth-lg: var(--shadow-lift);
+    --glow-green: var(--shadow-soft);
+    --glow-gold: var(--shadow-soft);
+
+    --radius-sm: 12px;
+    --radius-tile: 16px;
+    --radius-btn: 14px;
+    --radius-card: 22px;
+    --radius-frame: 28px;
+
+    --font-display: 'Miriam Libre', Heebo, Georgia, serif;
+    --font-ui: 'Heebo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+    --app-max-width: 460px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+    font-family: var(--font-ui);
+    background: var(--paper-edge);
+    color: var(--ink);
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+    line-height: 1.55;
+}
+button { font-family: var(--font-ui); cursor: pointer; }
+
+#app {
+    position: relative;
+    direction: rtl;
+    height: 100dvh;
+    max-width: var(--app-max-width);
+    margin: 0 auto;
+    background: var(--paper);
+    box-shadow: var(--shadow-soft);
+    border-radius: var(--radius-frame);
+    overflow: hidden;
+    display: flex; flex-direction: column;
+}
+.tap { transition: transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.14s ease, background 0.16s ease; }
+.tap:active { transform: scale(0.96); filter: brightness(0.97); }
+
+/* ---------- app bar ---------- */
+.appbar {
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px; padding: 14px 18px 12px;
+    border-bottom: 1px solid var(--line);
+}
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.brand .avatar {
+    width: 36px; height: 36px; border-radius: 11px; flex-shrink: 0;
+    background: var(--clay-tint); color: var(--clay-deep);
+    display: grid; place-items: center; font-family: var(--font-display);
+    font-weight: 700; font-size: 16px;
+}
+.brand .who { min-width: 0; }
+.brand .who b { display: block; font-size: 14.5px; font-weight: 700; }
+.brand .who span { display: block; font-size: 11.5px; color: var(--ink-soft); }
+.wordmark {
+    font-family: var(--font-display); font-weight: 700; font-size: 22px;
+    color: var(--clay-deep); flex-shrink: 0;
+}
+.live-toggle {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--card-2); border: 1px solid var(--line);
+    border-radius: 999px; padding: 6px 11px;
+    font-size: 11.5px; font-weight: 600; color: var(--ink-soft);
+    flex-shrink: 0;
+}
+.live-toggle i { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-faint); }
+.live-toggle.on { background: var(--honey-tint); border-color: #EFDFC0; color: var(--clay-deep); }
+.live-toggle.on i { background: var(--honey); animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+/* ---------- scroll ---------- */
+.scroll { flex: 1; overflow-y: auto; padding: 14px 14px 32px; }
+
+/* ---------- stat strip ---------- */
+.stats {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+    margin-bottom: 14px;
+}
+.stat {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius-tile); padding: 12px 10px; text-align: center;
+}
+.stat b { display: block; font-family: var(--font-display); font-weight: 700; font-size: 22px; }
+.stat span { display: block; font-size: 11px; color: var(--ink-soft); margin-top: 2px; }
+.stat.accent b { color: var(--sage); }
+
+/* ---------- today strip ---------- */
+.today { margin-bottom: 16px; }
+.today h2 {
+    font-size: 12px; font-weight: 700; color: var(--ink-faint);
+    letter-spacing: 0.4px; margin: 0 4px 8px;
+}
+.today-row { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.today-row::-webkit-scrollbar { display: none; }
+.booking {
+    flex-shrink: 0; min-width: 150px;
+    background: var(--sage-tint); border: 1px solid #D6E4D8;
+    border-radius: var(--radius-tile); padding: 12px 13px;
+}
+.booking .t { font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--sage); }
+.booking .p { font-size: 12.5px; color: var(--ink); font-weight: 600; margin-top: 3px; }
+.booking .n { font-size: 11.5px; color: var(--ink-soft); margin-top: 1px; }
+.today-empty {
+    background: var(--card); border: 1px dashed var(--line);
+    border-radius: var(--radius-tile); padding: 14px;
+    font-size: 12.5px; color: var(--ink-soft); text-align: center;
+}
+
+/* ---------- filter chips ---------- */
+.filters { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin-bottom: 12px; }
+.filters::-webkit-scrollbar { display: none; }
+.fchip {
+    flex-shrink: 0;
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 999px; padding: 8px 14px;
+    font-size: 13px; font-weight: 500; color: var(--ink-soft); white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 6px;
+}
+.fchip[aria-pressed="true"] {
+    background: var(--clay-tint); border-color: #E7CDBA; color: var(--clay-deep); font-weight: 600;
+}
+.fchip .badge {
+    background: var(--rose); color: #fff; font-size: 10px; font-weight: 700;
+    min-width: 16px; height: 16px; border-radius: 999px; padding: 0 4px;
+    display: inline-grid; place-items: center;
+}
+
+/* ---------- inquiry card ---------- */
+.inq {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius-card); box-shadow: var(--shadow-soft);
+    padding: 15px; margin-bottom: 11px;
+}
+.inq.just-in { animation: slideIn 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(-10px) scale(0.98); }
+    to { opacity: 1; transform: none; }
+}
+.inq-top { display: flex; gap: 12px; align-items: flex-start; }
+.pic {
+    width: 42px; height: 42px; border-radius: 13px; flex-shrink: 0;
+    display: grid; place-items: center;
+    font-weight: 700; font-size: 15px; color: #fff;
+}
+.inq-id { flex: 1; min-width: 0; }
+.inq-id h3 { font-size: 15px; font-weight: 700; }
+.inq-id .ago { font-size: 11.5px; color: var(--ink-faint); margin-top: 1px; }
+.pill {
+    font-size: 10.5px; font-weight: 700; padding: 4px 9px; border-radius: 999px; white-space: nowrap;
+}
+.pill.pending { background: var(--honey-tint); color: var(--clay-deep); }
+.pill.approved { background: var(--sage-tint); color: var(--sage); }
+.pill.declined { background: var(--card-2); color: var(--ink-faint); }
+
+.inq-kind {
+    display: flex; align-items: center; gap: 7px;
+    margin-top: 12px; font-size: 13.5px; font-weight: 600;
+}
+.inq-kind svg { width: 16px; height: 16px; color: var(--clay-deep); flex-shrink: 0; }
+.inq-kind .when { color: var(--ink-soft); font-weight: 500; }
+.inq-note {
+    margin-top: 8px; font-size: 13px; color: var(--ink); line-height: 1.55;
+    background: var(--card-2); border-radius: 12px; padding: 10px 12px;
+}
+.inq-liked { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+.inq-liked span {
+    font-size: 11px; font-weight: 500; color: var(--plum);
+    background: var(--plum-tint); border: 1px solid var(--plum-line);
+    padding: 3px 9px; border-radius: 999px;
+}
+.inq-state {
+    margin-top: 10px; font-size: 12px; color: var(--ink-soft);
+    display: flex; align-items: center; gap: 6px;
+}
+.inq-state svg { width: 14px; height: 14px; }
+.inq-state.ok { color: var(--sage); }
+
+.inq-actions { display: flex; gap: 8px; margin-top: 13px; }
+.inq-actions button {
+    flex: 1; border: none; border-radius: 13px; padding: 11px;
+    font-weight: 700; font-size: 13.5px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+}
+.inq-actions svg { width: 15px; height: 15px; }
+.btn-approve { background: var(--clay-deep); color: #fff; }
+.btn-decline { background: var(--card); border: 1px solid var(--line) !important; color: var(--rose); }
+.btn-alt {
+    flex: 0 0 auto !important;
+    background: var(--card-2); color: var(--ink-soft);
+    padding-inline: 13px !important;
+}
+.inq-actions.handled button {
+    background: var(--card-2); color: var(--ink-soft); flex: 1;
+}
+
+/* inline "propose another time" */
+.alt-box {
+    margin-top: 11px; padding: 12px; background: var(--card-2);
+    border-radius: 13px; display: none;
+}
+.alt-box.show { display: block; }
+.alt-box label { font-size: 12px; font-weight: 600; color: var(--ink-soft); }
+.alt-box .row { display: flex; gap: 8px; margin-top: 8px; }
+.alt-box select {
+    flex: 1; font-family: var(--font-ui); font-size: 15px; color: var(--ink);
+    background: var(--card); border: 1px solid var(--line); border-radius: 11px; padding: 10px 12px;
+    appearance: none;
+}
+.alt-box .send {
+    border: none; background: var(--clay-deep); color: #fff;
+    border-radius: 11px; padding: 10px 16px; font-weight: 700; font-size: 13px; flex-shrink: 0;
+}
+
+/* ---------- decline reason sheet ---------- */
+.sheet-wrap {
+    position: fixed; inset: 0; z-index: 70;
+    background: rgba(47, 42, 35, 0.44);
+    display: none;
+}
+.sheet-wrap.show { display: block; }
+.sheet {
+    position: absolute; inset-inline: 0; bottom: 0;
+    max-width: var(--app-max-width); margin: 0 auto;
+    background: var(--paper); border-radius: 24px 24px 0 0;
+    padding: 8px 20px calc(22px + env(safe-area-inset-bottom));
+    transform: translateY(100%);
+    transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.sheet-wrap.show .sheet { transform: translateY(0); }
+.grip { width: 40px; height: 4px; border-radius: 999px; background: var(--line); margin: 0 auto 14px; }
+.sheet h2 { font-family: var(--font-display); font-weight: 700; font-size: 19px; margin-bottom: 4px; }
+.sheet p { font-size: 13px; color: var(--ink-soft); margin-bottom: 14px; }
+.reasons { display: flex; flex-direction: column; gap: 8px; }
+.reasons button {
+    text-align: start; background: var(--card); border: 1px solid var(--line);
+    border-radius: 13px; padding: 13px 14px; font-size: 14px; font-weight: 500; color: var(--ink);
+}
+.reasons button:active { background: var(--card-2); }
+.sheet-cancel {
+    width: 100%; margin-top: 12px; background: none; border: none;
+    color: var(--ink-soft); font-size: 14px; font-weight: 600; padding: 8px;
+}
+
+/* ---------- detail sheet ---------- */
+.detail {
+    position: fixed; inset: 0; z-index: 60;
+    max-width: var(--app-max-width); margin: 0 auto;
+    background: var(--paper);
+    transform: translateY(100%);
+    transition: transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+    display: flex; flex-direction: column; direction: rtl;
+}
+.detail.show { transform: translateY(0); }
+.detail-head {
+    flex-shrink: 0; display: flex; align-items: center; gap: 12px;
+    padding: 16px 18px; border-bottom: 1px solid var(--line);
+}
+.detail-head .pic { width: 46px; height: 46px; }
+.detail-head .who { flex: 1; }
+.detail-head .who h3 { font-size: 16px; font-weight: 700; }
+.detail-head .who span { font-size: 12px; color: var(--ink-soft); }
+.detail-head .x {
+    width: 34px; height: 34px; border-radius: 50%; border: none;
+    background: var(--card-2); color: var(--ink); display: grid; place-items: center;
+}
+.detail-head .x svg { width: 16px; height: 16px; }
+.detail-body { flex: 1; overflow-y: auto; padding: 16px 18px; }
+.d-sec { margin-bottom: 18px; }
+.d-sec h4 { font-size: 12px; font-weight: 700; color: var(--ink-faint); letter-spacing: 0.4px; margin-bottom: 8px; }
+.d-sec .big { font-size: 15px; font-weight: 600; }
+.d-sec .sub { font-size: 13px; color: var(--ink-soft); margin-top: 2px; }
+.thread { display: flex; flex-direction: column; gap: 8px; }
+.msg { max-width: 82%; font-size: 13.5px; padding: 10px 13px; border-radius: 15px; line-height: 1.5; }
+.msg.them { align-self: flex-start; background: var(--card-2); border-bottom-inline-start-radius: 5px; }
+.msg.you { align-self: flex-end; background: var(--clay-tint); border-bottom-inline-end-radius: 5px; }
+.reply-row { display: flex; gap: 8px; margin-top: 10px; }
+.reply-row input {
+    flex: 1; font-family: var(--font-ui); font-size: 15px; color: var(--ink);
+    background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 11px 15px;
+}
+.reply-row button {
+    border: none; background: var(--clay-deep); color: #fff;
+    border-radius: 999px; padding: 0 18px; font-weight: 700; font-size: 13px;
+}
+.detail-cta {
+    flex-shrink: 0; padding: 12px 18px calc(16px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line); display: flex; gap: 8px;
+}
+.detail-cta button {
+    flex: 1; border: none; border-radius: 14px; padding: 14px;
+    font-weight: 700; font-size: 14px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+}
+.detail-cta svg { width: 16px; height: 16px; }
+.detail-cta .approve { background: var(--clay-deep); color: #fff; }
+.detail-cta .decline { background: var(--card); border: 1px solid var(--line); color: var(--rose); }
+.detail-cta .reopen { background: var(--card-2); color: var(--ink-soft); }
+
+/* ---------- toast ---------- */
+.toast {
+    position: fixed; left: 50%; bottom: 22px; transform: translate(-50%, 170%);
+    background: var(--ink); color: var(--paper);
+    font-weight: 600; font-size: 13.5px; padding: 12px 20px; border-radius: 999px;
+    box-shadow: var(--shadow-lift); z-index: 120; max-width: 88vw; text-align: center;
+    transition: transform 0.4s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+.toast.show { transform: translate(-50%, 0); }
+.toast b { color: #FFD98F; }
+
+.list-empty { text-align: center; color: var(--ink-soft); font-size: 13.5px; padding: 40px 24px; }
+.list-empty svg { width: 44px; height: 44px; color: var(--ink-faint); margin-bottom: 10px; }
+
+@media (prefers-reduced-motion: reduce) {
+    .live-toggle.on i { animation: none; }
+    .inq.just-in { animation: none; }
+    .tap, .sheet, .detail, .toast { transition: none; }
+}
+
+/* ============================================================================
+   "נקי" pass — structural de-decoration on top of the layout above.
+   Fewer filled pills, hairlines instead of heavy borders, one soft shadow.
+   ============================================================================ */
+
+/* --- countdowns: a quiet white pill that only turns loud near the end --- */
+.t-chip, .card-live, .swipe-live, .inq .stat.pending {
+    background: var(--card) !important;
+    color: var(--ink) !important;
+    box-shadow: 0 1px 3px rgba(20, 24, 26, .12);
+    font-weight: 600;
+}
+.t-chip svg { stroke: var(--pink); color: var(--pink); background: none; }
+.card-live i, .swipe-live i { background: var(--pink); }
+.t-chip.warn {
+    background: var(--pink) !important; color: #fff !important;
+}
+.t-chip.warn svg { stroke: #fff; }
+.t-chip.later { background: var(--card-2) !important; color: var(--ink-soft) !important; box-shadow: none; }
+
+/* --- segmented "when": white pill riding a light track --- */
+.when {
+    background: var(--card-2);
+    border-radius: 999px;
+    padding: 4px;
+    margin: 11px 16px;
+    gap: 4px;
+}
+.wbtn { background: transparent; border: none; color: var(--ink-soft); font-weight: 500; }
+.wbtn[aria-pressed="true"] {
+    background: var(--card); color: var(--ink); font-weight: 600;
+    box-shadow: 0 1px 3px rgba(20, 24, 26, .10);
+}
+
+/* --- chips and tags: neutral, hairline, no colour blocks --- */
+.chip, .fchip, .sit-chip, .holds-pill, .live-toggle {
+    border-color: var(--line);
+    box-shadow: none;
+}
+.chip[aria-pressed="true"] {
+    background: var(--teal-tint); border-color: transparent; color: var(--teal-deep);
+}
+.fchip[aria-pressed="true"] {
+    background: var(--teal-tint); border-color: transparent; color: var(--teal-deep);
+}
+.d-tags span, .inq-liked span {
+    background: var(--card-2); border-color: var(--line); color: var(--ink-soft);
+}
+
+/* --- price segments: solid teal, white label --- */
+.seg[aria-pressed="true"] {
+    background: var(--teal); color: #fff; box-shadow: none;
+}
+
+/* --- primary actions --- */
+.btn.save, .btn-approve, .detail-cta .approve, .empty .btn, .modal-btns .primary, .sheet-cta .send {
+    background: var(--teal); color: #fff; box-shadow: none;
+}
+.act.yes, .circle-btn.like { background: var(--teal); color: #fff; }
+.act.no, .circle-btn.nope { color: var(--ink-soft); }
+.act.info { color: var(--ink-faint); }
+.act, .circle-btn { box-shadow: var(--shadow-soft); }
+
+/* skipping is not destructive — keep it neutral */
+.btn-decline, .sheet-cta .pass { color: var(--ink-soft) !important; }
+
+/* --- cards: one soft shadow, hairline, consistent radius --- */
+.section, .inq, .photo, .booking, .stat, .hold, .empty, .live-card, .d-map, .sit {
+    box-shadow: var(--shadow-soft);
+}
+.card, .swipe-card { box-shadow: var(--shadow-lift); }
+.booking { background: var(--teal-tint); border-color: transparent; }
+.live-card { background: var(--card-2); border-color: var(--line); }
+.live-card.off { opacity: .55; }
+
+/* --- status pills --- */
+.pill.approved, .inq .stat.ok { background: var(--teal-tint); color: var(--teal-deep); }
+.pill.pending { background: var(--pink-tint) !important; color: var(--pink) !important; box-shadow: none; }
+.pill.declined { background: var(--card-2); color: var(--ink-faint); }
+
+/* --- photo scrims: neutral, not warm brown --- */
+.c-media::after {
+    background: linear-gradient(to top, rgba(20, 24, 26, .92) 0%, rgba(20, 24, 26, .40) 46%, rgba(20, 24, 26, 0) 66%);
+}
+.card-media::after, .swipe-media::after {
+    background: linear-gradient(to top, rgba(20, 24, 26, .90) 0%, rgba(20, 24, 26, .34) 44%, rgba(20, 24, 26, 0) 64%);
+}
+.sheet-hero::after { background: linear-gradient(to top, rgba(20, 24, 26, .46), transparent 34%); }
+.c-eyebrow, .swipe-body h3 em, .card-name em, .swipe-meta b, .card-meta b, .toast b { color: #FFFFFF; }
+.c-eyebrow { opacity: .82; }
+.c-fit svg { color: #fff; stroke: #fff; }
+.card-status.open { color: #B7E6D9; }
+.card-status.shut { color: #F3C6D8; }
+
+/* --- the offer line is the one place the display face appears --- */
+.c-offer, .swipe-body h3, .card-name, .modal h2, .pick h1 { font-family: var(--font-display); font-weight: 700; }
+
+/* --- swipe stamps --- */
+.stamp.yes { color: #35C4A8; }
+.stamp.no { color: #E8E5DE; }
+
+/* --- hold sheet --- */
+.arrive { background: var(--card-2); border-color: var(--line); }
+.arrive .num { color: var(--teal-deep); }
+.hold .cd { background: var(--teal-tint); color: var(--teal-deep); }
+.hold .cd.warn { background: var(--pink-tint); color: var(--pink); }
+.hold .cd.dead { background: var(--card-2); color: var(--ink-faint); }
+.empty .wait { background: var(--card-2); border-color: var(--line); }
+.empty .wait svg { color: var(--ink-soft); }
+.empty .wait.on { background: var(--teal-tint); border-color: transparent; }
+.empty .wait.on svg { color: var(--teal); }
+
+/* --- business app bits --- */
+.progress-fill { background: var(--teal); }
+.progress-label b { color: var(--teal-deep); }
+.section-head .idx { color: var(--teal); }
+.add-row { background: var(--teal-tint); color: var(--teal-deep); border-color: transparent; }
+.switch[aria-checked="true"] { background: var(--teal); }
+.dish-price, .swipe-dish span:last-child, .d-dish .p { color: var(--teal-deep) !important; }
+.dish-remove { background: var(--card-2); color: var(--ink-soft); }
+.stat.accent b { color: var(--teal); }
+.inq-kind svg { color: var(--teal); }
+.inq-state.ok { color: var(--teal); }
+.msg.you { background: var(--teal-tint); }
+.live-toggle.on { background: var(--teal-tint); border-color: transparent; color: var(--teal-deep); }
+.live-toggle.on i { background: var(--teal); }
+.day-closed-tag { color: var(--pink); }
+.navbtn.active { color: var(--teal-deep); }
+.navbadge { background: var(--pink); }
+.wordmark { color: var(--teal-deep); }
+.brand .avatar { background: var(--teal-tint); color: var(--teal-deep); }
+.appbar-slot .live-toggle { cursor: default; }
+.sit svg { color: var(--teal); }
+.sit:hover { border-color: var(--teal); }
+input:focus, textarea:focus, select:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(14, 124, 123, .16);
+}
+
+</style>
+
+<div id="app" lang="he" dir="rtl">
+    <header class="appbar">
+        <div class="brand">
+            <div class="avatar">ב</div>
+            <div class="who">
+                <b>בזלת קפה</b>
+                <span>לב תל אביב</span>
+            </div>
+        </div>
+        <button class="live-toggle on tap" id="liveToggle" type="button">
+            <i></i><span id="liveLabel">משדר · 4 מקומות</span>
+        </button>
+        <div class="wordmark">ביס</div>
+    </header>
+
+    <div class="scroll" id="scroll">
+        <div class="stats" id="stats"></div>
+
+        <div class="today">
+            <h2>היומן של היום</h2>
+            <div class="today-row" id="todayRow"></div>
+        </div>
+
+        <div class="filters" id="filters"></div>
+
+        <div id="list"></div>
+    </div>
+</div>
+
+<!-- decline reason sheet -->
+<div class="sheet-wrap" id="declineWrap">
+    <div class="sheet">
+        <div class="grip"></div>
+        <h2>דחיית הפנייה</h2>
+        <p>הלקוח יקבל הודעה מנומסת. אפשר לבחור סיבה — או לדלג.</p>
+        <div class="reasons" id="reasons"></div>
+        <button class="sheet-cancel" id="declineCancel" type="button">ביטול</button>
+    </div>
+</div>
+
+<!-- detail sheet -->
+<div class="detail" id="detail">
+    <div class="detail-head" id="detailHead"></div>
+    <div class="detail-body" id="detailBody"></div>
+    <div class="detail-cta" id="detailCta"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+    "use strict";
+
+    var HUES = {
+        maya: '#5B6E8C', ron: '#0E7C7B', dana: '#A8497A',
+        avi: '#2F6F63', shai: '#7A6A8E', tamar: '#B0566B', noa: '#4E7C8C'
+    };
+    var ICONS = {
+        table: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h18M5 10l1.5 9M19 10l-1.5 9M6 10 8 5h8l2 5"/></svg>',
+        interest: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.7-10-9.1C.4 8.8 2 5.5 5.2 5.5c1.9 0 3.3 1 3.8 2 .5-1 1.9-2 3.8-2 3.2 0 4.8 3.3 3.2 6.4C19.5 16.3 12 21 12 21z"/></svg>',
+        check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+        x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+        clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+        bell: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6M10 20a2 2 0 0 0 4 0"/></svg>'
+    };
+
+    var inquiries = [
+        {
+            id: 'dana', name: 'דנה פ׳', initials: 'דפ', hue: HUES.dana, ago: 'לפני דקה',
+            type: 'table', party: 4, when: 'היום 17:30', today: true, time: '17:30',
+            note: 'שלום! ראינו את הכרטיס בביס, באים 4 מבוגרים וכלב קטן. יש מקום בחוץ?',
+            liked: ['ישיבה בחוץ', 'כלבים מוזמנים', 'טבעוני-פרנדלי'],
+            status: 'pending', proposed: null
+        },
+        {
+            id: 'maya', name: 'מאיה כ׳', initials: 'מכ', hue: HUES.maya, ago: 'לפני 6 דק׳',
+            type: 'table', party: 2, when: 'היום 20:00', today: true, time: '20:00',
+            note: 'חוגגים יום הולדת קטן, אפשר שולחן שקט בפינה? מגיעים בסביבות 20:00.',
+            liked: ['רומנטי', 'שקט'],
+            status: 'pending', proposed: null
+        },
+        {
+            id: 'ron', name: 'רון ל׳', initials: 'רל', hue: HUES.ron, ago: 'לפני 14 דק׳',
+            type: 'interest', party: null, when: null, today: false, time: null,
+            note: 'התפריט נראה מעולה, במיוחד השקשוקה הירוקה. חושבים לקפוץ מחר בבוקר לעבוד קצת — יש שקעים פנויים?',
+            liked: ['עבודה מהלפטופ', 'קפה מיוחד'],
+            status: 'pending', proposed: null
+        },
+        {
+            id: 'avi', name: 'אבי מ׳', initials: 'אמ', hue: HUES.avi, ago: 'לפני שעה',
+            type: 'table', party: 6, when: 'היום 13:00', today: true, time: '13:00',
+            note: 'פגישת צהריים של הצוות, 6 אנשים. נשמח לשולחן ארוך.',
+            liked: [],
+            status: 'approved', proposed: null, arrival: '13:00'
+        },
+        {
+            id: 'shai', name: 'שי ג׳', initials: 'שג', hue: HUES.shai, ago: 'לפני 3 שעות',
+            type: 'interest', party: null, when: null, today: false, time: null,
+            note: 'אפשר להביא קבוצה של 12 לאירוע קטן בערב?',
+            liked: [],
+            status: 'declined', proposed: null, declineReason: 'לא מתאים לקבוצה בגודל הזה'
+        }
+    ];
+
+    var INCOMING = {
+        id: 'tamar', name: 'תמר ר׳', initials: 'תר', hue: HUES.tamar, ago: 'עכשיו',
+        type: 'table', party: 3, when: 'היום 21:15', today: true, time: '21:15',
+        note: 'סוגרים ערב עם קינוח וקפה, שלושה אנשים. פנוי ב-21:15?',
+        liked: ['ישיבה בחוץ'],
+        status: 'pending', proposed: null
+    };
+
+    var DECLINE_REASONS = ['מלא בשעה הזו', 'סגור בשעה שביקשת', 'לא מתאים לקבוצה בגודל הזה', 'סיבה אחרת'];
+
+    var $ = function (s, r) { return (r || document).querySelector(s); };
+    var filter = 'all';
+    var live = true;
+    var declineTarget = null;
+    var detailId = null;
+
+    function times() {
+        var out = [];
+        for (var h = 7; h <= 25; h++) {
+            for (var m = 0; m < 60; m += 15) {
+                var hh = h % 24;
+                out.push((hh < 10 ? '0' : '') + hh + ':' + (m === 0 ? '00' : m));
+            }
+        }
+        return out;
+    }
+    var TIMES = times();
+
+    function byId(id) { for (var i = 0; i < inquiries.length; i++) if (inquiries[i].id === id) return inquiries[i]; return null; }
+    function pendingCount() { return inquiries.filter(function (q) { return q.status === 'pending'; }).length; }
+
+    /* ---------- stats ---------- */
+    function renderStats() {
+        var total = inquiries.length;
+        var approved = inquiries.filter(function (q) { return q.status === 'approved'; }).length;
+        var pending = pendingCount();
+        $('#stats').innerHTML =
+            '<div class="stat"><b>' + total + '</b><span>פניות היום</span></div>' +
+            '<div class="stat accent"><b>' + approved + '</b><span>אושרו</span></div>' +
+            '<div class="stat"><b>' + pending + '</b><span>ממתינות לך</span></div>';
+    }
+
+    /* ---------- today strip ---------- */
+    function renderToday() {
+        var row = $('#todayRow');
+        var books = inquiries.filter(function (q) { return q.status === 'approved' && q.today && q.type === 'table'; })
+            .sort(function (a, b) { return (a.arrival || a.time).localeCompare(b.arrival || b.time); });
+        if (!books.length) {
+            row.innerHTML = '<div class="today-empty">אין עדיין הזמנות מאושרות להיום. פניות שתאשרו יופיעו כאן לפי שעה.</div>';
+            return;
+        }
+        row.innerHTML = books.map(function (q) {
+            return '<div class="booking"><div class="t">' + (q.arrival || q.time) + '</div>' +
+                '<div class="p">' + q.party + ' סועדים</div>' +
+                '<div class="n">' + q.name + '</div></div>';
+        }).join('');
+    }
+
+    /* ---------- filters ---------- */
+    var FDEF = [
+        { k: 'all', label: 'הכל' },
+        { k: 'pending', label: 'ממתינות' },
+        { k: 'approved', label: 'מאושרות' },
+        { k: 'declined', label: 'נדחו' }
+    ];
+    function renderFilters() {
+        $('#filters').innerHTML = FDEF.map(function (f) {
+            var badge = f.k === 'pending' && pendingCount()
+                ? '<span class="badge">' + pendingCount() + '</span>' : '';
+            return '<button class="fchip tap" type="button" data-k="' + f.k + '" aria-pressed="' + (filter === f.k) + '">' +
+                f.label + badge + '</button>';
+        }).join('');
+        Array.prototype.forEach.call($('#filters').querySelectorAll('.fchip'), function (b) {
+            b.addEventListener('click', function () { filter = b.getAttribute('data-k'); renderAll(); });
+        });
+    }
+
+    /* ---------- list ---------- */
+    function stateLine(q) {
+        if (q.status === 'approved') {
+            return '<div class="inq-state ok">' + ICONS.check + (q.type === 'table'
+                ? 'אושר · שעת הגעה ' + (q.arrival || q.time) + ' · הלקוח קיבל התראה'
+                : 'אושר · שלחת ללקוח הזמנה פתוחה') + '</div>';
+        }
+        if (q.status === 'declined') {
+            return '<div class="inq-state">' + ICONS.x + 'נדחתה' + (q.declineReason ? ' · ' + q.declineReason : '') + '</div>';
+        }
+        if (q.proposed) {
+            return '<div class="inq-state">' + ICONS.clock + 'הצעת שעה ' + q.proposed + ' · ממתין לאישור הלקוח</div>';
+        }
+        return '';
+    }
+
+    function cardHtml(q) {
+        var kind = q.type === 'table'
+            ? ICONS.table + '<span>בקשת שולחן · ' + q.party + ' סועדים</span><span class="when"> · ' + q.when + '</span>'
+            : ICONS.interest + '<span>הבעת עניין</span>';
+        var liked = q.liked.length
+            ? '<div class="inq-liked">' + q.liked.map(function (t) { return '<span>' + t + '</span>'; }).join('') + '</div>'
+            : '';
+        var actions = '';
+        if (q.status === 'pending') {
+            actions =
+                '<div class="inq-actions">' +
+                    '<button class="btn-approve tap" data-act="approve" data-id="' + q.id + '">' + ICONS.check + 'אישור</button>' +
+                    (q.type === 'table' ? '<button class="btn-alt tap" data-act="alt" data-id="' + q.id + '">' + ICONS.clock + '</button>' : '') +
+                    '<button class="btn-decline tap" data-act="decline" data-id="' + q.id + '">' + ICONS.x + 'דחייה</button>' +
+                '</div>' +
+                '<div class="alt-box" id="alt-' + q.id + '">' +
+                    '<label>הצעת שעה אחרת ל' + q.name + '</label>' +
+                    '<div class="row">' +
+                        '<select id="altsel-' + q.id + '">' + TIMES.map(function (t) {
+                            return '<option' + (t === q.time ? ' selected' : '') + '>' + t + '</option>';
+                        }).join('') + '</select>' +
+                        '<button class="send tap" data-act="propose" data-id="' + q.id + '">שליחה</button>' +
+                    '</div>' +
+                '</div>';
+        }
+        return '<div class="inq' + (q.justIn ? ' just-in' : '') + '" data-open="' + q.id + '">' +
+            '<div class="inq-top">' +
+                '<div class="pic" style="background:' + q.hue + '">' + q.initials + '</div>' +
+                '<div class="inq-id"><h3>' + q.name + '</h3><div class="ago">' + q.ago + '</div></div>' +
+                '<span class="pill ' + q.status + '">' + (q.status === 'pending' ? 'ממתינה' : q.status === 'approved' ? 'מאושרת' : 'נדחתה') + '</span>' +
+            '</div>' +
+            '<div class="inq-kind">' + kind + '</div>' +
+            '<div class="inq-note">' + q.note + '</div>' +
+            liked +
+            stateLine(q) +
+            actions +
+        '</div>';
+    }
+
+    function renderList() {
+        var rows = inquiries.filter(function (q) { return filter === 'all' || q.status === filter; });
+        var list = $('#list');
+        if (!rows.length) {
+            list.innerHTML = '<div class="list-empty">' + ICONS.bell + '<div>אין פניות בקטגוריה הזו.</div></div>';
+            return;
+        }
+        list.innerHTML = rows.map(cardHtml).join('');
+        rows.forEach(function (q) { q.justIn = false; });
+
+        Array.prototype.forEach.call(list.querySelectorAll('[data-act]'), function (b) {
+            b.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var id = b.getAttribute('data-id'), act = b.getAttribute('data-act');
+                if (act === 'approve') approve(id);
+                else if (act === 'decline') openDecline(id);
+                else if (act === 'alt') { var box = $('#alt-' + id); box.classList.toggle('show'); }
+                else if (act === 'propose') propose(id, $('#altsel-' + id).value);
+            });
+        });
+        Array.prototype.forEach.call(list.querySelectorAll('[data-open]'), function (c) {
+            c.addEventListener('click', function () { openDetail(c.getAttribute('data-open')); });
+        });
+    }
+
+    function renderAll() { renderStats(); renderToday(); renderFilters(); renderList(); }
+
+    /* ---------- actions ---------- */
+    function approve(id) {
+        var q = byId(id); if (!q || q.status !== 'pending') return;
+        q.status = 'approved';
+        q.proposed = null;
+        if (q.type === 'table') q.arrival = q.time;
+        renderAll();
+        flash(q.type === 'table'
+            ? '<b>' + q.name + '</b> אושר/ה · שעה ' + q.arrival
+            : '<b>' + q.name + '</b> קיבל/ה הזמנה פתוחה');
+        if (detailId === id) openDetail(id);
+    }
+    function propose(id, t) {
+        var q = byId(id); if (!q) return;
+        q.proposed = t;
+        renderAll();
+        flash('הצעת ' + t + ' נשלחה ל<b>' + q.name + '</b>');
+    }
+    function openDecline(id) {
+        declineTarget = id;
+        $('#reasons').innerHTML = DECLINE_REASONS.map(function (r) {
+            return '<button type="button" data-r="' + r + '">' + r + '</button>';
+        }).join('') + '<button type="button" data-r="">בלי לציין סיבה</button>';
+        Array.prototype.forEach.call($('#reasons').querySelectorAll('button'), function (b) {
+            b.addEventListener('click', function () { doDecline(b.getAttribute('data-r')); });
+        });
+        $('#declineWrap').classList.add('show');
+    }
+    function doDecline(reason) {
+        var q = byId(declineTarget);
+        $('#declineWrap').classList.remove('show');
+        if (!q) return;
+        q.status = 'declined';
+        q.proposed = null;
+        q.declineReason = reason || null;
+        renderAll();
+        flash('הפנייה של <b>' + q.name + '</b> נדחתה');
+        if (detailId === q.id) openDetail(q.id);
+    }
+    function reopen(id) {
+        var q = byId(id); if (!q) return;
+        q.status = 'pending'; q.arrival = null; q.declineReason = null; q.proposed = null;
+        renderAll();
+        flash('<b>' + q.name + '</b> חזר/ה לפניות הממתינות');
+        if (detailId === id) openDetail(id);
+    }
+    $('#declineCancel').addEventListener('click', function () { $('#declineWrap').classList.remove('show'); });
+    $('#declineWrap').addEventListener('click', function (e) {
+        if (e.target === $('#declineWrap')) $('#declineWrap').classList.remove('show');
+    });
+
+    /* ---------- detail sheet ---------- */
+    function openDetail(id) {
+        var q = byId(id); if (!q) return;
+        detailId = id;
+        $('#detailHead').innerHTML =
+            '<div class="pic" style="background:' + q.hue + '">' + q.initials + '</div>' +
+            '<div class="who"><h3>' + q.name + '</h3><span>' + q.ago + ' · דרך ביס</span></div>' +
+            '<button class="x tap" id="detailX" type="button" aria-label="סגירה">' + ICONS.x + '</button>';
+
+        var reqBig = q.type === 'table' ? q.party + ' סועדים' : 'הבעת עניין כללית';
+        var reqSub = q.type === 'table' ? q.when + (q.proposed ? ' · הצעת ' + q.proposed : '') : 'ראה/תה את הכרטיס והחליק/ה ימינה';
+        var likes = q.liked.length
+            ? '<div class="inq-liked" style="margin-top:0">' + q.liked.map(function (t) { return '<span>' + t + '</span>'; }).join('') + '</div>'
+            : '<div class="sub">לא סימנ/ה תיוגים ספציפיים</div>';
+        var youMsg = q.status === 'approved'
+            ? (q.type === 'table' ? 'מעולה, שמור לכם שולחן ל' + (q.arrival || q.time) + '. נתראה!' : 'תיכנסו מתי שנוח, נשמח לארח.')
+            : q.status === 'declined'
+                ? 'תודה שפניתם. הפעם לא נוכל' + (q.declineReason ? ' — ' + q.declineReason : '') + '. נשמח בפעם הבאה.'
+                : q.proposed ? 'נוכל להציע ' + q.proposed + ' במקום. מתאים לכם?' : null;
+
+        $('#detailBody').innerHTML =
+            '<div class="d-sec"><h4>הבקשה</h4><div class="big">' + reqBig + '</div><div class="sub">' + reqSub + '</div></div>' +
+            '<div class="d-sec"><h4>ההודעה שלהם</h4><div class="inq-note" style="margin:0">' + q.note + '</div></div>' +
+            '<div class="d-sec"><h4>מה משך אותם בכרטיס</h4>' + likes + '</div>' +
+            '<div class="d-sec"><h4>שיחה</h4><div class="thread">' +
+                '<div class="msg them">' + q.note + '</div>' +
+                (youMsg ? '<div class="msg you">' + youMsg + '</div>' : '') +
+            '</div>' +
+            '<div class="reply-row"><input type="text" placeholder="כתיבת הודעה ללקוח…" id="replyInput" /><button type="button" id="replySend">שליחה</button></div>' +
+            '</div>';
+
+        var cta = '';
+        if (q.status === 'pending') {
+            cta = '<button class="decline tap" id="dDecline" type="button">' + ICONS.x + 'דחייה</button>' +
+                  '<button class="approve tap" id="dApprove" type="button">' + ICONS.check + 'אישור' + (q.type === 'table' ? ' · ' + q.time : '') + '</button>';
+        } else {
+            cta = '<button class="reopen tap" id="dReopen" type="button">החזרה לפניות הממתינות</button>';
+        }
+        $('#detailCta').innerHTML = cta;
+
+        $('#detailX').addEventListener('click', closeDetail);
+        var el;
+        if ((el = $('#dApprove'))) el.addEventListener('click', function () { approve(id); });
+        if ((el = $('#dDecline'))) el.addEventListener('click', function () { closeDetail(); openDecline(id); });
+        if ((el = $('#dReopen'))) el.addEventListener('click', function () { reopen(id); });
+        if ((el = $('#replySend'))) el.addEventListener('click', function () {
+            var v = $('#replyInput').value.trim();
+            if (!v) return;
+            var t = document.createElement('div');
+            t.className = 'msg you'; t.textContent = v;
+            $('#detailBody .thread').appendChild(t);
+            $('#replyInput').value = '';
+            $('#detailBody').scrollTop = $('#detailBody').scrollHeight;
+        });
+
+        $('#detail').classList.add('show');
+    }
+    function closeDetail() { $('#detail').classList.remove('show'); detailId = null; }
+
+    /* ---------- live toggle ---------- */
+    $('#liveToggle').addEventListener('click', function () {
+        live = !live;
+        this.classList.toggle('on', live);
+        $('#liveLabel').textContent = live ? 'משדר · 4 מקומות' : 'שידור כבוי';
+        flash(live ? 'שידור מקומות פנויים הופעל' : 'הפסקת לשדר מקומות פנויים');
+    });
+
+    /* ---------- toast ---------- */
+    var toastT;
+    function flash(msg) {
+        var t = $('#toast');
+        t.innerHTML = msg;
+        t.classList.add('show');
+        clearTimeout(toastT);
+        toastT = setTimeout(function () { t.classList.remove('show'); }, 3000);
+    }
+
+    /* ---------- incoming inquiry (demo liveliness) ---------- */
+    setTimeout(function () {
+        var q = JSON.parse(JSON.stringify(INCOMING));
+        q.justIn = true;
+        inquiries.unshift(q);
+        renderAll();
+        flash('פנייה חדשה מ<b>' + q.name + '</b>');
+        $('#scroll').scrollTo({ top: 0, behavior: 'smooth' });
+    }, 5200);
+
+    renderAll();
+})();
+</script>

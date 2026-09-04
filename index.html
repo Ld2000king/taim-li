@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="he">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#FCFBF9" />
+<title>ביס · דמו</title>
+<meta name="description" content="ביס — שוק בזמן אמת לקיבולת מתכלה של מסעדות. דמו של צד הלקוח, צד העסק ומסמך המיקוד." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&family=Miriam+Libre:wght@400;700&display=swap" />
+<style>
+:root {
+    --paper: #FCFBF9;
+    --card: #FFFFFF;
+    --card-2: #F5F3EF;
+    --line: #EAE7E1;
+    --ink: #14181A;
+    --ink-soft: #565D61;
+    --ink-faint: #6E7579;
+    --teal: #0E7C7B;
+    --teal-deep: #0A6160;
+    --teal-tint: #E4F1F0;
+    --pink: #D6246E;
+    --shadow: 0 1px 2px rgba(20,24,26,.04), 0 8px 24px rgba(20,24,26,.06);
+    --font-display: 'Miriam Libre', Heebo, Georgia, serif;
+    --font-ui: 'Heebo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    background: var(--paper); color: var(--ink);
+    font-family: var(--font-ui); line-height: 1.6;
+    direction: rtl;
+    -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 720px; margin: 0 auto; padding: 56px 24px 72px; }
+
+.mark {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 30px; color: var(--teal-deep); letter-spacing: .3px;
+}
+h1 {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: clamp(28px, 6vw, 40px); line-height: 1.2;
+    margin-top: 20px; text-wrap: balance;
+}
+.lede {
+    font-size: 17px; color: var(--ink-soft); margin-top: 12px;
+    max-width: 56ch; text-wrap: pretty;
+}
+.pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--teal-tint); color: var(--teal-deep);
+    font-size: 13px; font-weight: 600;
+    padding: 7px 14px; border-radius: 999px; margin-top: 22px;
+}
+.pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--pink); }
+
+.grid { display: grid; gap: 14px; margin-top: 38px; }
+a.card {
+    display: block; text-decoration: none; color: inherit;
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 20px; padding: 22px 22px 20px;
+    box-shadow: var(--shadow);
+    transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+}
+a.card:hover {
+    transform: translateY(-2px);
+    border-color: var(--teal);
+    box-shadow: 0 2px 6px rgba(20,24,26,.05), 0 16px 36px rgba(20,24,26,.10);
+}
+a.card:focus-visible { outline: 3px solid var(--teal); outline-offset: 3px; }
+.card .top { display: flex; align-items: center; gap: 12px; }
+.card .ico {
+    width: 42px; height: 42px; flex-shrink: 0; border-radius: 13px;
+    background: var(--teal-tint); color: var(--teal-deep);
+    display: grid; place-items: center;
+}
+.card .ico svg { width: 21px; height: 21px; }
+.card h2 { font-family: var(--font-display); font-weight: 700; font-size: 20px; }
+.card p { font-size: 14.5px; color: var(--ink-soft); margin-top: 11px; text-wrap: pretty; }
+.card .go {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 14px; font-size: 14px; font-weight: 700; color: var(--teal-deep);
+}
+.card .go svg { width: 15px; height: 15px; }
+
+.about {
+    margin-top: 40px; padding-top: 28px; border-top: 1px solid var(--line);
+}
+.about h3 { font-size: 13px; font-weight: 700; letter-spacing: 1.2px; color: var(--ink-faint); }
+.about p { font-size: 15px; color: var(--ink-soft); margin-top: 12px; max-width: 62ch; text-wrap: pretty; }
+.about p + p { margin-top: 10px; }
+.about b { color: var(--ink); font-weight: 700; }
+
+.foot { margin-top: 34px; font-size: 13px; color: var(--ink-faint); }
+.foot a { color: var(--teal-deep); }
+
+@media (prefers-reduced-motion: reduce) { a.card { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+    <div class="mark">ביס</div>
+    <h1>למכור את השעות שאף אחד לא קונה</h1>
+    <p class="lede">
+        שולחן ריק ב־17:00 שווה ₪0 — לנצח. ביס הוא שוק בזמן אמת לקיבולת מתכלה של מסעדות:
+        העסק משדר מה פנוי ומה ההצעה, והלקוח נכנס דרך סיטואציה ורואה רק מה שזמין עכשיו.
+    </p>
+    <div class="pill"><i></i>גרסת דמו · הנתונים מדומים</div>
+
+    <div class="grid">
+
+        <a class="card" href="customer.html">
+            <div class="top">
+                <div class="ico">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+                </div>
+                <h2>צד הלקוח</h2>
+            </div>
+            <p>
+                בוחרים סיטואציה — ״לעבוד כמה שעות״, ״דייט״, ״עם הכלב״ — ומקבלים רק הצעות חיות,
+                ממוינות לפי מה שפג הכי קרוב. מחליקים ימינה כדי לתפוס מקום ל־15 דקות.
+            </p>
+            <span class="go">פתיחה
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg>
+            </span>
+        </a>
+
+        <a class="card" href="business.html">
+            <div class="top">
+                <div class="ico">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"></circle><path d="M8.6 8.6a4.8 4.8 0 0 0 0 6.8M15.4 8.6a4.8 4.8 0 0 1 0 6.8"></path><path d="M5.6 5.6a9 9 0 0 0 0 12.8M18.4 5.6a9 9 0 0 1 0 12.8"></path></svg>
+                </div>
+                <h2>צד העסק</h2>
+            </div>
+            <p>
+                שלושה טאבים: פניות שנכנסות מלקוחות, קונסולת שידור עם מפת השעות המתות של העסק,
+                ועורך הפרופיל. השידור נסגר לבד בסוף החלון.
+            </p>
+            <span class="go">פתיחה
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg>
+            </span>
+        </a>
+
+        <a class="card" href="concept.html">
+            <div class="top">
+                <div class="ico">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v16H5z"></path><path d="M8.5 9h7M8.5 13h7M8.5 17h4"></path></svg>
+                </div>
+                <h2>מסמך המיקוד</h2>
+            </div>
+            <p>
+                למה ״טינדר למסעדות״ לא עובד, מהו המלאי שאנחנו באמת מוכרים, איך הלולאה נסגרת,
+                מודל ההכנסה, ותוכנית הקר־סטארט — עם הסיכונים בלי לייפות.
+            </p>
+            <span class="go">קריאה
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg>
+            </span>
+        </a>
+
+    </div>
+
+    <div class="about">
+        <h3>מה זה</h3>
+        <p>
+            <b>ביס</b> מתחיל מהמספר היחיד שכל בעל מסעדה מכיר ואף אחד לא מודד: כמה כיסאות נשארו ריקים היום.
+            במקום עוד אפליקציית גילוי, ביס מוכר <b>רק את החלונות המתים</b> — אף פעם לא את שעות השיא —
+            ולכן הפיץ׳ לעסק הוא ״תן לי את מה שאתה ממילא מפסיד״, והעמלה נגבית רק כשמישהו באמת התיישב.
+        </p>
+        <p>
+            אצל הלקוח זה מתורגם לשתי החלטות במקום עשר: מה בא לך עכשיו, ומה עומד להיעלם.
+        </p>
+    </div>
+
+    <p class="foot">
+        דמו בלבד — אין שרת, אין הרשמה, והנתונים מומצאים. הכול רץ בדפדפן.
+        הקוד ב־<a href="https://github.com/Ld2000king/taim-li">GitHub</a>.
+    </p>
+
+</div>
+</body>
+</html>

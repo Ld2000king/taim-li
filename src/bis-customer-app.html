@@ -1,0 +1,1042 @@
+<title>ביס ללקוח</title>
+<meta name="description" content="צד הלקוח לאפליקציית גילוי מסעדות ובתי קפה בהחלקה — גרסת דמו." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@500;600;700&display=swap" />
+
+<style>
+/* ============================================================================
+   ביס ללקוח — swipe-to-discover (demo)
+   Same "יום־יום" language as the business editor: warm paper, soft rounded
+   surfaces, clay / sage / honey accents, feather shadows. Committed light.
+   ============================================================================ */
+:root {
+    --paper: #FBF8F3;
+    --paper-edge: #F1EBE0;
+    --card: #FFFFFF;
+    --card-2: #F5F0E7;
+    --line: #EDE6D9;
+
+    --ink: #2F2A23;
+    --ink-soft: #857B6B;
+    --ink-faint: #A79D8B;
+
+    --sage: #5F9070;
+    --sage-tint: #EAF1EA;
+    --clay: #CB7D55;
+    --clay-deep: #A6572F;
+    --clay-tint: #F7EBE1;
+    --honey: #D9A94E;
+    --honey-tint: #FAF1DF;
+    --plum: #7C5A82;
+    --plum-tint: #EFE7F0;
+    --plum-line: #D9C7DC;
+    --rose: #BC5A4C;
+    --rose-tint: #F7E4E0;
+
+    --shadow-soft: 0 1px 2px rgba(47, 42, 35, 0.04), 0 6px 20px rgba(47, 42, 35, 0.05);
+    --shadow-lift: 0 2px 6px rgba(47, 42, 35, 0.06), 0 16px 40px rgba(47, 42, 35, 0.12);
+
+    --radius-sm: 14px;
+    --radius-tile: 18px;
+    --radius-card: 26px;
+    --radius-frame: 30px;
+
+    --font-display: 'Frank Ruhl Libre', Georgia, 'Times New Roman', serif;
+    --font-ui: 'Rubik', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+    --app-max-width: 460px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+
+body {
+    font-family: var(--font-ui);
+    background: var(--paper-edge);
+    color: var(--ink);
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+    line-height: 1.55;
+}
+button { font-family: var(--font-ui); cursor: pointer; }
+
+#app {
+    position: relative;
+    direction: rtl;
+    height: 100dvh;
+    max-width: var(--app-max-width);
+    margin: 0 auto;
+    background: var(--paper);
+    box-shadow: var(--shadow-soft);
+    border-radius: var(--radius-frame);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.tap { transition: transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.14s ease, background 0.16s ease; }
+.tap:active { transform: scale(0.94); filter: brightness(0.97); }
+
+/* ---------- app bar ---------- */
+.appbar {
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px 10px;
+    border-bottom: 1px solid var(--line);
+}
+.wordmark {
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 25px; letter-spacing: 0.2px;
+    color: var(--clay-deep);
+}
+.wordmark small {
+    color: var(--ink-faint);
+    font-family: var(--font-ui); font-weight: 500; font-size: 12px;
+    margin-inline-start: 8px;
+}
+.likes-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--card-2); border: 1px solid var(--line);
+    border-radius: 999px; padding: 7px 13px 7px 11px;
+    font-size: 13px; font-weight: 600; color: var(--ink-soft);
+}
+.likes-pill svg { width: 15px; height: 15px; }
+.likes-pill .dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--sage);
+    display: none;
+}
+.likes-pill.has-news .dot { display: block; }
+
+/* ---------- filter row ---------- */
+.filters {
+    flex-shrink: 0;
+    display: flex; gap: 8px;
+    padding: 12px 16px 12px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.filters::-webkit-scrollbar { display: none; }
+.fchip {
+    flex-shrink: 0;
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 999px; padding: 8px 14px;
+    font-size: 13px; font-weight: 500; color: var(--ink-soft);
+    white-space: nowrap;
+}
+.fchip[aria-pressed="true"] {
+    background: var(--clay-tint); border-color: #E7CDBA; color: var(--clay-deep);
+    font-weight: 600;
+}
+
+/* ---------- deck ---------- */
+.stage {
+    flex: 1;
+    position: relative;
+    padding: 12px 16px 4px;
+    min-height: 0;
+}
+.card {
+    position: absolute;
+    top: 12px; inset-inline: 16px; bottom: 4px;
+    background: var(--card);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    box-shadow: var(--shadow-lift);
+    will-change: transform;
+    user-select: none; -webkit-user-select: none;
+}
+.card.behind-1 { transform: scale(0.955) translateY(10px); }
+.card.behind-2 { transform: scale(0.912) translateY(18px); }
+.card.settling { transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1); }
+.card.top { touch-action: none; cursor: grab; }
+.card.top:active { cursor: grabbing; }
+.card.gone { transition: transform 0.36s ease, opacity 0.36s ease; opacity: 0; }
+
+.card-media { position: absolute; inset: 0; background: var(--card-2); }
+.card-media svg { width: 100%; height: 100%; display: block; }
+.card-media::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(38, 33, 27, 0.92) 0%, rgba(38, 33, 27, 0.3) 42%, rgba(38, 33, 27, 0) 60%);
+}
+.card-body {
+    position: absolute; inset-inline: 0; bottom: 0; z-index: 2;
+    padding: 18px 18px 20px;
+    color: #fff;
+}
+.card-name {
+    font-family: var(--font-display); font-weight: 700; font-size: 26px;
+    display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;
+}
+.card-name em {
+    font-family: var(--font-ui); font-style: normal; font-weight: 600;
+    font-size: 14px; color: #FFD98F;
+}
+.card-meta { font-size: 13px; color: #EFE7DA; margin-top: 4px; }
+.card-meta b { color: #FFD98F; font-weight: 600; }
+.card-status { font-size: 12.5px; margin-top: 3px; font-weight: 500; }
+.card-status.open { color: #A9E0B8; }
+.card-status.shut { color: #F0C4BD; }
+.card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.card-tags span {
+    font-size: 11px; font-weight: 600;
+    background: rgba(255, 255, 255, 0.18); color: #fff;
+    padding: 4px 10px; border-radius: 999px;
+    backdrop-filter: blur(3px);
+}
+.card-live {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 12px;
+    font-size: 11.5px; font-weight: 700;
+    background: var(--honey); color: var(--ink);
+    padding: 5px 11px; border-radius: 999px;
+}
+.card-live i {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--clay-deep);
+    animation: pulse 1.1s ease-in-out infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+.card-hint {
+    position: absolute; top: 14px; inset-inline-start: 16px; z-index: 2;
+    font-size: 11px; font-weight: 600; color: #fff;
+    background: rgba(38, 33, 27, 0.4);
+    padding: 5px 10px; border-radius: 999px;
+    backdrop-filter: blur(3px);
+    transition: opacity 0.15s ease;
+}
+.card.dragging .card-hint { opacity: 0; }
+.price { unicode-bidi: isolate; font-family: var(--font-ui); }
+
+.stamp {
+    position: absolute; top: 26px; z-index: 3;
+    font-family: var(--font-display); font-weight: 700; font-size: 26px;
+    padding: 6px 16px; border-radius: 12px;
+    border: 3px solid currentColor;
+    opacity: 0; pointer-events: none;
+    text-transform: none;
+}
+.stamp.like { inset-inline-start: 22px; transform: rotate(-14deg); color: #3FA05C; }
+.stamp.nope { inset-inline-end: 22px; transform: rotate(14deg); color: #E6E1D6; }
+
+/* ---------- action buttons ---------- */
+.actions {
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; gap: 18px;
+    padding: 12px 0 20px;
+}
+.act {
+    border: none; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--card);
+    box-shadow: var(--shadow-lift);
+}
+.act svg { width: 24px; height: 24px; }
+.act.skip { width: 56px; height: 56px; color: var(--rose); }
+.act.undo { width: 46px; height: 46px; color: var(--ink-faint); }
+.act.info { width: 46px; height: 46px; color: var(--clay-deep); }
+.act.like { width: 66px; height: 66px; color: #fff; background: var(--sage); }
+.act.like svg { width: 30px; height: 30px; }
+.act:disabled { opacity: 0.4; box-shadow: var(--shadow-soft); }
+
+/* ---------- empty state ---------- */
+.empty {
+    position: absolute; inset: 12px 16px 4px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-soft);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 30px; gap: 14px;
+}
+.empty svg { width: 54px; height: 54px; color: var(--ink-faint); }
+.empty h2 { font-family: var(--font-display); font-weight: 600; font-size: 20px; }
+.empty p { font-size: 13.5px; color: var(--ink-soft); max-width: 260px; }
+.empty button {
+    margin-top: 4px;
+    background: var(--clay-deep); color: #fff; border: none;
+    border-radius: 999px; padding: 12px 22px; font-weight: 700; font-size: 14px;
+}
+
+/* ---------- detail sheet ---------- */
+.sheet {
+    position: fixed; inset: 0; z-index: 60;
+    background: var(--paper);
+    max-width: var(--app-max-width); margin: 0 auto;
+    transform: translateY(100%);
+    transition: transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+    display: flex; flex-direction: column;
+    direction: rtl;
+}
+.sheet.show { transform: translateY(0); }
+.sheet-scroll { flex: 1; overflow-y: auto; }
+.sheet-hero { position: relative; aspect-ratio: 3 / 2.4; background: var(--card-2); }
+.sheet-hero .frame { position: absolute; inset: 0; }
+.sheet-hero .frame svg { width: 100%; height: 100%; display: block; }
+.sheet-hero::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(to top, rgba(38, 33, 27, 0.5), transparent 34%);
+}
+.sheet-dots {
+    position: absolute; top: 12px; inset-inline: 14px; z-index: 3;
+    display: flex; gap: 5px;
+}
+.sheet-dots i { flex: 1; height: 3px; border-radius: 999px; background: rgba(255, 255, 255, 0.4); }
+.sheet-dots i.on { background: #fff; }
+.sheet-nav { position: absolute; inset: 0; z-index: 2; display: flex; }
+.sheet-nav div { flex: 1; }
+.sheet-close {
+    position: absolute; top: 12px; inset-inline-start: 14px; z-index: 4;
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(251, 248, 243, 0.92); border: none;
+    display: grid; place-items: center; color: var(--ink);
+    box-shadow: var(--shadow-soft);
+}
+.sheet-close svg { width: 18px; height: 18px; }
+
+.sheet-pad { padding: 18px 18px 8px; }
+.sheet-title { font-family: var(--font-display); font-weight: 700; font-size: 27px; }
+.sheet-sub { font-size: 13.5px; color: var(--ink-soft); margin-top: 4px; }
+.sheet-sub b { color: var(--clay-deep); }
+.sheet-status { margin-top: 8px; font-size: 13px; font-weight: 600; }
+.sheet-status.open { color: var(--sage); }
+.sheet-status.shut { color: var(--rose); }
+
+.sheet-block { padding: 16px 18px; border-top: 1px solid var(--line); }
+.sheet-block h3 {
+    font-size: 12px; font-weight: 700; color: var(--ink-faint);
+    letter-spacing: 0.4px; margin-bottom: 10px;
+}
+.sheet-about { font-size: 14px; color: var(--ink); line-height: 1.65; }
+.d-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.d-tags span {
+    font-size: 12px; font-weight: 500; color: var(--plum);
+    background: var(--plum-tint); border: 1px solid var(--plum-line);
+    padding: 5px 11px; border-radius: 999px;
+}
+.d-menu { display: flex; flex-direction: column; gap: 11px; }
+.d-dish { display: flex; justify-content: space-between; gap: 14px; align-items: baseline; }
+.d-dish .n { font-weight: 600; font-size: 14px; }
+.d-dish .d { font-size: 12.5px; color: var(--ink-soft); }
+.d-dish .p { color: var(--clay-deep); font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.d-hours { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; font-size: 13px; }
+.d-hours .day { color: var(--ink-soft); }
+.d-hours .day.today { color: var(--ink); font-weight: 700; }
+.d-hours .val { font-variant-numeric: tabular-nums; }
+.d-hours .val.shut { color: var(--ink-faint); }
+.d-map {
+    border-radius: var(--radius-tile); overflow: hidden;
+    border: 1px solid var(--line);
+}
+.d-map svg { width: 100%; height: 120px; display: block; }
+.d-addr { font-size: 13.5px; color: var(--ink); margin-top: 8px; }
+
+.sheet-cta {
+    flex-shrink: 0;
+    padding: 12px 18px calc(16px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    background: var(--paper);
+    display: flex; gap: 10px;
+}
+.sheet-cta .pass {
+    width: 54px; flex-shrink: 0;
+    background: var(--card); border: 1px solid var(--line); color: var(--rose);
+    border-radius: var(--radius-btn, 16px); border-radius: 16px;
+    display: grid; place-items: center;
+}
+.sheet-cta .pass svg { width: 20px; height: 20px; }
+.sheet-cta .send {
+    flex: 1;
+    background: var(--clay-deep); color: #fff; border: none;
+    border-radius: 16px; padding: 15px; font-weight: 700; font-size: 15px;
+}
+
+/* ---------- sent modal ---------- */
+.modal-wrap {
+    position: fixed; inset: 0; z-index: 80;
+    background: rgba(47, 42, 35, 0.5);
+    backdrop-filter: blur(5px);
+    display: none; align-items: center; justify-content: center;
+    padding: 26px;
+}
+.modal-wrap.show { display: flex; }
+.modal {
+    background: var(--card);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-lift);
+    padding: 28px 24px 22px;
+    text-align: center;
+    max-width: 340px; width: 100%;
+}
+.modal .spark {
+    width: 66px; height: 66px; margin: 0 auto 16px;
+    border-radius: 50%; background: var(--sage-tint);
+    display: grid; place-items: center; color: var(--sage);
+}
+.modal .spark svg { width: 34px; height: 34px; }
+.modal h2 { font-family: var(--font-display); font-weight: 700; font-size: 21px; }
+.modal p { font-size: 13.5px; color: var(--ink-soft); margin-top: 8px; line-height: 1.6; }
+.modal p b { color: var(--ink); }
+.modal-btns { display: flex; flex-direction: column; gap: 9px; margin-top: 20px; }
+.modal-btns button {
+    border-radius: 999px; padding: 13px; font-weight: 700; font-size: 14px; border: none;
+}
+.modal-btns .primary { background: var(--clay-deep); color: #fff; }
+.modal-btns .ghost { background: var(--card-2); color: var(--ink-soft); }
+
+/* ---------- inquiries tray ---------- */
+.tray-wrap {
+    position: fixed; inset: 0; z-index: 70;
+    background: rgba(47, 42, 35, 0.42);
+    display: none;
+}
+.tray-wrap.show { display: block; }
+.tray {
+    position: absolute; inset-inline: 0; bottom: 0;
+    max-width: var(--app-max-width); margin: 0 auto;
+    background: var(--paper);
+    border-radius: 24px 24px 0 0;
+    max-height: 78%;
+    display: flex; flex-direction: column;
+    transform: translateY(100%);
+    transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.tray-wrap.show .tray { transform: translateY(0); }
+.tray-grip { width: 40px; height: 4px; border-radius: 999px; background: var(--line); margin: 10px auto 4px; }
+.tray-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 20px 12px;
+}
+.tray-head h2 { font-family: var(--font-display); font-weight: 700; font-size: 19px; }
+.tray-head button { background: none; border: none; color: var(--ink-soft); font-size: 14px; font-weight: 600; }
+.tray-list { overflow-y: auto; padding: 4px 16px 24px; display: flex; flex-direction: column; gap: 10px; }
+.inq {
+    display: flex; gap: 12px; align-items: center;
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius-tile); padding: 12px;
+}
+.inq .thumb { width: 52px; height: 52px; border-radius: 13px; overflow: hidden; flex-shrink: 0; background: var(--card-2); }
+.inq .thumb svg { width: 100%; height: 100%; display: block; }
+.inq .txt { flex: 1; min-width: 0; }
+.inq .txt h4 { font-size: 14.5px; font-weight: 700; }
+.inq .txt p { font-size: 12.5px; color: var(--ink-soft); margin-top: 2px; }
+.inq .txt p.accepted { color: var(--sage); font-weight: 600; }
+.inq .stat {
+    font-size: 11px; font-weight: 700; padding: 5px 9px; border-radius: 999px;
+    white-space: nowrap;
+}
+.inq .stat.pending { background: var(--honey-tint); color: var(--clay-deep); }
+.inq .stat.ok { background: var(--sage-tint); color: var(--sage); }
+.tray-empty { text-align: center; color: var(--ink-soft); font-size: 13.5px; padding: 30px 20px; }
+
+/* ---------- toast ---------- */
+.toast {
+    position: fixed; left: 50%; bottom: 22px;
+    transform: translate(-50%, 160%);
+    background: var(--ink); color: var(--paper);
+    font-weight: 600; font-size: 13.5px;
+    padding: 12px 20px; border-radius: 999px;
+    box-shadow: var(--shadow-lift);
+    z-index: 120; max-width: 88vw; text-align: center;
+    transition: transform 0.4s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+.toast.show { transform: translate(-50%, 0); }
+.toast b { color: #FFD98F; }
+
+@media (prefers-reduced-motion: reduce) {
+    .card-live i { animation: none; }
+    .tap, .card.settling, .card.gone, .sheet, .tray, .toast { transition: none; }
+}
+</style>
+
+<div id="app" lang="he" dir="rtl">
+    <header class="appbar">
+        <div class="wordmark">ביס<small>גילוי</small></div>
+        <button class="likes-pill tap" id="likesPill" type="button">
+            <span class="dot"></span>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.7-10-9.1C.4 8.8 2 5.5 5.2 5.5c1.9 0 3.3 1 3.8 2 .5-1 1.9-2 3.8-2 3.2 0 4.8 3.3 3.2 6.4C19.5 16.3 12 21 12 21z"/></svg>
+            <span id="likesCount">0</span>
+        </button>
+    </header>
+
+    <nav class="filters" id="filters"></nav>
+
+    <div class="stage" id="stage"></div>
+
+    <div class="actions" id="actions">
+        <button class="act undo tap" id="btnUndo" type="button" aria-label="ביטול" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg>
+        </button>
+        <button class="act skip tap" id="btnSkip" type="button" aria-label="דילוג">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+        <button class="act like tap" id="btnLike" type="button" aria-label="שליחת פנייה">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.7-10-9.1C.4 8.8 2 5.5 5.2 5.5c1.9 0 3.3 1 3.8 2 .5-1 1.9-2 3.8-2 3.2 0 4.8 3.3 3.2 6.4C19.5 16.3 12 21 12 21z"/></svg>
+        </button>
+        <button class="act info tap" id="btnInfo" type="button" aria-label="פרטים">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 11v6"/><circle cx="12" cy="7.5" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="9"/></svg>
+        </button>
+    </div>
+</div>
+
+<div class="sheet" id="sheet">
+    <div class="sheet-scroll" id="sheetScroll"></div>
+    <div class="sheet-cta">
+        <button class="pass tap" id="sheetPass" type="button" aria-label="דילוג">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+        <button class="send tap" id="sheetSend" type="button">שליחת פנייה</button>
+    </div>
+</div>
+
+<div class="modal-wrap" id="modalWrap">
+    <div class="modal">
+        <div class="spark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+        <h2>הפנייה נשלחה</h2>
+        <p id="modalText"></p>
+        <div class="modal-btns">
+            <button class="primary tap" id="modalNext" type="button">אפשר להמשיך</button>
+            <button class="ghost tap" id="modalToInq" type="button">לצפייה בפניות שלי</button>
+        </div>
+    </div>
+</div>
+
+<div class="tray-wrap" id="trayWrap">
+    <div class="tray">
+        <div class="tray-grip"></div>
+        <div class="tray-head">
+            <h2>הפניות שלי</h2>
+            <button id="trayClose" type="button">סגירה</button>
+        </div>
+        <div class="tray-list" id="trayList"></div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+    "use strict";
+
+    var ART = {
+        coffee: '<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="300" fill="#EADFCB"/><rect width="400" height="300" fill="#E3D4BB"/><circle cx="200" cy="150" r="150" fill="#8a6440"/><circle cx="200" cy="150" r="112" fill="#e9ddc7"/><circle cx="200" cy="150" r="100" fill="#c98a4b"/><circle cx="200" cy="150" r="92" fill="#a9682f"/><path d="M200 92c14 20 14 40 0 58-14-18-14-38 0-58zm0 62c10 16 26 22 44 20-6 16-22 24-44 24s-38-8-44-24c18 2 34-4 44-20zm0 0c-10 16-26 22-44 20 2-16 14-28 30-32 6-2 10 4 14 12zm0 0c10 16 26 22 44 20-2-16-14-28-30-32-6-2-10 4-14 12z" fill="#e9ddc7" opacity="0.9"/><ellipse cx="330" cy="150" rx="16" ry="30" fill="none" stroke="#e9ddc7" stroke-width="10"/><filter id="n"><feTurbulence baseFrequency="0.9" numOctaves="2"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope="0.05"/></feComponentTransfer></filter><rect width="400" height="300" filter="url(#n)"/></svg>',
+        shakshuka: '<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="300" fill="#ECE4D2"/><circle cx="200" cy="150" r="150" fill="#DED4BC"/><circle cx="185" cy="150" r="120" fill="#1f1c17"/><circle cx="185" cy="150" r="104" fill="#2e5e3a"/><circle cx="185" cy="150" r="104" fill="#367044" opacity="0.7"/><rect x="300" y="140" width="90" height="22" rx="11" fill="#1f1c17"/><ellipse cx="160" cy="128" rx="34" ry="26" fill="#f3ead0"/><circle cx="160" cy="128" r="14" fill="#e8a13c"/><ellipse cx="214" cy="176" rx="32" ry="24" fill="#f3ead0"/><circle cx="214" cy="176" r="13" fill="#e8a13c"/><path d="M120 96c8 6 8 14 2 20M240 110c8 6 8 14 2 20M150 200c8 6 8 14 2 20" stroke="#8fbf6a" stroke-width="6" fill="none" stroke-linecap="round"/><circle cx="118" cy="170" r="7" fill="#b5401f"/><circle cx="235" cy="140" r="6" fill="#b5401f"/><circle cx="190" cy="112" r="5" fill="#b5401f"/><filter id="n2"><feTurbulence baseFrequency="0.9" numOctaves="2"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope="0.05"/></feComponentTransfer></filter><rect width="400" height="300" filter="url(#n2)"/></svg>',
+        storefront: '<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="300" fill="#b98f5e"/><rect y="150" width="400" height="150" fill="#CDA97F"/><rect x="40" y="70" width="320" height="150" fill="#2c2620"/><rect x="56" y="86" width="130" height="120" fill="#3f6f6a"/><rect x="214" y="86" width="130" height="120" fill="#1f1c17"/><rect x="214" y="86" width="130" height="120" fill="#c68a2e" opacity="0.15"/><rect x="30" y="52" width="340" height="26" fill="#8f4216"/><g fill="#e9ddc7"><rect x="30" y="52" width="42" height="26"/><rect x="114" y="52" width="42" height="26"/><rect x="198" y="52" width="42" height="26"/><rect x="282" y="52" width="42" height="26"/></g><rect x="150" y="120" width="100" height="34" rx="6" fill="#17140f"/><text x="200" y="144" font-family="Georgia, serif" font-size="20" fill="#e7b45c" text-anchor="middle" font-weight="bold">בית קפה</text><circle cx="352" cy="210" r="40" fill="#3c5a34"/><circle cx="322" cy="230" r="34" fill="#4a6f3c"/><circle cx="360" cy="245" r="30" fill="#3c5a34"/><rect x="344" y="240" width="10" height="50" fill="#4a3323"/><rect x="70" y="238" width="70" height="10" rx="5" fill="#2c2620"/><rect x="98" y="238" width="8" height="40" fill="#2c2620"/><filter id="n3"><feTurbulence baseFrequency="0.9" numOctaves="2"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope="0.05"/></feComponentTransfer></filter><rect width="400" height="300" filter="url(#n3)"/></svg>',
+        croissant: '<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="300" fill="#d8cbb0"/><rect width="400" height="300" fill="#cbbd9e"/><ellipse cx="200" cy="165" rx="150" ry="90" fill="#efe7d4"/><ellipse cx="200" cy="160" rx="120" ry="66" fill="#e7dcc2"/><path d="M96 168c22-46 78-64 120-52 30 8 54 30 70 62-24-14-44-16-70-8-32 10-56 34-64 66-30-22-44-56-56-68z" fill="#b5773a"/><path d="M110 164c20-34 62-48 96-40M126 190c18-24 46-38 78-40M150 214c16-18 40-30 66-32" stroke="#8a5628" stroke-width="6" fill="none" stroke-linecap="round"/><g fill="#efe7d4"><ellipse cx="150" cy="150" rx="6" ry="3"/><ellipse cx="190" cy="140" rx="6" ry="3"/><ellipse cx="176" cy="196" rx="6" ry="3"/><ellipse cx="220" cy="176" rx="6" ry="3"/></g><circle cx="330" cy="120" r="34" fill="#a9682f"/><circle cx="330" cy="120" r="26" fill="#c98a4b"/><path d="M364 108c14 2 14 22 0 26" fill="none" stroke="#a9682f" stroke-width="7"/><filter id="n4"><feTurbulence baseFrequency="0.9" numOctaves="2"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope="0.05"/></feComponentTransfer></filter><rect width="400" height="300" filter="url(#n4)"/></svg>',
+        bourekas: '<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="300" fill="#E9E0CD"/><rect x="30" y="70" width="340" height="170" rx="14" fill="#DCD2BB"/><rect x="30" y="70" width="340" height="170" rx="14" fill="none" stroke="#5a5344" stroke-width="4"/><g><path d="M70 190l40-80 40 80z" fill="#d7a44e"/><path d="M160 190l40-80 40 80z" fill="#cf9a44"/><path d="M250 190l40-80 40 80z" fill="#d7a44e"/><path d="M115 210l40-80 40 80z" fill="#c9913c"/><path d="M205 210l40-80 40 80z" fill="#d7a44e"/></g><g fill="#3a3326"><circle cx="90" cy="150" r="2.5"/><circle cx="100" cy="165" r="2.5"/><circle cx="180" cy="150" r="2.5"/><circle cx="195" cy="168" r="2.5"/><circle cx="270" cy="150" r="2.5"/><circle cx="285" cy="162" r="2.5"/><circle cx="235" cy="180" r="2.5"/></g><g fill="#7aa653"><ellipse cx="150" cy="120" rx="7" ry="3"/><ellipse cx="240" cy="128" rx="7" ry="3"/><ellipse cx="120" cy="205" rx="7" ry="3"/></g><filter id="n5"><feTurbulence baseFrequency="0.9" numOctaves="2"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope="0.05"/></feComponentTransfer></filter><rect width="400" height="300" filter="url(#n5)"/></svg>',
+        pasta: '<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="300" fill="#EEE5D1"/><ellipse cx="200" cy="162" rx="150" ry="98" fill="#F7F1E3"/><ellipse cx="200" cy="158" rx="118" ry="72" fill="#EFE6D2"/><g fill="none" stroke="#E0A94B" stroke-width="7" stroke-linecap="round"><path d="M110 150c30-40 150-40 180 0"/><path d="M108 168c26-36 158-36 184 2"/><path d="M120 186c30-30 130-30 160 0"/><path d="M130 138c40-26 100-26 140 0"/><path d="M118 200c40-20 126-20 164 4"/></g><g fill="#C4452E"><circle cx="150" cy="150" r="9"/><circle cx="250" cy="168" r="9"/><circle cx="205" cy="135" r="8"/></g><g fill="#5f8f4a"><path d="M170 178c8-10 18-10 22 0-8 8-16 8-22 0z"/><path d="M232 146c8-10 18-10 22 0-8 8-16 8-22 0z"/></g><g stroke="#9a8a6a" stroke-width="7" fill="none" stroke-linecap="round"><path d="M330 92c5 40 5 118 3 156"/><path d="M320 92v24M330 92v24M340 92v24"/></g><filter id="np"><feTurbulence baseFrequency="0.9" numOctaves="2"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope="0.05"/></feComponentTransfer></filter><rect width="400" height="300" filter="url(#np)"/></svg>',
+        wine: '<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="300" fill="#EFE7D7"/><rect x="72" y="34" width="78" height="214" rx="30" fill="#3a5240"/><rect x="72" y="34" width="78" height="214" rx="30" fill="#2f4535" opacity="0.5"/><rect x="90" y="120" width="60" height="74" fill="#efe7d4"/><rect x="99" y="8" width="24" height="44" rx="6" fill="#6a4a34"/><path d="M232 68h98l-13 74a37 37 0 0 1-72 0z" fill="#f2ecdd"/><path d="M241 90h80l-7 50a30 30 0 0 1-66 0z" fill="#8f2f3a"/><rect x="277" y="176" width="8" height="58" fill="#d8cfbb"/><ellipse cx="281" cy="242" rx="48" ry="12" fill="#e4dcc6"/><g fill="#6a3350"><circle cx="150" cy="212" r="10"/><circle cx="168" cy="222" r="10"/><circle cx="156" cy="234" r="10"/><circle cx="176" cy="240" r="10"/></g><filter id="nw"><feTurbulence baseFrequency="0.9" numOctaves="2"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope="0.05"/></feComponentTransfer></filter><rect width="400" height="300" filter="url(#nw)"/></svg>',
+        bowl: '<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="300" fill="#E7EEDD"/><path d="M66 138a134 92 0 0 0 268 0z" fill="#e8dfc9"/><ellipse cx="200" cy="138" rx="134" ry="54" fill="#d9cdb0"/><ellipse cx="150" cy="130" rx="36" ry="21" fill="#7aa653"/><path d="M122 130c9-13 47-13 56 0-9 11-47 11-56 0z" fill="#5f8f4a"/><g fill="#c4452e"><circle cx="232" cy="124" r="13"/><circle cx="262" cy="140" r="13"/></g><g fill="#d9a94e"><circle cx="196" cy="150" r="8"/><circle cx="213" cy="159" r="8"/><circle cx="179" cy="159" r="8"/></g><path d="M250 114l26-11-7 26z" fill="#e0b83f"/><filter id="nb"><feTurbulence baseFrequency="0.9" numOctaves="2"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope="0.05"/></feComponentTransfer></filter><rect width="400" height="300" filter="url(#nb)"/></svg>',
+        map: '<svg viewBox="0 0 400 160" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="160" fill="#EEE9DE"/><g stroke="#DDD3C2" stroke-width="10" fill="none"><path d="M-10 46h420"/><path d="M-10 120h420"/><path d="M78 -10v180"/><path d="M300 -10v180"/></g><path d="M-10 84h420" stroke="#E4DCCC" stroke-width="20" fill="none"/><circle cx="200" cy="84" r="30" fill="#CB7D55" opacity="0.16"/><path d="M200 60c-12 0-21 9-21 21 0 15 21 35 21 35s21-20 21-35c0-12-9-21-21-21z" fill="#A6572F"/><circle cx="200" cy="80" r="7.5" fill="#fff"/></svg>'
+    };
+
+    var DAYS = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+
+    // hours: { def:[open,close], <getDay>:[open,close] | null }. Missing day -> def.
+    var BUSINESSES = [
+        {
+            id: 'bazelet', name: 'בזלת קפה', cat: 'בית קפה', area: 'לב תל אביב', dist: 1.2,
+            rating: 4.6, reviews: 128, price: 2,
+            tags: ['עבודה מהלפטופ', 'שכונתי', 'ישיבה בחוץ', 'כלבים מוזמנים', 'טבעוני-פרנדלי'],
+            about: 'פינה קטנה ברוטשילד עם קפה שנקלה במקום, מאפים של הבוקר ותפריט צהריים שמתחלף לפי השוק. ישיבה בחוץ מתחת לפיקוסים, שקע חשמל בכל שולחן, וכלבים תמיד מוזמנים.',
+            photos: ['storefront', 'coffee', 'shakshuka', 'croissant'],
+            dishes: [
+                { n: 'שקשוקה ירוקה', d: 'תרד, מנגולד, לברנה ופלפל מעושן', p: 46 },
+                { n: 'כריך פוקצ׳ה חצילים', d: 'חציל קלוי, מוצרלה טרייה, פסטו', p: 42 },
+                { n: 'בורקס גבינות של הבית', d: 'בצק עלים, בולגרית וזעתר', p: 18 },
+                { n: 'קרואסון שקדים', d: 'נאפה כל בוקר, מלית פרנג׳יפן', p: 16 }
+            ],
+            hours: { def: ['07:30', '19:00'], 5: ['07:30', '15:00'], 6: ['08:30', '16:00'] },
+            address: 'רוטשילד 45, תל אביב', live: { seats: 4, until: '17:30' }
+        },
+        {
+            id: 'nonna', name: 'טרטוריה נונה', cat: 'מסעדה', area: 'פלורנטין', dist: 0.8,
+            rating: 4.7, reviews: 243, price: 3,
+            tags: ['רומנטי', 'פסטה טרייה', 'יין טבעי', 'אינטימי'],
+            about: 'מטבח איטלקי ביתי עם פסטה שנמעכת ביד כל בוקר ותפריט שמשתנה לפי מה שמצאנו בשוק לוינסקי. 22 מקומות בלבד, מומלץ להזמין.',
+            photos: ['pasta', 'storefront', 'wine'],
+            dishes: [
+                { n: 'קצ׳ו א פפה', d: 'פקורינו, פלפל שחור גרוס', p: 62 },
+                { n: 'ראוויולי חמאה חומה ומרווה', d: 'מלית ריקוטה ואגוזי מלך', p: 68 },
+                { n: 'קרפצ׳ו סלק צלוי', d: 'עיזים, פיסטוק, ויניגרט הדרים', p: 44 },
+                { n: 'טירמיסו', d: 'מסקרפונה, אספרסו של הבית', p: 32 }
+            ],
+            hours: { def: ['18:00', '24:00'], 6: null },
+            address: 'אברבנאל 12, תל אביב', live: { seats: 2, until: '21:00' }
+        },
+        {
+            id: 'hamtzutz', name: 'חמצוץ יין טבעי', cat: 'בר', area: 'נווה צדק', dist: 1.9,
+            rating: 4.5, reviews: 96, price: 3,
+            tags: ['יין טבעי', 'תוסס', 'בר', 'פתוח מאוחר'],
+            about: 'בר יין קטן עם כשלושים בקבוקים פתוחים בכל ערב, גבינות ממחלבות קטנות ומוזיקה בווליום שעדיין מאפשר לדבר.',
+            photos: ['wine', 'bowl', 'storefront'],
+            dishes: [
+                { n: 'כרית גבינות', d: 'שלוש גבינות, דבש ואגוזים', p: 58 },
+                { n: 'קרודו דג היום', d: 'שמן זית, לימון כבוש, צנובר', p: 54 },
+                { n: 'פוקצ׳ה רוזמרין', d: 'יוצאת חמה מהתנור', p: 26 },
+                { n: 'כוס יין הבית', d: 'לבן או כתום, מתחלף', p: 34 }
+            ],
+            hours: { def: ['19:00', '25:30'], 0: null },
+            address: 'שבזי 21, תל אביב', live: null
+        },
+        {
+            id: 'lehem', name: 'לחם של יום', cat: 'מאפייה', area: 'קרליבך', dist: 2.4,
+            rating: 4.8, reviews: 311, price: 1,
+            tags: ['מאפייה', 'בוקר', 'טייק אווי', 'מחמצת'],
+            about: 'מאפיית מחמצת שפותחת ב-6:30. כיכרות, קרואסונים וקוויש יוצאים חמים כל שעתיים. בעיקר טייק אווי, יש שני שולחנות בחוץ.',
+            photos: ['croissant', 'bourekas'],
+            dishes: [
+                { n: 'קרואסון חמאה', d: 'שלושה ימי קיפול', p: 14 },
+                { n: 'כיכר מחמצת', d: 'קמח מקומי, 48 שעות התפחה', p: 28 },
+                { n: 'ראגלך שוקולד', d: 'חמאתי, לא מתקתק', p: 8 },
+                { n: 'קוויש בטטה ועיזים', d: 'בצק פריך, פרוסה נדיבה', p: 26 }
+            ],
+            hours: { def: ['06:30', '16:00'], 6: null },
+            address: 'המלאכה 4, תל אביב', live: null
+        },
+        {
+            id: 'seven', name: 'סבן · חומוס ובוקר', cat: 'מסעדה', area: 'שוק הכרמל', dist: 0.5,
+            rating: 4.4, reviews: 512, price: 2,
+            tags: ['משפחתי', 'ארוחת בוקר', 'חומוס', 'מקומי'],
+            about: 'חומוס, ביצים וסלטים מהבוקר עד שנגמר. תור בסוף השבוע אבל זז מהר. יש פינת ילדים קטנה בפנים.',
+            photos: ['shakshuka', 'bourekas', 'storefront'],
+            dishes: [
+                { n: 'חומוס משבצת', d: 'גרגירים, טחינה, ביצה', p: 38 },
+                { n: 'שקשוקה אדומה', d: 'עגבניות שוק, פלפלים קלויים', p: 42 },
+                { n: 'מנת בוקר זוגית', d: 'ביצים, סלטים, לחם הבית, שתייה', p: 92 },
+                { n: 'לימונדה בכד', d: 'נענע, מספיק לשולחן', p: 24 }
+            ],
+            hours: { def: ['08:00', '17:00'] },
+            address: 'הקרמל 28, תל אביב', live: { seats: 6, until: '12:30' }
+        },
+        {
+            id: 'bowls', name: 'באולים', cat: 'מסעדה', area: 'שדרות רוטשילד', dist: 1.4,
+            rating: 4.3, reviews: 77, price: 2,
+            tags: ['טבעוני-פרנדלי', 'בריא', 'מהיר', 'עבודה מהלפטופ'],
+            about: 'קערות דגנים, טופו מעושן וירקות שוק. אפשר להזמין מראש ולאסוף בלי תור, או לשבת בפנים עם שקע חשמל.',
+            photos: ['bowl', 'croissant'],
+            dishes: [
+                { n: 'קערת בודהה', d: 'קינואה, בטטה, אבוקדו, טחינה', p: 46 },
+                { n: 'טופו טריאקי', d: 'אורז מלא, אדממה, שומשום', p: 48 },
+                { n: 'שייק ירוק', d: 'תרד, אננס, ג׳ינג׳ר', p: 26 },
+                { n: 'קוקיס טחינה', d: 'ללא גלוטן', p: 12 }
+            ],
+            hours: { def: ['11:00', '21:00'] },
+            address: 'רוטשילד 90, תל אביב', live: null
+        }
+    ];
+
+    var $ = function (s, r) { return (r || document).querySelector(s); };
+    var now = new Date();
+
+    function resolveHours(biz, day) {
+        var h = Object.prototype.hasOwnProperty.call(biz.hours, day) ? biz.hours[day] : biz.hours.def;
+        return h || null;
+    }
+    function toMin(s) { var p = s.split(':'); return (+p[0]) * 60 + (+p[1]); }
+    function openState(biz) {
+        var h = resolveHours(biz, now.getDay());
+        if (!h) return { open: false, text: 'סגור היום' };
+        var cur = now.getHours() * 60 + now.getMinutes();
+        var o = toMin(h[0]), c = toMin(h[1]);
+        var disp = h[1].replace(/^24/, '00').replace(/^25/, '01').replace(/^26/, '02');
+        if (cur >= o && cur < c) return { open: true, text: 'פתוח · נסגר ' + disp };
+        if (cur < o) return { open: false, text: 'נפתח ' + h[0] };
+        return { open: false, text: 'סגור עכשיו' };
+    }
+
+    /* ---------- state ---------- */
+    var acted = {};              // id -> 'like' | 'skip'
+    var history = [];            // [{id, action}]
+    var inquiries = [];          // [{id, name, photo, status, line}]
+    var deck = [];
+    var filters = { openNow: false, seatsNow: false, cats: {}, maxPrice: 0 };
+
+    function passesFilters(biz) {
+        if (filters.openNow && !openState(biz).open) return false;
+        if (filters.seatsNow && !biz.live) return false;
+        var catKeys = Object.keys(filters.cats).filter(function (k) { return filters.cats[k]; });
+        if (catKeys.length && catKeys.indexOf(biz.cat) === -1) return false;
+        if (filters.maxPrice && biz.price > filters.maxPrice) return false;
+        return true;
+    }
+    function rebuildDeck() {
+        deck = BUSINESSES.filter(function (b) { return !acted[b.id] && passesFilters(b); });
+        renderDeck();
+    }
+
+    /* ---------- filter chips ---------- */
+    var FILTER_DEFS = [
+        { key: 'openNow', label: 'פתוח עכשיו' },
+        { key: 'seatsNow', label: 'שולחן עכשיו' },
+        { key: 'cat:בית קפה', label: 'בתי קפה' },
+        { key: 'cat:מסעדה', label: 'מסעדות' },
+        { key: 'cat:בר', label: 'ברים' },
+        { key: 'cat:מאפייה', label: 'מאפיות' },
+        { key: 'price:2', label: '₪₪ ומטה' }
+    ];
+    function renderFilters() {
+        var wrap = $('#filters');
+        wrap.innerHTML = '';
+        FILTER_DEFS.forEach(function (f) {
+            var b = document.createElement('button');
+            b.className = 'fchip tap';
+            b.type = 'button';
+            b.textContent = f.label;
+            b.setAttribute('aria-pressed', isFilterOn(f.key) ? 'true' : 'false');
+            b.addEventListener('click', function () {
+                toggleFilter(f.key);
+                b.setAttribute('aria-pressed', isFilterOn(f.key) ? 'true' : 'false');
+                rebuildDeck();
+            });
+            wrap.appendChild(b);
+        });
+    }
+    function isFilterOn(key) {
+        if (key === 'openNow') return filters.openNow;
+        if (key === 'seatsNow') return filters.seatsNow;
+        if (key.indexOf('cat:') === 0) return !!filters.cats[key.slice(4)];
+        if (key.indexOf('price:') === 0) return filters.maxPrice === +key.slice(6);
+        return false;
+    }
+    function toggleFilter(key) {
+        if (key === 'openNow') filters.openNow = !filters.openNow;
+        else if (key === 'seatsNow') filters.seatsNow = !filters.seatsNow;
+        else if (key.indexOf('cat:') === 0) {
+            var c = key.slice(4); filters.cats[c] = !filters.cats[c];
+        } else if (key.indexOf('price:') === 0) {
+            var v = +key.slice(6); filters.maxPrice = filters.maxPrice === v ? 0 : v;
+        }
+    }
+
+    /* ---------- deck render ---------- */
+    function priceStr(p) { return Array(p + 1).join('₪'); }
+
+    function cardMarkup(biz) {
+        var st = openState(biz);
+        var tags = biz.tags.slice(0, 3).map(function (t) { return '<span>' + t + '</span>'; }).join('');
+        var live = biz.live ? '<div class="card-live"><i></i>' + biz.live.seats + ' מקומות פנויים עד ' + biz.live.until + '</div>' : '';
+        return '' +
+            '<div class="card-media">' + ART[biz.photos[0]] + '</div>' +
+            '<div class="card-hint">הקישו לפרטים</div>' +
+            '<div class="stamp like">אהבתי</div>' +
+            '<div class="stamp nope">אולי אחר כך</div>' +
+            '<div class="card-body">' +
+                '<div class="card-name">' + biz.name + ' <em class="price">' + priceStr(biz.price) + '</em></div>' +
+                '<div class="card-meta"><b>★ ' + biz.rating.toFixed(1) + '</b> · ' + biz.cat + ' · ' + biz.area + ' · ' + biz.dist.toFixed(1) + ' ק״מ</div>' +
+                '<div class="card-status ' + (st.open ? 'open' : 'shut') + '">' + st.text + '</div>' +
+                '<div class="card-tags">' + tags + '</div>' +
+                live +
+            '</div>';
+    }
+
+    var stage = $('#stage');
+    var topCard = null;
+
+    function renderDeck() {
+        stage.innerHTML = '';
+        if (!deck.length) { renderEmpty(); syncControls(); return; }
+        var shown = deck.slice(0, 3);
+        // render back-to-front so DOM order puts the top card last (on top)
+        for (var i = shown.length - 1; i >= 0; i--) {
+            var biz = shown[i];
+            var el = document.createElement('div');
+            el.className = 'card' + (i === 0 ? ' top' : i === 1 ? ' behind-1' : ' behind-2');
+            el.innerHTML = cardMarkup(biz);
+            stage.appendChild(el);
+        }
+        topCard = stage.querySelector('.card.top');
+        attachDrag(topCard);
+        syncControls();
+    }
+
+    function renderEmpty() {
+        var anyFilter = filters.openNow || filters.seatsNow || filters.maxPrice ||
+            Object.keys(filters.cats).some(function (k) { return filters.cats[k]; });
+        var el = document.createElement('div');
+        el.className = 'empty';
+        el.innerHTML =
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 7l1.5 12.5A2 2 0 0 0 7.5 21h9a2 2 0 0 0 2-1.5L20 7M9 7V5a3 3 0 0 1 6 0v2"/></svg>' +
+            '<h2>' + (anyFilter ? 'אין עוד מקומות בסינון הזה' : 'זהו להיום') + '</h2>' +
+            '<p>' + (anyFilter
+                ? 'אפשר לשחרר כמה מסננים ולראות עוד אפשרויות בסביבה.'
+                : 'עברתם על כל המקומות הקרובים. חזרו אחר כך לכרטיסים חדשים, או התחילו מחדש.') + '</p>' +
+            '<button class="tap" id="resetDeck" type="button">' + (anyFilter ? 'ניקוי מסננים' : 'להתחיל מחדש') + '</button>';
+        stage.appendChild(el);
+        $('#resetDeck').addEventListener('click', function () {
+            if (anyFilter) {
+                filters = { openNow: false, seatsNow: false, cats: {}, maxPrice: 0 };
+                renderFilters();
+            } else {
+                acted = {}; history = [];
+            }
+            rebuildDeck();
+        });
+    }
+
+    function syncControls() {
+        var has = deck.length > 0;
+        ['#btnSkip', '#btnLike', '#btnInfo'].forEach(function (s) { $(s).disabled = !has; });
+        $('#btnUndo').disabled = history.length === 0;
+    }
+
+    /* ---------- drag ---------- */
+    var drag = null;
+    function attachDrag(card) {
+        if (!card) return;
+        card.addEventListener('pointerdown', function (e) {
+            if (e.button != null && e.button !== 0) return;
+            drag = { x: e.clientX, y: e.clientY, dx: 0, dy: 0, t: Date.now(), moved: false, id: e.pointerId };
+            card.style.transition = 'none';
+            card.classList.add('dragging');
+            try { card.setPointerCapture(e.pointerId); } catch (err) {}
+        });
+        card.addEventListener('pointermove', function (e) {
+            if (!drag) return;
+            drag.dx = e.clientX - drag.x;
+            drag.dy = e.clientY - drag.y;
+            if (Math.abs(drag.dx) + Math.abs(drag.dy) > 8) drag.moved = true;
+            var rot = drag.dx * 0.055;
+            card.style.transform = 'translate(' + drag.dx + 'px,' + drag.dy + 'px) rotate(' + rot + 'deg)';
+            setStamp(card, drag.dx);
+        });
+        function end() {
+            if (!drag) return;
+            var d = drag; drag = null;
+            card.style.transition = '';
+            card.classList.remove('dragging');
+            var quickTap = !d.moved && (Date.now() - d.t) < 260;
+            if (quickTap) { snapBack(card); openDetail(deck[0]); return; }
+            if (d.dx > 108) { flingCard('like'); }
+            else if (d.dx < -108) { flingCard('skip'); }
+            else { snapBack(card); }
+        }
+        card.addEventListener('pointerup', end);
+        card.addEventListener('pointercancel', end);
+    }
+    function setStamp(card, dx) {
+        var like = card.querySelector('.stamp.like');
+        var nope = card.querySelector('.stamp.nope');
+        var t = Math.min(1, Math.abs(dx) / 90);
+        if (dx > 0) { like.style.opacity = t; nope.style.opacity = 0; }
+        else if (dx < 0) { nope.style.opacity = t; like.style.opacity = 0; }
+        else { like.style.opacity = 0; nope.style.opacity = 0; }
+    }
+    function snapBack(card) {
+        card.classList.add('settling');
+        card.style.transform = '';
+        setStamp(card, 0);
+        setTimeout(function () { card.classList.remove('settling'); }, 340);
+    }
+
+    /* ---------- actions ---------- */
+    function flingCard(action) {
+        if (!topCard || !deck.length) return;
+        var card = topCard;
+        var biz = deck[0];
+        topCard = null;
+        var dir = action === 'like' ? 1 : -1;
+        card.classList.add('gone');
+        card.style.transform = 'translate(' + (dir * 140) + '%, 40px) rotate(' + (dir * 22) + 'deg)';
+        commit(biz, action);
+        setTimeout(function () { renderDeck(); }, 300);
+    }
+    function commit(biz, action) {
+        acted[biz.id] = action;
+        history.push({ id: biz.id, action: action });
+        deck = deck.filter(function (b) { return b.id !== biz.id; });
+        if (action === 'like') addInquiry(biz);
+        syncControls();
+    }
+    function undo() {
+        if (!history.length) return;
+        var last = history.pop();
+        delete acted[last.id];
+        if (last.action === 'like') {
+            inquiries = inquiries.filter(function (q) { return q.id !== last.id; });
+            refreshLikeUi();
+        }
+        rebuildDeck();
+        var t = stage.querySelector('.card.top');
+        if (t) {
+            t.classList.add('settling');
+            t.style.transform = 'scale(0.9)';
+            requestAnimationFrame(function () {
+                requestAnimationFrame(function () { t.style.transform = ''; });
+            });
+            setTimeout(function () { t.classList.remove('settling'); }, 340);
+        }
+    }
+
+    $('#btnSkip').addEventListener('click', function () { if (deck.length) flingCard('skip'); });
+    $('#btnLike').addEventListener('click', function () { if (deck.length) flingCard('like'); });
+    $('#btnInfo').addEventListener('click', function () { if (deck.length) openDetail(deck[0]); });
+    $('#btnUndo').addEventListener('click', undo);
+
+    document.addEventListener('keydown', function (e) {
+        if ($('#sheet').classList.contains('show') || $('#modalWrap').classList.contains('show')) return;
+        if (e.key === 'ArrowRight') { if (deck.length) flingCard('like'); }
+        else if (e.key === 'ArrowLeft') { if (deck.length) flingCard('skip'); }
+        else if (e.key === 'ArrowUp') { if (deck.length) openDetail(deck[0]); }
+        else if (e.key === 'Backspace') { e.preventDefault(); undo(); }
+    });
+
+    /* ---------- inquiries ---------- */
+    function addInquiry(biz) {
+        var line = biz.live
+            ? 'ביקשת שולחן ל-' + biz.live.seats + ' · ממתין לאישור'
+            : 'שלחת הבעת עניין · ממתין לתשובה';
+        var q = { id: biz.id, name: biz.name, photo: biz.photos[0], status: 'pending', line: line, biz: biz };
+        inquiries.unshift(q);
+        refreshLikeUi();
+        showSentModal(biz);
+        setTimeout(function () { acceptInquiry(q); }, 4500);
+    }
+    function acceptInquiry(q) {
+        if (q.status !== 'pending') return;
+        q.status = 'ok';
+        q.line = q.biz.live
+            ? 'אישרו! שולחן ל-' + q.biz.live.seats + ' שמור עד ' + q.biz.live.until
+            : 'ענו לך: "נשמח לארח, אפשר לקפוץ"';
+        refreshLikeUi();
+        if (!$('#trayWrap').classList.contains('show')) {
+            $('#likesPill').classList.add('has-news');
+            flash('<b>' + q.name + '</b> אישרו את הפנייה');
+        }
+        if ($('#trayWrap').classList.contains('show')) renderTray();
+    }
+    function refreshLikeUi() {
+        $('#likesCount').textContent = inquiries.length;
+        if ($('#trayWrap').classList.contains('show')) renderTray();
+    }
+
+    function showSentModal(biz) {
+        $('#modalText').innerHTML = biz.live
+            ? '<b>' + biz.name + '</b> קיבלו את בקשת השולחן שלך. בדמו התשובה חוזרת עוד רגע — במציאות בעל העסק מאשר מהצד שלו.'
+            : '<b>' + biz.name + '</b> קיבלו את הפנייה שלך. עסקים בביס חוזרים בממוצע תוך 7 דקות.';
+        $('#modalWrap').classList.add('show');
+    }
+    $('#modalNext').addEventListener('click', function () { $('#modalWrap').classList.remove('show'); });
+    $('#modalToInq').addEventListener('click', function () {
+        $('#modalWrap').classList.remove('show');
+        openTray();
+    });
+
+    /* ---------- inquiries tray ---------- */
+    function openTray() {
+        $('#likesPill').classList.remove('has-news');
+        renderTray();
+        $('#trayWrap').classList.add('show');
+    }
+    function renderTray() {
+        var list = $('#trayList');
+        if (!inquiries.length) {
+            list.innerHTML = '<div class="tray-empty">עדיין לא שלחת פניות. החליקו ימינה או הקישו על הלב כדי לפנות למקום.</div>';
+            return;
+        }
+        list.innerHTML = inquiries.map(function (q) {
+            return '<div class="inq">' +
+                '<div class="thumb">' + ART[q.photo] + '</div>' +
+                '<div class="txt"><h4>' + q.name + '</h4><p class="' + (q.status === 'ok' ? 'accepted' : '') + '">' + q.line + '</p></div>' +
+                '<div class="stat ' + (q.status === 'ok' ? 'ok' : 'pending') + '">' + (q.status === 'ok' ? 'אושר' : 'ממתין') + '</div>' +
+            '</div>';
+        }).join('');
+    }
+    $('#likesPill').addEventListener('click', openTray);
+    $('#trayClose').addEventListener('click', function () { $('#trayWrap').classList.remove('show'); });
+    $('#trayWrap').addEventListener('click', function (e) {
+        if (e.target === $('#trayWrap')) $('#trayWrap').classList.remove('show');
+    });
+
+    /* ---------- detail sheet ---------- */
+    var sheetBiz = null, sheetPhoto = 0;
+    function openDetail(biz) {
+        if (!biz) return;
+        sheetBiz = biz; sheetPhoto = 0;
+        renderSheet();
+        $('#sheet').classList.add('show');
+    }
+    function closeSheet() { $('#sheet').classList.remove('show'); }
+    function renderSheet() {
+        var biz = sheetBiz;
+        var st = openState(biz);
+        var photos = biz.photos;
+        var dots = photos.map(function (_, i) { return '<i class="' + (i === sheetPhoto ? 'on' : '') + '"></i>'; }).join('');
+        var tags = biz.tags.map(function (t) { return '<span>' + t + '</span>'; }).join('');
+        var menu = biz.dishes.map(function (d) {
+            return '<div class="d-dish"><div><div class="n">' + d.n + '</div><div class="d">' + d.d + '</div></div><div class="p">' + d.p + ' ₪</div></div>';
+        }).join('');
+        var hoursRows = '';
+        for (var i = 0; i < 7; i++) {
+            var h = resolveHours(biz, i);
+            var isToday = i === now.getDay();
+            hoursRows += '<div class="day' + (isToday ? ' today' : '') + '">' + DAYS[i] + '</div>' +
+                '<div class="val' + (h ? '' : ' shut') + '">' + (h ? h[0] + '–' + h[1].replace(/^24/, '00').replace(/^25/, '01').replace(/^26/, '02') : 'סגור') + '</div>';
+        }
+        var live = biz.live
+            ? '<div class="card-live" style="margin-top:12px"><i></i>' + biz.live.seats + ' מקומות פנויים עד ' + biz.live.until + '</div>'
+            : '';
+
+        $('#sheetScroll').innerHTML =
+            '<div class="sheet-hero">' +
+                '<div class="frame">' + ART[photos[sheetPhoto]] + '</div>' +
+                '<div class="sheet-dots">' + dots + '</div>' +
+                '<div class="sheet-nav"><div data-nav="prev"></div><div data-nav="next"></div></div>' +
+                '<button class="sheet-close" id="sheetCloseBtn" type="button" aria-label="סגירה">' +
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>' +
+                '</button>' +
+            '</div>' +
+            '<div class="sheet-pad">' +
+                '<div class="sheet-title">' + biz.name + '</div>' +
+                '<div class="sheet-sub"><b>★ ' + biz.rating.toFixed(1) + '</b> · ' + biz.reviews + ' ביקורות · <span class="price">' + priceStr(biz.price) + '</span> · ' + biz.cat + ' · ' + biz.dist.toFixed(1) + ' ק״מ ממך</div>' +
+                '<div class="sheet-status ' + (st.open ? 'open' : 'shut') + '">' + st.text + '</div>' +
+                live +
+            '</div>' +
+            '<div class="sheet-block"><h3>קצת עליהם</h3><div class="sheet-about">' + biz.about + '</div></div>' +
+            '<div class="sheet-block"><h3>אווירה</h3><div class="d-tags">' + tags + '</div></div>' +
+            '<div class="sheet-block"><h3>מהתפריט</h3><div class="d-menu">' + menu + '</div></div>' +
+            '<div class="sheet-block"><h3>שעות פתיחה</h3><div class="d-hours">' + hoursRows + '</div></div>' +
+            '<div class="sheet-block"><h3>מיקום</h3><div class="d-map">' + ART.map + '</div><div class="d-addr">' + biz.address + '</div></div>';
+
+        $('#sheetCloseBtn').addEventListener('click', closeSheet);
+        Array.prototype.forEach.call($('#sheetScroll').querySelectorAll('[data-nav]'), function (z) {
+            z.addEventListener('click', function () {
+                var n = photos.length;
+                sheetPhoto = (sheetPhoto + (z.getAttribute('data-nav') === 'next' ? 1 : n - 1)) % n;
+                renderSheet();
+                $('#sheetScroll').scrollTop = 0;
+            });
+        });
+    }
+    $('#sheetPass').addEventListener('click', function () {
+        var biz = sheetBiz; closeSheet();
+        setTimeout(function () {
+            if (biz && deck.length && deck[0].id === biz.id) flingCard('skip');
+            else if (biz && !acted[biz.id]) { commit(biz, 'skip'); rebuildDeck(); }
+        }, 260);
+    });
+    $('#sheetSend').addEventListener('click', function () {
+        var biz = sheetBiz; closeSheet();
+        setTimeout(function () {
+            if (biz && deck.length && deck[0].id === biz.id) flingCard('like');
+            else if (biz && !acted[biz.id]) { commit(biz, 'like'); rebuildDeck(); }
+        }, 260);
+    });
+
+    /* ---------- toast ---------- */
+    var toastT;
+    function flash(msg) {
+        var t = $('#toast');
+        t.innerHTML = msg;
+        t.classList.add('show');
+        clearTimeout(toastT);
+        toastT = setTimeout(function () { t.classList.remove('show'); }, 3000);
+    }
+
+    /* ---------- go ---------- */
+    renderFilters();
+    rebuildDeck();
+})();
+</script>
