@@ -1,160 +1,31 @@
-<!doctype html>
-<html lang="he" dir="rtl">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="theme-color" content="#FFF7F2" />
-<title>(מ)טעים לי · דמו</title>
-<meta name="description" content="(מ)טעים לי — שוק בזמן אמת לקיבולת מתכלה של מסעדות. דמו של צד הלקוח, צד העסק ומסמך המיקוד." />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" />
-<!--SUPER:boot-->
-<script>
-(function () {
-    try {
-        var s = JSON.parse(localStorage.getItem('taimli-look') || '{}');
-        var dark = s.mode ? s.mode === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
-        var r = document.documentElement;
-        r.setAttribute('data-theme', dark ? 'dark' : 'light');
-        if (s.accent) r.style.setProperty('--accent', s.accent);
-    } catch (e) {}
-})();
-</script>
-<!--/SUPER:boot-->
-<style>
-/* Home page. Colours, fonts and dark mode come from the SUPER block that
-   src/apply-super.mjs appends to this stylesheet. */
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-    background: var(--bg); color: var(--text);
-    font-family: var(--font-ui); line-height: 1.6;
-    -webkit-font-smoothing: antialiased; overflow-x: hidden;
-}
-a { color: inherit; }
-.wrap { max-width: 760px; margin: 0 auto; padding: 0 20px 72px; }
+/*
+ * "תיאבון" — the SuperUI pass. Layers a bolder, warmer look over the pages:
+ * one switchable accent (default: paprika), light + dark mode, Rubik, grouped
+ * cards, gradient CTAs, and an "המראה שלך" sheet (sun/moon toggle, accent
+ * swatches, live preview, staged changes with a pending bar).
+ *
+ * Idempotent: everything it adds sits between /* SUPER:... *\/ or <!--SUPER:...-->
+ * markers and is replaced on every run.
+ *
+ *   node src/stitch.mjs   (from src/)  -> src/bis-business-app.html
+ *   node src/apply-super.mjs           -> restyles the pages listed below
+ *   node build.mjs                     -> standalone pages at the repo root
+ */
+import fs from 'node:fs';
 
-/* ---------- hero ---------- */
-html { overflow-x: clip; }
-body { position: relative; isolation: isolate; }
-.hero-wash {
-    position: absolute; z-index: -1; inset: 0 0 auto 0; height: 640px; pointer-events: none;
-    background:
-        radial-gradient(48% 52% at 78% 6%, color-mix(in srgb, var(--accent) 30%, transparent) 0%, transparent 70%),
-        radial-gradient(40% 46% at 18% 24%, color-mix(in srgb, var(--accent-hot) 24%, transparent) 0%, transparent 70%),
-        linear-gradient(to bottom, transparent 60%, var(--bg));
-}
-.top { display: flex; align-items: center; justify-content: space-between; padding: 20px 0 0; }
-.brand-chip {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-card);
-    border-radius: 999px; padding: 8px 16px 8px 14px; font-weight: 800; font-size: 17px; letter-spacing: -.2px;
-}
-.brand-chip svg { width: 17px; height: 17px; color: var(--accent); }
+const PAGES = [
+    { file: 'src/bis-live-customer.html', kind: 'app' },
+    { file: 'src/bis-business-app.html',  kind: 'app' },
+    { file: 'src/bis-concept.html',       kind: 'concept' },
+    { file: 'index.html',                 kind: 'home' }
+];
 
-.hero { display: grid; gap: 28px; align-items: center; padding-top: 44px; }
-@media (min-width: 720px) { .hero { grid-template-columns: 1.15fr .85fr; padding-top: 64px; } }
-.live-pill {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: color-mix(in srgb, var(--surface) 80%, transparent); backdrop-filter: blur(8px);
-    border: 1px solid var(--border); border-radius: 999px; padding: 6px 14px;
-    font-size: 13px; font-weight: 600;
-}
-.live-pill i { width: 8px; height: 8px; border-radius: 50%; background: var(--urgent); animation: pulse 1.3s ease-in-out infinite; }
-@keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--urgent) 50%, transparent); } 50% { box-shadow: 0 0 0 7px transparent; } }
-h1 {
-    font-family: var(--font-display); font-weight: 800;
-    font-size: clamp(38px, 9vw, 58px); line-height: 1.04; letter-spacing: -1.4px;
-    margin-top: 18px; text-wrap: balance;
-}
-h1 em { font-style: normal; -webkit-box-decoration-break: clone; box-decoration-break: clone; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.lede { font-size: 17px; color: var(--muted); margin-top: 16px; max-width: 46ch; text-wrap: pretty; }
-.ctas { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
-.cta {
-    display: inline-flex; align-items: center; gap: 9px; text-decoration: none;
-    border-radius: 999px; padding: 15px 24px; font-weight: 700; font-size: 16px;
-    transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .2s;
-}
-.cta svg { width: 17px; height: 17px; }
-.cta.primary { background: var(--grad); color: #fff; box-shadow: var(--glow); }
-.cta.ghost { background: var(--surface); border: 1px solid var(--border); color: var(--text); box-shadow: var(--shadow-card); }
-.cta:hover { transform: translateY(-2px); }
-.cta:active { transform: scale(.96); }
-.cta:focus-visible, a.row:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+const FONT_LINK = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" />';
 
-/* ---------- mock offer card ---------- */
-.mock {
-    position: relative; border-radius: 30px; overflow: hidden; aspect-ratio: 4 / 5; max-width: 340px; width: 100%;
-    justify-self: center; box-shadow: var(--shadow-pop); color: #fff; transform: rotate(-2.5deg);
-    background: var(--grad);
-}
-.mock .plate { position: absolute; inset: 0; }
-.mock .plate svg { width: 100%; height: 100%; display: block; }
-.mock::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(22,10,6,.85), rgba(22,10,6,.1) 55%, transparent 70%); }
-.mock .chips { position: absolute; z-index: 2; top: 14px; inset-inline: 14px; display: flex; justify-content: space-between; }
-.mock .timer {
-    background: #fff; color: #1F1411; font-weight: 800; font-size: 14px; padding: 6px 12px; border-radius: 999px;
-    font-variant-numeric: tabular-nums; display: inline-flex; gap: 6px; align-items: center;
-}
-.mock .timer i { width: 7px; height: 7px; border-radius: 50%; background: var(--urgent); }
-.mock .seats { background: rgba(255,255,255,.22); backdrop-filter: blur(8px); font-weight: 700; font-size: 12.5px; padding: 6px 12px; border-radius: 999px; }
-.mock .body { position: absolute; z-index: 2; inset-inline: 0; bottom: 0; padding: 20px; }
-.mock .eyebrow { display: inline-block; background: #fff; color: var(--accent-deep); font-size: 11.5px; font-weight: 800; padding: 3px 10px; border-radius: 999px; }
-:root[data-theme="dark"] .mock .eyebrow { color: color-mix(in srgb, var(--accent) 80%, #000); }
-.mock b { display: block; font-size: 27px; font-weight: 800; line-height: 1.12; margin-top: 8px; letter-spacing: -.5px; }
-.mock small { display: block; font-size: 13.5px; opacity: .85; margin-top: 4px; }
-
-/* ---------- stats ---------- */
-.stats {
-    display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 44px;
-    background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-card); box-shadow: var(--shadow-card);
-}
-.stats div { padding: 18px 10px; text-align: center; }
-.stats div + div { border-inline-start: 1px solid var(--border); }
-.stats b { display: block; font-size: 26px; font-weight: 800; letter-spacing: -.5px; color: var(--accent-deep); }
-.stats span { display: block; font-size: 12.5px; color: var(--muted); margin-top: 2px; }
-
-/* ---------- grouped rows ---------- */
-.label {
-    display: flex; justify-content: space-between; align-items: baseline;
-    margin: 34px 4px 10px; font-size: 12px; font-weight: 600; letter-spacing: 1.2px; color: var(--muted);
-}
-.label span { letter-spacing: 0; color: var(--accent-deep); font-weight: 700; }
-.group { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-card); box-shadow: var(--shadow-card); overflow: hidden; }
-a.row {
-    display: flex; align-items: center; gap: 14px; padding: 16px; text-decoration: none; position: relative;
-    transition: background-color .15s;
-}
-a.row + a.row::before { content: ''; position: absolute; top: 0; left: 16px; right: 70px; height: 1px; background: var(--border); }
-a.row:hover { background: var(--raised); }
-.tile {
-    width: 46px; height: 46px; border-radius: 14px; flex-shrink: 0; display: grid; place-items: center;
-    background: var(--accent-soft); color: var(--accent-deep);
-}
-.tile svg { width: 23px; height: 23px; }
-.row .txt { flex: 1; min-width: 0; }
-.row .txt b { display: block; font-size: 17px; font-weight: 700; }
-.row .txt small { display: block; font-size: 13.5px; color: var(--muted); margin-top: 2px; line-height: 1.5; text-wrap: pretty; }
-.row .chev { width: 18px; height: 18px; color: var(--faint); flex-shrink: 0; transition: transform .2s; }
-a.row:hover .chev { transform: translateX(-3px); color: var(--accent); }
-
-/* ---------- about ---------- */
-.about { padding: 20px 18px; }
-.about p { font-size: 15.5px; color: var(--muted); text-wrap: pretty; }
-.about p + p { margin-top: 10px; }
-.about b { color: var(--text); font-weight: 700; }
-.foot { margin-top: 30px; font-size: 13px; color: var(--faint); text-align: center; }
-.foot a { color: var(--accent-deep); font-weight: 600; }
-
-/* ---------- entrance ---------- */
-@keyframes rise { from { opacity: 0; transform: translateY(14px); } }
-.rise { animation: rise .45s cubic-bezier(.22,1,.36,1) both; animation-delay: calc(var(--i, 0) * 70ms); }
-.mock.rise { animation-name: riseTilt; }
-@keyframes riseTilt { from { opacity: 0; transform: translateY(20px) rotate(2deg); } }
-@media (prefers-reduced-motion: reduce) { .rise, .live-pill i { animation: none; } .cta { transition: none; } }
-
-/* SUPER:style */
-
+/* ---------------------------------------------------------------------------
+   tokens
+   --------------------------------------------------------------------------- */
+const TOKENS = `
 @property --accent { syntax: '<color>'; inherits: true; initial-value: #E64A19; }
 :root {
     /* ---- one accent drives everything; swapped live from the sheet ---- */
@@ -252,7 +123,12 @@ a.row:hover .chev { transform: translateX(-3px); color: var(--accent); }
     --scrim: rgba(0, 0, 0, .62);
     color-scheme: dark;
 }
+`;
 
+/* ---------------------------------------------------------------------------
+   shared UI: the appearance sheet + its trigger (every page)
+   --------------------------------------------------------------------------- */
+const SHEET_CSS = `
 body { transition: background-color .35s ease, color .35s ease; }
 
 .su-open {
@@ -419,90 +295,343 @@ body { transition: background-color .35s ease, color .35s ease; }
     .su-sheet, .su-pending, .su-toast, .su-daynight .thumb, .su-sw svg { transition: none; }
     .su-stagger > * { animation: none; }
 }
+`;
 
-/* /SUPER:style */
-</style>
-</head>
-<body>
-<div class="hero-wash"></div>
-<div class="wrap">
+/* ---------------------------------------------------------------------------
+   app layer — the customer and business apps
+   --------------------------------------------------------------------------- */
+const APP_CSS = `
+html { background: var(--bg-edge); }
+body { background: var(--bg-edge); font-family: var(--font-ui); letter-spacing: 0; }
+button, input, select, textarea { font-family: var(--font-ui); }
+#app { background: var(--bg); box-shadow: var(--shadow-pop); transition: background-color .35s; }
+@media (max-width: 480px) { #app { border-radius: 0; box-shadow: none; } }
+.tap:active { transform: scale(.95); filter: none; }
 
-    <div class="top">
-        <div class="brand-chip"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.1 6.2 6.4.3-5 4 1.8 6.3L12 15.6l-5.3 3.7 1.8-6.3-5-4 6.4-.3z"/></svg>(מ)טעים לי</div>
-        <button class="su-open" type="button" data-su-open></button>
-    </div>
+/* ======================= customer: situation picker ======================= */
+.pick { padding: 0 20px 28px; position: relative; isolation: isolate; }
+.pick::before {                      /* warm hero wash */
+    content: ''; position: absolute; z-index: -1; inset: 0 0 auto 0; height: 380px;
+    background:
+        radial-gradient(120% 70% at 85% 0%, color-mix(in srgb, var(--accent) 26%, transparent) 0%, transparent 60%),
+        radial-gradient(90% 60% at 0% 20%, color-mix(in srgb, var(--accent-hot) 22%, transparent) 0%, transparent 65%),
+        linear-gradient(to bottom, transparent 55%, var(--bg));
+    transition: background .25s;
+}
+.pick-top { display: flex; align-items: center; justify-content: space-between; padding: 18px 0 0; }
+.brand-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-card);
+    border-radius: 999px; padding: 8px 15px 8px 13px;
+    font-weight: 800; font-size: 16px; color: var(--text); letter-spacing: -.2px;
+}
+.brand-chip svg { width: 17px; height: 17px; color: var(--accent); }
+.live-pill {
+    display: inline-flex; align-items: center; gap: 8px; margin-top: 30px;
+    background: color-mix(in srgb, var(--surface) 80%, transparent); backdrop-filter: blur(8px);
+    border: 1px solid var(--border); border-radius: 999px; padding: 6px 13px;
+    font-size: 13px; font-weight: 600; color: var(--text);
+}
+.live-pill i { width: 8px; height: 8px; border-radius: 50%; background: var(--urgent); animation: suPulse 1.3s ease-in-out infinite; }
+.live-pill b { color: var(--accent-deep); font-weight: 800; }
+@keyframes suPulse { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--urgent) 50%, transparent); } 50% { box-shadow: 0 0 0 6px transparent; } }
+.pick h1 {
+    font-family: var(--font-display); font-weight: 800; font-size: 40px; line-height: 1.08;
+    letter-spacing: -1px; margin: 14px 0 10px;
+}
+.pick h1 em {
+    font-style: normal; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.pick .sub { font-size: 15.5px; color: var(--muted); margin-bottom: 0; max-width: 34ch; }
+.sec-label {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin: 28px 4px 10px; font-size: 12px; font-weight: 600; letter-spacing: 1.2px; color: var(--muted);
+}
+.sec-label span { letter-spacing: 0; color: var(--accent-deep); font-weight: 700; }
+.sit-grid { gap: 12px; }
+.sit {
+    --h: var(--accent);
+    background: var(--surface); border: 1px solid var(--border); border-radius: 22px;
+    padding: 16px 15px 15px; min-height: 0; gap: 14px; box-shadow: var(--shadow-card);
+    color: var(--text); position: relative; overflow: hidden;
+    transition: transform .18s cubic-bezier(.34,1.56,.64,1), border-color .2s, background-color .35s, box-shadow .2s;
+}
+.sit::after {
+    content: ''; position: absolute; width: 90px; height: 90px; border-radius: 50%;
+    top: -40px; left: -34px; background: color-mix(in srgb, var(--h) 10%, transparent); pointer-events: none;
+}
+.sit:hover { border-color: color-mix(in srgb, var(--h) 45%, var(--surface)); box-shadow: var(--shadow-pop); }
+.sit .ico {
+    width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center;
+    background: color-mix(in srgb, var(--h) 14%, var(--surface)); color: var(--h);
+}
+:root[data-theme="dark"] .sit .ico { background: color-mix(in srgb, var(--h) 24%, var(--surface)); color: color-mix(in srgb, var(--h) 60%, #fff); }
+.sit svg, .sit .ico svg { width: 23px; height: 23px; color: inherit; }
+.sit b { font-size: 16px; font-weight: 700; }
+.sit span { font-size: 12.5px; color: var(--muted); }
+.sit .sit-live {
+    position: absolute; top: 14px; left: 14px;
+    font-style: normal; font-size: 11.5px; font-weight: 700; color: var(--accent-deep);
+    background: var(--accent-soft); padding: 3px 9px; border-radius: 999px;
+}
+.sit .sit-live.none { color: var(--faint); background: var(--raised); }
+.pick .foot { margin-top: 24px; color: var(--faint); }
 
-    <section class="hero">
-        <div>
-            <div class="live-pill rise" style="--i:0"><i></i>גרסת דמו · הנתונים מדומים</div>
-            <h1 class="rise" style="--i:1">למכור את השעות <em>שאף אחד לא קונה</em></h1>
-            <p class="lede rise" style="--i:2">
-                שולחן ריק ב־17:00 שווה ₪0 — לנצח. (מ)טעים לי הוא שוק בזמן אמת לקיבולת מתכלה של מסעדות:
-                העסק משדר מה פנוי ומה ההצעה, והלקוח נכנס דרך סיטואציה ורואה רק מה שזמין עכשיו.
-            </p>
-            <div class="ctas rise" style="--i:3">
-                <a class="cta primary" href="customer.html">מה בא לי עכשיו?
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
-                </a>
-                <a class="cta ghost" href="business.html">אני בעל עסק</a>
-            </div>
-        </div>
+/* ======================= customer: live feed ======================= */
+.bar { border-bottom: 0; padding: 14px 16px 6px; }
+.sit-chip {
+    background: var(--accent-soft); border: 0; color: var(--accent-deep);
+    font-weight: 700; font-size: 14px; padding: 9px 16px 9px 13px;
+}
+.holds-pill {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    font-weight: 700; padding: 8px 13px; box-shadow: var(--shadow-card);
+}
+.holds-pill.hot { background: var(--grad); border-color: transparent; color: #fff; box-shadow: var(--glow); }
+.feed-tools { display: flex; align-items: center; gap: 8px; }
+.when { background: var(--raised); margin: 8px 16px 10px; padding: 4px; }
+.wbtn { font-size: 14px; padding: 10px 6px; color: var(--muted); transition: background-color .2s, color .2s, box-shadow .2s; }
+.wbtn[aria-pressed="true"] { background: var(--surface); color: var(--accent-deep); font-weight: 700; box-shadow: 0 2px 8px rgba(60, 20, 5, .10); }
 
-        <div class="mock rise" style="--i:2" aria-hidden="true">
-            <div class="plate">
-                <svg viewBox="0 0 300 375" preserveAspectRatio="xMidYMid slice"><circle cx="150" cy="150" r="128" fill="rgba(255,255,255,.18)"/><circle cx="150" cy="150" r="100" fill="#FFF6EE"/><circle cx="150" cy="150" r="78" fill="#F3E3CF"/><ellipse cx="122" cy="132" rx="30" ry="22" fill="#fff"/><circle cx="122" cy="132" r="12" fill="#F5A524"/><ellipse cx="178" cy="172" rx="28" ry="21" fill="#fff"/><circle cx="178" cy="172" r="11" fill="#F5A524"/><circle cx="160" cy="118" r="7" fill="#C62D1F"/><circle cx="112" cy="178" r="8" fill="#C62D1F"/><circle cx="196" cy="134" r="6" fill="#C62D1F"/><path d="M96 104c8 6 8 14 2 20M200 196c8 6 8 14 2 20M140 196c8 6 8 14 2 20" stroke="#4E9A3A" stroke-width="6" fill="none" stroke-linecap="round"/></svg>
-            </div>
-            <div class="chips"><span class="timer"><i></i>14:52</span><span class="seats">4 מקומות</span></div>
-            <div class="body">
-                <span class="eyebrow">מבצע</span>
-                <b>מנת בוקר זוגית ₪79</b>
-                <small>סבן · חומוס ובוקר · 6 דק׳ הליכה</small>
-            </div>
-        </div>
-    </section>
+.card { border-radius: 30px; box-shadow: var(--shadow-pop); }
+.c-media::after {
+    background: linear-gradient(to top, rgba(22, 10, 6, .94) 0%, rgba(22, 10, 6, .45) 46%, rgba(22, 10, 6, 0) 68%);
+}
+.t-chip { font-weight: 700 !important; padding: 7px 13px; }
+.s-chip { background: rgba(255, 255, 255, .2); backdrop-filter: blur(8px); font-weight: 700; padding: 7px 12px; }
+.c-body { padding: 20px 20px 22px; }
+.c-eyebrow {
+    display: inline-block; background: var(--grad); color: #fff; opacity: 1;
+    font-size: 11.5px; letter-spacing: .3px; padding: 4px 11px; border-radius: 999px; margin-bottom: 9px;
+}
+.c-offer { font-family: var(--font-display); font-weight: 800; font-size: 30px; letter-spacing: -.6px; line-height: 1.12; }
+.c-note { font-size: 13.5px; color: rgba(255, 255, 255, .78); margin-top: 5px; }
+.c-venue { font-size: 14.5px; font-weight: 700; }
+.c-fit { background: rgba(255, 255, 255, .16); backdrop-filter: blur(8px); font-size: 12.5px; padding: 6px 12px; }
+.stamp { font-family: var(--font-display); font-weight: 800; border-radius: 14px; }
+.stamp.yes { color: #fff; background: var(--grad); border-color: transparent; }
+.stamp.no { color: #fff; border-color: rgba(255,255,255,.85); }
 
-    <div class="stats rise" style="--i:4">
-        <div><b>₪0</b><span>שווה שולחן ריק ב־17:00</span></div>
-        <div><b>15 דק׳</b><span>מקום שמור בהחלקה</span></div>
-        <div><b>2</b><span>החלטות במקום עשר</span></div>
-    </div>
+.acts { gap: 22px; padding: 14px 0 20px; }
+.act { background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-card); }
+.act.no { width: 60px; height: 60px; color: var(--muted); }
+.act.info { width: 48px; height: 48px; color: var(--faint); }
+.act.yes { width: 76px; height: 76px; background: var(--grad); color: #fff; border: 0; box-shadow: var(--glow); }
+.act.yes svg { width: 32px; height: 32px; }
 
-    <div class="label">מה יש בדמו <span>3 מסכים</span></div>
-    <div class="group">
-        <a class="row" href="customer.html">
-            <span class="tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
-            <span class="txt"><b>צד הלקוח</b><small>בוחרים סיטואציה ומקבלים רק הצעות חיות, לפי מה שפג הכי קרוב. מחליקים כדי לתפוס מקום.</small></span>
-            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
-        </a>
-        <a class="row" href="business.html">
-            <span class="tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M8.6 8.6a4.8 4.8 0 0 0 0 6.8M15.4 8.6a4.8 4.8 0 0 1 0 6.8"/><path d="M5.6 5.6a9 9 0 0 0 0 12.8M18.4 5.6a9 9 0 0 1 0 12.8"/></svg></span>
-            <span class="txt"><b>צד העסק</b><small>פניות מלקוחות, קונסולת שידור עם מפת השעות המתות, ועורך הפרופיל.</small></span>
-            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
-        </a>
-        <a class="row" href="concept.html">
-            <span class="tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v16H5z"/><path d="M8.5 9h7M8.5 13h7M8.5 17h4"/></svg></span>
-            <span class="txt"><b>מסמך המיקוד</b><small>מה אנחנו באמת מוכרים, איך הלולאה נסגרת, מודל ההכנסה והקר־סטארט — עם הסיכונים.</small></span>
-            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
-        </a>
-    </div>
+.empty { border-radius: 30px; background: var(--surface); }
+.empty svg.big { color: var(--accent); }
+.empty h2 { font-family: var(--font-display); font-weight: 800; font-size: 22px; }
+.empty .btn { background: var(--grad); box-shadow: var(--glow); padding: 13px 24px; }
+.empty .btn.ghost { background: var(--raised); color: var(--text); box-shadow: none; }
 
-    <div class="label">מה זה</div>
-    <div class="group about">
-        <p>
-            <b>(מ)טעים לי</b> מתחיל מהמספר היחיד שכל בעל מסעדה מכיר ואף אחד לא מודד: כמה כיסאות נשארו ריקים היום.
-            במקום עוד אפליקציית גילוי, (מ)טעים לי מוכר <b>רק את החלונות המתים</b> — אף פעם לא את שעות השיא —
-            ולכן הפיץ׳ לעסק הוא ״תן לי את מה שאתה ממילא מפסיד״, והעמלה נגבית רק כשמישהו באמת התיישב.
-        </p>
-        <p>אצל הלקוח זה מתורגם לשתי החלטות במקום עשר: מה בא לך עכשיו, ומה עומד להיעלם.</p>
-    </div>
+.modal-wrap { background: var(--scrim); }
+.modal { border-radius: 30px; background: var(--surface); }
+.modal .spark { background: var(--grad); color: #fff; box-shadow: var(--glow); width: 68px; height: 68px; }
+.modal h2 { font-weight: 800; font-size: 24px; letter-spacing: -.4px; }
+.arrive { background: var(--accent-soft); border: 0; border-radius: 18px; }
+.arrive .num { color: var(--accent-deep); font-weight: 800; font-size: 36px; }
+.modal-btns .primary { background: var(--grad); color: #fff; box-shadow: var(--glow); }
+.modal-btns .ghost { background: var(--raised); color: var(--text); }
 
-    <p class="foot">
-        דמו בלבד — אין שרת, אין הרשמה, והנתונים מומצאים. הכול רץ בדפדפן.
-        הקוד ב־<a href="https://github.com/Ld2000king/taim-li">GitHub</a>.
-    </p>
-</div>
-<!--SUPER:sheet-->
-<script>
+.tray-wrap { background: var(--scrim); }
+.tray { background: var(--bg); border-radius: 30px 30px 0 0; }
+.tray-head h2 { font-weight: 800; font-size: 22px; }
+.hold { background: var(--surface); border-radius: 20px; }
+
+.toast { background: var(--text); color: var(--bg); }
+.toast b { color: inherit; }
+
+/* ======================= business: shell ======================= */
+.appbar {
+    background: var(--topbar); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    border-bottom: 1px solid var(--border); padding: 12px 16px;
+}
+.brand .avatar {
+    width: 42px; height: 42px; border-radius: 14px; background: var(--grad); color: #fff;
+    font-weight: 800; font-size: 18px; box-shadow: var(--glow);
+}
+.brand .who b { font-size: 16px; font-weight: 800; }
+.brand .who span { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.live-toggle { font-size: 12px; font-weight: 700; padding: 7px 12px; }
+.live-toggle.on { background: var(--accent-soft); color: var(--accent-deep); border-color: transparent; }
+.live-toggle.on i { background: var(--accent); }
+.appbar .btn.icon { width: 40px; height: 40px; padding: 0; justify-content: center; border-radius: 50%; }
+.appbar .btn.icon svg { width: 19px; height: 19px; }
+
+.bottomnav {
+    background: var(--topbar); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    border-top: 1px solid var(--border); padding-top: 8px;
+}
+.navbtn { color: var(--faint); font-size: 11.5px; transition: color .2s; }
+.navbtn svg { position: relative; z-index: 1; }
+.navbtn::before {
+    content: ''; position: absolute; top: 4px; left: 50%; width: 58px; height: 32px; border-radius: 999px;
+    background: var(--accent-soft); transform: translateX(-50%) scaleX(.4); opacity: 0;
+    transition: transform .28s cubic-bezier(.34,1.56,.64,1), opacity .2s;
+}
+.navbtn.active { color: var(--accent-deep); font-weight: 700; }
+.navbtn.active::before { transform: translateX(-50%) scaleX(1); opacity: 1; }
+.navbtn span { position: relative; z-index: 1; }
+.navbadge { background: var(--urgent); z-index: 2; box-shadow: 0 0 0 2px var(--bg); }
+.navdot { z-index: 2; background: var(--accent); }
+
+/* ======================= business: inbox ======================= */
+.scroll { padding: 16px 16px 32px; }
+.stats { gap: 10px; }
+.stat { background: var(--surface); border-radius: 20px; padding: 14px 10px; box-shadow: var(--shadow-card); }
+.stat b { font-family: var(--font-display); font-weight: 800; font-size: 28px; line-height: 1.1; }
+.stat.accent b { color: var(--accent-deep); }
+.stat span { font-size: 12px; }
+.today h2 { font-size: 12px; font-weight: 600; letter-spacing: 1.2px; color: var(--muted); margin: 20px 4px 10px; }
+.booking { background: var(--grad); color: #fff; border: 0; border-radius: 20px; box-shadow: var(--glow); }
+.booking .t { color: #fff; font-family: var(--font-display); font-weight: 800; font-size: 22px; }
+.booking .p, .booking .n { color: #fff; }
+.booking .n { opacity: .85; }
+.fchip { font-size: 13.5px; padding: 9px 16px; font-weight: 600; transition: background-color .2s, color .2s; }
+.fchip[aria-pressed="true"] { background: var(--text); border-color: var(--text); color: var(--bg); }
+.fchip .badge { background: var(--urgent); }
+.inq { border-radius: 24px; background: var(--surface); }
+.pic { border-radius: 15px; font-weight: 800; }
+.inq-id h3 { font-size: 16px; font-weight: 700; }
+.pill.pending { background: var(--urgent-soft) !important; color: var(--urgent) !important; }
+.pill.approved { background: var(--accent-soft); color: var(--accent-deep); }
+.inq-kind svg { color: var(--accent); }
+.inq-note { background: var(--raised); border-radius: 16px; }
+.inq-actions button { border-radius: 16px; padding: 12px; font-weight: 700; }
+.btn-approve { background: var(--grad) !important; color: #fff !important; box-shadow: var(--glow); }
+.btn-decline { background: var(--surface); color: var(--muted) !important; }
+.btn-alt { background: var(--raised); color: var(--text); }
+.alt-box .send, .reply-row button { background: var(--grad); }
+.sheet-wrap, .overlay { background: var(--scrim); }
+.sheet { background: var(--bg); border-radius: 30px 30px 0 0; }
+.sheet h2 { font-weight: 800; }
+.reasons button { background: var(--surface); border-radius: 16px; }
+.detail { background: var(--bg); }
+.detail-cta .approve { background: var(--grad); color: #fff; }
+.msg.them { background: var(--raised); }
+.msg.you { background: var(--accent); color: #fff; }
+
+/* ======================= business: broadcast ======================= */
+.bc-scroll { padding: 16px 16px 32px; gap: 16px; }
+.bc-card { border-radius: 24px; padding: 20px 18px; background: var(--surface); }
+.bc-card h2 { font-weight: 800; font-size: 20px; letter-spacing: -.3px; }
+.bc-off .dot { background: var(--faint); }
+.bc-off h2 { font-size: 24px; }
+.bc-off p b { color: var(--urgent); }
+.bc-on { background: var(--grad); box-shadow: var(--glow); }
+.bc-on .what { font-weight: 800; font-size: 24px; }
+.bc-stat { background: rgba(255, 255, 255, .18); border-radius: 16px; }
+.bc-on .acts button.stop { background: #fff; color: color-mix(in srgb, var(--accent) 82%, #000); }
+.bc-chip { font-weight: 600; transition: background-color .2s, color .2s; }
+.bc-chip[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.bc-step button { background: var(--raised); border: 0; color: var(--text); }
+.bc-step .n { font-weight: 800; font-size: 34px; }
+.bc-go { background: var(--grad); border-radius: 999px; box-shadow: var(--glow); font-size: 17px; }
+.bc-cell { border-radius: 10px; }
+.bc-cell.c1 { background: var(--raised); }
+.bc-cell.c2 { background: color-mix(in srgb, var(--accent) 16%, var(--surface)); }
+.bc-cell.c3 { background: color-mix(in srgb, var(--accent) 36%, var(--surface)); }
+.bc-cell.c4 { background: color-mix(in srgb, var(--accent) 66%, var(--surface)); color: #fff; }
+.bc-cell.c5 { background: var(--accent); color: #fff; }
+.bc-cell.dead { background: var(--surface); border-color: var(--urgent); color: var(--urgent); }
+.bc-cell.picked { background: var(--urgent); border-color: var(--urgent); color: #fff; }
+.bc-roi div b { font-weight: 800; font-size: 26px; color: var(--accent-deep); }
+
+/* ======================= business: profile editor ======================= */
+.profile-progress { padding: 14px 18px 4px; }
+.progress-track { height: 8px; background: var(--raised); }
+.progress-fill { background: var(--grad); }
+.progress-label b { color: var(--accent-deep); }
+.editor { padding: 16px 16px 44px; gap: 16px; }
+.section { border-radius: 24px; padding: 22px 18px; background: var(--surface); }
+.section-head { align-items: center; gap: 10px; }
+.section-head h2 { font-weight: 800; font-size: 20px; letter-spacing: -.3px; }
+.section-head .idx {
+    min-width: 30px; height: 30px; border-radius: 10px; display: grid; place-items: center;
+    background: var(--accent-soft); color: var(--accent-deep); font-size: 12.5px; font-weight: 800; letter-spacing: 0;
+}
+.field label { color: var(--muted); font-weight: 600; }
+input[type="text"], input[type="tel"], input[type="url"], textarea, select {
+    background-color: var(--raised); border: 1.5px solid transparent; border-radius: 16px; color: var(--text);
+}
+input:focus, textarea:focus, select:focus {
+    background-color: var(--surface); border-color: var(--accent);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+.chip { background: var(--surface); border-color: var(--border); color: var(--muted); font-weight: 500; transition: background-color .2s, color .2s, border-color .2s; }
+.chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent-line); color: var(--accent-deep); font-weight: 700; }
+.seg { background: var(--raised); border: 0; border-radius: 16px; transition: background-color .2s, color .2s; }
+.seg[aria-pressed="true"] { background: var(--grad); color: #fff; box-shadow: var(--glow); }
+.dish { background: var(--raised); border-radius: 18px; }
+.dish input { background: var(--surface); }
+.add-row { background: var(--accent-soft); color: var(--accent-deep); border: 1.5px dashed var(--accent-line); border-radius: 16px; font-weight: 700; }
+.add-photo { background: var(--raised); border-color: var(--accent-line); }
+.photo { border-radius: 18px; }
+.photo .cover-tag { background: var(--grad); color: #fff; }
+.switch { background: var(--border); }
+.switch[aria-checked="true"] { background: var(--accent); }
+.live-card { background: var(--raised); border: 0; border-radius: 20px; }
+.btn { font-weight: 700; }
+.btn.ghost { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
+.btn.save { background: var(--grad); color: #fff; box-shadow: var(--glow); }
+.preview-hdr span { color: rgba(255,255,255,.85); }
+.swipe-card { border-radius: 28px; }
+.swipe-live { background: var(--surface) !important; color: var(--text) !important; }
+.swipe-live i { background: var(--urgent); }
+.circle-btn.nope { background: var(--surface); color: var(--muted); }
+.circle-btn.like { background: var(--grad); box-shadow: var(--glow); }
+.swipe-dish span:last-child, .dish-price { color: var(--accent-deep) !important; }
+.day-closed-tag { color: var(--urgent); }
+`;
+
+/* ---------------------------------------------------------------------------
+   concept memo: its own token names, mapped onto the new palette.
+   Triple :root out-ranks the memo's own light/dark/system blocks.
+   --------------------------------------------------------------------------- */
+const CONCEPT_CSS = `
+:root:root:root {
+    --paper: var(--bg);
+    --card: var(--surface);
+    --card-2: var(--raised);
+    --line: var(--border);
+    --ink: var(--text);
+    --ink-soft: var(--muted);
+    --ink-faint: var(--faint);
+    --clay: var(--accent);
+    --clay-deep: var(--accent-deep);
+    --clay-tint: var(--accent-soft);
+    --sage: var(--accent-deep);
+    --sage-tint: var(--accent-soft);
+    --honey: var(--urgent);
+    --honey-tint: var(--urgent-soft);
+    --rose: var(--urgent);
+    --rose-tint: var(--urgent-soft);
+    --shadow: var(--shadow-card);
+    --font-display: 'Rubik', 'Heebo', system-ui, sans-serif;
+    --font-ui: 'Rubik', 'Heebo', system-ui, sans-serif;
+}
+body { background: var(--bg); }
+h1, h2, h3 { letter-spacing: -.4px; }
+h1 { font-weight: 800; }
+`;
+
+/* ---------------------------------------------------------------------------
+   behaviour: theme boot (in <head>, no flash) + the sheet (end of page)
+   --------------------------------------------------------------------------- */
+const BOOT = `<script>
+(function () {
+    try {
+        var s = JSON.parse(localStorage.getItem('taimli-look') || '{}');
+        var dark = s.mode ? s.mode === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+        var r = document.documentElement;
+        r.setAttribute('data-theme', dark ? 'dark' : 'light');
+        if (s.accent) r.style.setProperty('--accent', s.accent);
+    } catch (e) {}
+})();
+</script>`;
+
+const SHEET_JS = `<script>
 (function () {
     var KEY = 'taimli-look';
     var ACCENTS = [
@@ -664,7 +793,42 @@ body { transition: background-color .35s ease, color .35s ease; }
     });
     sync();
 })();
-</script>
-<!--/SUPER:sheet-->
-</body>
-</html>
+</script>`;
+
+/* ---------------------------------------------------------------------------
+   apply
+   --------------------------------------------------------------------------- */
+function block(tag, body, html = false) {
+    return html ? `<!--SUPER:${tag}-->\n${body}\n<!--/SUPER:${tag}-->` : `/* SUPER:${tag} */\n${body}\n/* /SUPER:${tag} */`;
+}
+function strip(t) {
+    return t
+        .replace(/\n?\/\* SUPER:(\w+) \*\/[\s\S]*?\/\* \/SUPER:\1 \*\/\n?/g, '\n')
+        .replace(/\n?<!--SUPER:(\w+)-->[\s\S]*?<!--\/SUPER:\1-->\n?/g, '\n');
+}
+
+for (const { file, kind } of PAGES) {
+    let t = strip(fs.readFileSync(file, 'utf8'));
+
+    // font: swap the first Google Fonts stylesheet for Rubik
+    t = t.replace(/<link rel="stylesheet" href="https:\/\/fonts\.googleapis\.com\/css2\?[^"]*" \/>/, FONT_LINK);
+
+    // theme boot right after the font link, so the mode is set before first paint
+    const fi = t.indexOf(FONT_LINK);
+    if (fi < 0) throw new Error(`${file}: font link not found`);
+    t = t.slice(0, fi + FONT_LINK.length) + '\n' + block('boot', BOOT, true) + t.slice(fi + FONT_LINK.length);
+
+    // styles at the end of the first stylesheet, so they win the cascade
+    const css = TOKENS + SHEET_CSS + (kind === 'app' ? APP_CSS : kind === 'concept' ? CONCEPT_CSS : '');
+    const si = t.indexOf('</style>');
+    if (si < 0) throw new Error(`${file}: no </style>`);
+    t = t.slice(0, si).replace(/\s+$/, '\n') + '\n' + block('style', css) + '\n' + t.slice(si);
+
+    // sheet behaviour at the very end (before </body> when the page has one)
+    const bi = t.lastIndexOf('</body>');
+    const js = block('sheet', SHEET_JS, true);
+    t = bi >= 0 ? t.slice(0, bi).replace(/\s+$/, '\n') + js + '\n' + t.slice(bi) : t.replace(/\s+$/, '\n') + js + '\n';
+
+    fs.writeFileSync(file, t.replace(/\n{3,}/g, '\n\n'));
+    console.log(`super: ${file}`);
+}

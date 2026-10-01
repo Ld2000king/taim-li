@@ -142,9 +142,10 @@ ${shellCss}
                 <div class="live-toggle on" id="liveToggle"><i></i><span id="liveLabel">משדר · 4 מקומות</span></div>
             </div>
             <div data-slot="profile" hidden>
-                <button class="btn ghost tap" id="previewBtn" type="button">תצוגה מקדימה</button>
+                <button class="btn ghost icon tap" id="previewBtn" type="button" aria-label="תצוגה מקדימה" title="תצוגה מקדימה"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
                 <button class="btn save tap" id="saveBtn" type="button">שמירה</button>
             </div>
+            <button class="su-open tap" type="button" data-su-open></button>
         </div>
     </header>
 
