@@ -23,6 +23,8 @@
         var r = document.documentElement;
         r.setAttribute('data-theme', dark ? 'dark' : 'light');
         if (s.accent) r.style.setProperty('--accent', s.accent);
+        if (s.ts) r.style.setProperty('--ts', s.ts);
+        if (s.ui && s.ui !== 'rounded') r.setAttribute('data-ui', s.ui);
     } catch (e) {}
 })();
 </script>
@@ -1481,8 +1483,14 @@ button { font-family: var(--font-ui); cursor: pointer; }
     --font-display: 'Rubik', 'Heebo', system-ui, sans-serif;
     --font-ui: 'Rubik', 'Heebo', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
+    /* ---- UI style: Rounded (default) · Soft · Crisp ---- */
     --r-card: 24px;
+    --r-card-lg: 30px;
     --r-tile: 14px;
+    --r-field: 16px;
+    --r-btn: 999px;
+    --r-chip: 999px;
+    --ts: 1;                           /* text size: .9 · 1 · 1.12 · 1.25 */
 
     /* ---- legacy role names, so every older rule follows the new palette ---- */
     --paper: var(--bg);
@@ -1515,15 +1523,20 @@ button { font-family: var(--font-ui); cursor: pointer; }
     --shadow-depth-sm: var(--shadow-card);
     --shadow-depth-md: var(--shadow-card);
     --shadow-depth-lg: var(--shadow-pop);
-    --radius-sm: 14px;
-    --radius-tile: 18px;
-    --radius-btn: 999px;
+    --radius-sm: var(--r-field);
+    --radius-tile: var(--r-field);
+    --radius-btn: var(--r-btn);
     --radius-card: var(--r-card);
-    --radius-frame: 32px;
+    --radius-frame: var(--r-card-lg);
 
     color-scheme: light;
     transition: --accent .25s ease-out;
 }
+:root[data-ui="soft"]  { --r-card: 16px; --r-card-lg: 20px; --r-tile: 11px; --r-field: 12px; --r-btn: 14px; --r-chip: 12px; }
+:root[data-ui="crisp"] { --r-card: 10px; --r-card-lg: 12px; --r-tile: 7px;  --r-field: 8px;  --r-btn: 8px;  --r-chip: 6px; }
+/* text size scales the page content; the appearance sheet and its bar stay put */
+body > :not(.su-wrap, .su-pending, .su-toast, .su-open, script, style) { zoom: var(--ts); }
+.su-preview { zoom: var(--ts); }
 @supports (color: oklch(from red l c h)) {
     :root { --accent-hot: oklch(from var(--accent) calc(l + .03) c calc(h - 32)); }
 }
@@ -1572,7 +1585,7 @@ body { transition: background-color .35s ease, color .35s ease; }
 .su-sheet {
     position: absolute; inset-inline: 0; bottom: 0; margin: 0 auto;
     max-width: 460px; max-height: 92dvh; overflow-y: auto;
-    background: var(--bg); border-radius: 30px 30px 0 0;
+    background: var(--bg); border-radius: var(--r-card-lg) var(--r-card-lg) 0 0;
     padding: 10px 20px calc(110px + env(safe-area-inset-bottom));
     transform: translateY(105%); transition: transform .34s cubic-bezier(.22,1,.36,1), background-color .35s;
 }
@@ -1600,7 +1613,7 @@ body { transition: background-color .35s ease, color .35s ease; }
 /* live preview: a mini offer card */
 .su-preview { margin-top: 18px; padding: 12px; display: flex; gap: 12px; align-items: stretch; }
 .su-pv-media {
-    width: 96px; flex-shrink: 0; border-radius: 18px; background: var(--grad);
+    width: 96px; flex-shrink: 0; border-radius: var(--r-field); background: var(--grad);
     position: relative; overflow: hidden; min-height: 112px;
 }
 .su-pv-media::before, .su-pv-media::after {
@@ -1612,18 +1625,18 @@ body { transition: background-color .35s ease, color .35s ease; }
 .su-pv-chip {
     align-self: flex-start; display: inline-flex; align-items: center; gap: 5px;
     background: var(--urgent-soft); color: var(--urgent); font-weight: 700; font-size: 12px;
-    padding: 3px 9px; border-radius: 999px; font-variant-numeric: tabular-nums;
+    padding: 3px 9px; border-radius: var(--r-btn); font-variant-numeric: tabular-nums;
 }
 .su-pv-body b { font-size: 17px; font-weight: 700; margin-top: 4px; }
 .su-pv-body small { font-size: 12.5px; color: var(--muted); }
 .su-pv-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; padding-top: 8px; }
-.su-pv-tag { font-size: 12px; font-weight: 600; color: var(--accent-deep); background: var(--accent-soft); padding: 4px 10px; border-radius: 999px; }
-.su-pv-cta { font-size: 13px; font-weight: 700; color: #fff; background: var(--grad); padding: 7px 14px; border-radius: 999px; box-shadow: var(--glow); }
+.su-pv-tag { font-size: 12px; font-weight: 600; color: var(--accent-deep); background: var(--accent-soft); padding: 4px 10px; border-radius: var(--r-btn); }
+.su-pv-cta { font-size: 13px; font-weight: 700; color: #fff; background: var(--grad); padding: 7px 14px; border-radius: var(--r-btn); box-shadow: var(--glow); }
 
 /* settings row */
 .su-row { display: flex; align-items: center; gap: 12px; padding: 14px 16px; min-height: 68px; }
 .su-tile {
-    width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+    width: 40px; height: 40px; border-radius: var(--r-tile); flex-shrink: 0;
     display: grid; place-items: center; background: var(--accent-soft); color: var(--accent-deep);
     transition: background-color .25s, color .25s;
 }
@@ -1634,11 +1647,11 @@ body { transition: background-color .35s ease, color .35s ease; }
 
 /* sun / moon toggle — light: sun on sky; dark: moon among stars */
 .su-daynight {
-    position: relative; width: 62px; height: 34px; border-radius: 999px; border: 0; flex-shrink: 0;
+    position: relative; width: 62px; height: 34px; border-radius: var(--r-btn); border: 0; flex-shrink: 0;
     background: #CFE3FF; cursor: pointer; overflow: hidden; transition: background-color .35s ease;
 }
 .su-daynight::before {           /* cloud */
-    content: ''; position: absolute; left: 9px; bottom: 6px; width: 18px; height: 7px; border-radius: 999px;
+    content: ''; position: absolute; left: 9px; bottom: 6px; width: 18px; height: 7px; border-radius: var(--r-btn);
     background: #fff; box-shadow: 5px -4px 0 -1px #fff; transition: opacity .25s, transform .35s;
 }
 .su-daynight .thumb {
@@ -1684,26 +1697,74 @@ body { transition: background-color .35s ease, color .35s ease; }
     left: 50%; width: min(420px, calc(100% - 40px));
     display: flex; align-items: center; gap: 10px; padding: 10px 10px 10px 10px;
     padding-inline-start: 18px;
-    background: var(--surface); border: 1px solid var(--border); border-radius: 22px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-card);
     box-shadow: 0 8px 30px rgba(40, 14, 4, .16);
     transform: translate(-50%, 180%); transition: transform .3s cubic-bezier(.22,1,.36,1);
     direction: rtl; font-family: var(--font-ui); color: var(--text);
 }
-.su-pending.show { transform: translate(-50%, 0); }
+.su-pending:not(.show) { opacity: 0; pointer-events: none; transition: transform .3s cubic-bezier(.22,1,.36,1), opacity 0s .3s; }
+.su-pending.show { transform: translate(-50%, 0); opacity: 1; transition: transform .3s cubic-bezier(.22,1,.36,1); }
 .su-pending .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
 .su-pending .n { font-size: 14px; font-weight: 600; flex: 1; }
 .su-pending button { border: 0; cursor: pointer; font-family: inherit; font-weight: 700; font-size: 14px; }
 .su-pending .discard { background: none; color: var(--muted); padding: 10px 8px; }
-.su-pending .review { background: var(--grad); color: #fff; padding: 11px 20px; border-radius: 999px; box-shadow: var(--glow); }
+.su-pending .review { background: var(--grad); color: #fff; padding: 11px 20px; border-radius: var(--r-btn); box-shadow: var(--glow); }
 
 .su-toast {
     position: fixed; z-index: 220; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom));
     transform: translate(-50%, 200%); background: var(--text); color: var(--bg);
+    width: max-content; max-width: calc(100vw - 40px); text-align: center;
     font-family: var(--font-ui); font-weight: 600; font-size: 14px; direction: rtl;
-    padding: 12px 20px; border-radius: 999px; box-shadow: var(--shadow-pop);
+    padding: 12px 20px; border-radius: var(--r-btn); box-shadow: var(--shadow-pop);
     transition: transform .4s cubic-bezier(.34,1.4,.64,1);
 }
 .su-toast.show { transform: translate(-50%, 0); }
+
+/* sticky compact header inside the sheet */
+.su-sheet { padding-top: 0; max-height: calc(92dvh / var(--ts)); }
+.su-top {
+    position: sticky; top: 0; z-index: 3; margin: 0 -20px; padding: 10px 20px 8px;
+    background: var(--bg); transition: box-shadow .2s, background-color .35s;
+}
+.su-top.scrolled { background: var(--topbar); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); box-shadow: 0 1px 0 var(--border); }
+.su-top .su-grip { margin-bottom: 8px; }
+.su-bar { display: flex; align-items: center; position: relative; min-height: 40px; }
+.su-compact { position: absolute; left: 50%; transform: translateX(-50%); font-size: 17px; font-weight: 700; opacity: 0; white-space: nowrap; pointer-events: none; }
+.su-head { margin-top: 4px; }
+.su-x[hidden] { display: none; }
+
+/* text size + UI style option cards */
+.su-opts { display: grid; gap: 10px; padding: 12px; }
+.su-opts.four { grid-template-columns: repeat(4, 1fr); }
+.su-opts.three { grid-template-columns: repeat(3, 1fr); }
+.su-opt {
+    border: 1.5px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer;
+    border-radius: max(6px, calc(var(--r-card) - 8px)); padding: 12px 4px 10px; font-family: inherit;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; min-height: 78px;
+    transition: border-color .2s, color .2s, background-color .2s, transform .18s cubic-bezier(.34,1.56,.64,1);
+}
+.su-opt:active { transform: scale(.95); }
+.su-opt .aa { font-weight: 700; line-height: 1; }
+.su-opt small { font-size: 11.5px; color: var(--muted); font-weight: 500; }
+.su-opt[aria-checked="true"] { border-color: var(--accent); color: var(--accent-deep); background: var(--accent-soft); }
+.su-opt[aria-checked="true"] small { color: var(--accent-deep); font-weight: 700; }
+.su-thumb { width: 56px; height: 38px; background: var(--raised); border: 1px solid var(--border); display: flex; align-items: flex-end; padding: 6px; }
+.su-thumb i { display: block; height: 9px; width: 70%; background: var(--faint); transition: background-color .2s; }
+.su-opt[aria-checked="true"] .su-thumb i { background: var(--accent); }
+
+/* lists, review, buttons */
+.su-list .su-row { position: relative; }
+.su-list .su-row + .su-row::before { content: ''; position: absolute; top: 0; left: 16px; right: 68px; height: 1px; background: var(--border); }
+.su-txt small s { color: var(--faint); }
+.su-txt small em { font-style: normal; color: var(--accent-deep); font-weight: 700; }
+.su-primary, .su-secondary {
+    display: block; width: 100%; border: 0; cursor: pointer; font-family: inherit; font-weight: 700; font-size: 16px;
+    padding: 15px; border-radius: var(--r-btn); margin-top: 18px;
+}
+.su-primary { background: var(--grad); color: #fff; box-shadow: var(--glow); }
+.su-secondary { background: none; color: var(--muted); margin-top: 6px; }
+.su-panel[hidden] { display: none; }
+.su-panel { animation: suRise .3s cubic-bezier(.22,1,.36,1) both; }
 
 /* staggered entrance */
 @keyframes suRise { from { opacity: 0; transform: translateY(12px); } }
@@ -1717,9 +1778,91 @@ body { transition: background-color .35s ease, color .35s ease; }
 html { background: var(--bg-edge); }
 body { background: var(--bg-edge); font-family: var(--font-ui); letter-spacing: 0; }
 button, input, select, textarea { font-family: var(--font-ui); }
-#app { background: var(--bg); box-shadow: var(--shadow-pop); transition: background-color .35s; }
+#app { background: var(--bg); box-shadow: var(--shadow-pop); transition: background-color .35s; height: calc(100dvh / var(--ts)); min-height: 0; }
 @media (max-width: 480px) { #app { border-radius: 0; box-shadow: none; } }
 .tap:active { transform: scale(.95); filter: none; }
+
+/* UI style reaches the base rules that hard-code their radius */
+#app { border-radius: var(--r-card-lg); }
+.wbtn, .fchip, .chip, .bc-chip, .sit-chip, .holds-pill, .live-toggle, .btn, .empty .btn,
+.modal-btns button, .reply-row input, .reply-row button, .t-chip, .s-chip, .c-fit, .pill { border-radius: var(--r-chip); }
+.when { border-radius: calc(var(--r-chip) + 4px); }
+.card, .swipe-card { border-radius: var(--r-card-lg); }
+.inq-actions button, .detail-cta button, .alt-box .send, .alt-box select, .reasons button, .bc-on .acts button { border-radius: var(--r-field); }
+.bc-stat, .booking, .hold, .hold .thumb, .pic, .brand .avatar { border-radius: var(--r-tile); }
+.photo .cover-tag, .navbadge { border-radius: var(--r-chip); }
+.appbar .btn.icon { border-radius: 50%; }
+
+/* ======================= large title -> compact title ======================= */
+.lt { padding: 6px 4px 18px; }
+.lt h1 { font-family: var(--font-display); font-weight: 800; font-size: 32px; letter-spacing: -.7px; line-height: 1.12; }
+.lt p { font-size: 14.5px; color: var(--muted); margin-top: 4px; }
+.lt h1, .lt p, .live-pill, .pick h1, .pick .sub { will-change: opacity, transform; }
+.lt .live-toggle { display: inline-flex; margin-top: 12px; cursor: default; }
+.appbar { min-height: 64px; border-bottom-color: transparent; transition: border-color .2s, background-color .35s; }
+.appbar.scrolled { border-bottom-color: var(--border); }
+.appbar-title {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    font-size: 17px; font-weight: 700; opacity: 0; pointer-events: none; white-space: nowrap;
+}
+.appbar .brand .avatar { width: 40px; height: 40px; font-size: 17px; }
+
+/* ======================= view entrance: stagger on push ======================= */
+@keyframes suEnter { from { opacity: 0; transform: translateY(12px); } }
+.views, .view { min-width: 0; }
+.view.enter :is(.scroll, .bc-scroll, .editor) > * { animation: suEnter .3s cubic-bezier(.22,1,.36,1) both; }
+.view.enter :is(.scroll, .bc-scroll, .editor) > :nth-child(2) { animation-delay: 40ms; }
+.view.enter :is(.scroll, .bc-scroll, .editor) > :nth-child(3) { animation-delay: 80ms; }
+.view.enter :is(.scroll, .bc-scroll, .editor) > :nth-child(4) { animation-delay: 120ms; }
+.view.enter :is(.scroll, .bc-scroll, .editor) > :nth-child(n+5) { animation-delay: 160ms; }
+
+/* ======================= profile header ======================= */
+.ph { text-align: center; padding: 10px 0 4px; }
+.ph-avatar { position: relative; width: 112px; height: 112px; margin: 0 auto 12px; }
+.ph-ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+.ph-ring circle { fill: none; stroke-width: 4; }
+.ph-ring .trk { stroke: var(--border); }
+.ph-ring .arc {
+    stroke: var(--accent); stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100;
+    transition: stroke-dashoffset .8s cubic-bezier(.33,1,.68,1), stroke .25s;
+}
+.ph-face {
+    position: absolute; inset: 11px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--grad); color: #fff; font-size: 38px; font-weight: 800; box-shadow: var(--glow);
+}
+.ph-badge {
+    position: absolute; bottom: 6px; left: 6px; width: 30px; height: 30px; border-radius: 50%;
+    display: grid; place-items: center; background: var(--accent); color: #fff;
+    border: 3px solid var(--bg); transform: scale(0); transition: transform .25s cubic-bezier(.34,1.56,.64,1);
+}
+.ph-badge svg { width: 14px; height: 14px; }
+.ph-badge.show { transform: scale(1); }
+.ph h1 { font-size: 26px; }
+.ph p { margin-top: 2px; }
+.ph-stats {
+    display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 18px; text-align: center;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-card); box-shadow: var(--shadow-card);
+}
+.ph-stats div { padding: 14px 6px; }
+.ph-stats div + div { border-inline-start: 1px solid var(--border); }
+.ph-stats b { display: block; font-size: 22px; font-weight: 800; color: var(--accent-deep); font-variant-numeric: tabular-nums; }
+.ph-stats span { display: block; font-size: 12px; color: var(--muted); }
+.su-pending.above-nav { bottom: calc(84px + env(safe-area-inset-bottom)); }
+body.su-sheet-open .su-pending.above-nav { transform: translate(-50%, 260%); }
+.editor { padding-bottom: 120px; }
+
+/* ======================= disable by dimming, not hiding ======================= */
+.day .day-times, .live-detail { transition: opacity .2s; }
+.day.closed .day-times { display: flex; opacity: .4; pointer-events: none; }
+.day.closed .day-closed-tag { display: none; }
+.live-card.off { opacity: 1; }
+.live-card.off .live-detail { display: flex; opacity: .4; pointer-events: none; }
+
+/* checkbox toggle: the thumb carries a check when on */
+.switch::after { transition: transform .22s cubic-bezier(.34,1.56,.64,1), background-color .2s; }
+.switch[aria-checked="true"]::after {
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237A6A62' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / 62% no-repeat;
+}
 
 /* ======================= customer: situation picker ======================= */
 .pick { padding: 0 20px 28px; position: relative; isolation: isolate; }
@@ -1731,18 +1874,27 @@ button, input, select, textarea { font-family: var(--font-ui); }
         linear-gradient(to bottom, transparent 55%, var(--bg));
     transition: background .25s;
 }
-.pick-top { display: flex; align-items: center; justify-content: space-between; padding: 18px 0 0; }
+.pick-top {
+    position: sticky; top: 0; z-index: 5; margin: 0 -20px; padding: 14px 20px 10px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid transparent; transition: background-color .2s, border-color .2s;
+}
+.pick-top.scrolled { background: var(--topbar); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-bottom-color: var(--border); }
+.pick-compact {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    font-size: 17px; font-weight: 700; opacity: 0; pointer-events: none; white-space: nowrap;
+}
 .brand-chip {
     display: inline-flex; align-items: center; gap: 8px;
     background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-card);
-    border-radius: 999px; padding: 8px 15px 8px 13px;
+    border-radius: var(--r-btn); padding: 8px 15px 8px 13px;
     font-weight: 800; font-size: 16px; color: var(--text); letter-spacing: -.2px;
 }
 .brand-chip svg { width: 17px; height: 17px; color: var(--accent); }
 .live-pill {
-    display: inline-flex; align-items: center; gap: 8px; margin-top: 30px;
+    display: inline-flex; align-items: center; gap: 8px; margin-top: 18px;
     background: color-mix(in srgb, var(--surface) 80%, transparent); backdrop-filter: blur(8px);
-    border: 1px solid var(--border); border-radius: 999px; padding: 6px 13px;
+    border: 1px solid var(--border); border-radius: var(--r-btn); padding: 6px 13px;
     font-size: 13px; font-weight: 600; color: var(--text);
 }
 .live-pill i { width: 8px; height: 8px; border-radius: 50%; background: var(--urgent); animation: suPulse 1.3s ease-in-out infinite; }
@@ -1764,7 +1916,7 @@ button, input, select, textarea { font-family: var(--font-ui); }
 .sit-grid { gap: 12px; }
 .sit {
     --h: var(--accent);
-    background: var(--surface); border: 1px solid var(--border); border-radius: 22px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-card);
     padding: 16px 15px 15px; min-height: 0; gap: 14px; box-shadow: var(--shadow-card);
     color: var(--text); position: relative; overflow: hidden;
     transition: transform .18s cubic-bezier(.34,1.56,.64,1), border-color .2s, background-color .35s, box-shadow .2s;
@@ -1775,7 +1927,7 @@ button, input, select, textarea { font-family: var(--font-ui); }
 }
 .sit:hover { border-color: color-mix(in srgb, var(--h) 45%, var(--surface)); box-shadow: var(--shadow-pop); }
 .sit .ico {
-    width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center;
+    width: 44px; height: 44px; border-radius: var(--r-tile); display: grid; place-items: center;
     background: color-mix(in srgb, var(--h) 14%, var(--surface)); color: var(--h);
 }
 :root[data-theme="dark"] .sit .ico { background: color-mix(in srgb, var(--h) 24%, var(--surface)); color: color-mix(in srgb, var(--h) 60%, #fff); }
@@ -1785,7 +1937,7 @@ button, input, select, textarea { font-family: var(--font-ui); }
 .sit .sit-live {
     position: absolute; top: 14px; left: 14px;
     font-style: normal; font-size: 11.5px; font-weight: 700; color: var(--accent-deep);
-    background: var(--accent-soft); padding: 3px 9px; border-radius: 999px;
+    background: var(--accent-soft); padding: 3px 9px; border-radius: var(--r-btn);
 }
 .sit .sit-live.none { color: var(--faint); background: var(--raised); }
 .pick .foot { margin-top: 24px; color: var(--faint); }
@@ -1806,7 +1958,7 @@ button, input, select, textarea { font-family: var(--font-ui); }
 .wbtn { font-size: 14px; padding: 10px 6px; color: var(--muted); transition: background-color .2s, color .2s, box-shadow .2s; }
 .wbtn[aria-pressed="true"] { background: var(--surface); color: var(--accent-deep); font-weight: 700; box-shadow: 0 2px 8px rgba(60, 20, 5, .10); }
 
-.card { border-radius: 30px; box-shadow: var(--shadow-pop); }
+.card { border-radius: var(--r-card-lg); box-shadow: var(--shadow-pop); }
 .c-media::after {
     background: linear-gradient(to top, rgba(22, 10, 6, .94) 0%, rgba(22, 10, 6, .45) 46%, rgba(22, 10, 6, 0) 68%);
 }
@@ -1815,13 +1967,13 @@ button, input, select, textarea { font-family: var(--font-ui); }
 .c-body { padding: 20px 20px 22px; }
 .c-eyebrow {
     display: inline-block; background: var(--grad); color: #fff; opacity: 1;
-    font-size: 11.5px; letter-spacing: .3px; padding: 4px 11px; border-radius: 999px; margin-bottom: 9px;
+    font-size: 11.5px; letter-spacing: .3px; padding: 4px 11px; border-radius: var(--r-btn); margin-bottom: 9px;
 }
 .c-offer { font-family: var(--font-display); font-weight: 800; font-size: 30px; letter-spacing: -.6px; line-height: 1.12; }
 .c-note { font-size: 13.5px; color: rgba(255, 255, 255, .78); margin-top: 5px; }
 .c-venue { font-size: 14.5px; font-weight: 700; }
 .c-fit { background: rgba(255, 255, 255, .16); backdrop-filter: blur(8px); font-size: 12.5px; padding: 6px 12px; }
-.stamp { font-family: var(--font-display); font-weight: 800; border-radius: 14px; }
+.stamp { font-family: var(--font-display); font-weight: 800; border-radius: var(--r-tile); }
 .stamp.yes { color: #fff; background: var(--grad); border-color: transparent; }
 .stamp.no { color: #fff; border-color: rgba(255,255,255,.85); }
 
@@ -1832,25 +1984,25 @@ button, input, select, textarea { font-family: var(--font-ui); }
 .act.yes { width: 76px; height: 76px; background: var(--grad); color: #fff; border: 0; box-shadow: var(--glow); }
 .act.yes svg { width: 32px; height: 32px; }
 
-.empty { border-radius: 30px; background: var(--surface); }
+.empty { border-radius: var(--r-card-lg); background: var(--surface); }
 .empty svg.big { color: var(--accent); }
 .empty h2 { font-family: var(--font-display); font-weight: 800; font-size: 22px; }
 .empty .btn { background: var(--grad); box-shadow: var(--glow); padding: 13px 24px; }
 .empty .btn.ghost { background: var(--raised); color: var(--text); box-shadow: none; }
 
 .modal-wrap { background: var(--scrim); }
-.modal { border-radius: 30px; background: var(--surface); }
+.modal { border-radius: var(--r-card-lg); background: var(--surface); }
 .modal .spark { background: var(--grad); color: #fff; box-shadow: var(--glow); width: 68px; height: 68px; }
 .modal h2 { font-weight: 800; font-size: 24px; letter-spacing: -.4px; }
-.arrive { background: var(--accent-soft); border: 0; border-radius: 18px; }
+.arrive { background: var(--accent-soft); border: 0; border-radius: var(--r-field); }
 .arrive .num { color: var(--accent-deep); font-weight: 800; font-size: 36px; }
 .modal-btns .primary { background: var(--grad); color: #fff; box-shadow: var(--glow); }
 .modal-btns .ghost { background: var(--raised); color: var(--text); }
 
 .tray-wrap { background: var(--scrim); }
-.tray { background: var(--bg); border-radius: 30px 30px 0 0; }
+.tray { background: var(--bg); border-radius: var(--r-card-lg) var(--r-card-lg) 0 0; }
 .tray-head h2 { font-weight: 800; font-size: 22px; }
-.hold { background: var(--surface); border-radius: 20px; }
+.hold { background: var(--surface); border-radius: var(--r-card); }
 
 .toast { background: var(--text); color: var(--bg); }
 .toast b { color: inherit; }
@@ -1858,10 +2010,11 @@ button, input, select, textarea { font-family: var(--font-ui); }
 /* ======================= business: shell ======================= */
 .appbar {
     background: var(--topbar); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
-    border-bottom: 1px solid var(--border); padding: 12px 16px;
+    border-bottom: 1px solid transparent; padding: 12px 16px;
 }
+.appbar.scrolled { border-bottom-color: var(--border); }
 .brand .avatar {
-    width: 42px; height: 42px; border-radius: 14px; background: var(--grad); color: #fff;
+    width: 42px; height: 42px; border-radius: var(--r-tile); background: var(--grad); color: #fff;
     font-weight: 800; font-size: 18px; box-shadow: var(--glow);
 }
 .brand .who b { font-size: 16px; font-weight: 800; }
@@ -1879,7 +2032,7 @@ button, input, select, textarea { font-family: var(--font-ui); }
 .navbtn { color: var(--faint); font-size: 11.5px; transition: color .2s; }
 .navbtn svg { position: relative; z-index: 1; }
 .navbtn::before {
-    content: ''; position: absolute; top: 4px; left: 50%; width: 58px; height: 32px; border-radius: 999px;
+    content: ''; position: absolute; top: 4px; left: 50%; width: 58px; height: 32px; border-radius: var(--r-btn);
     background: var(--accent-soft); transform: translateX(-50%) scaleX(.4); opacity: 0;
     transition: transform .28s cubic-bezier(.34,1.56,.64,1), opacity .2s;
 }
@@ -1892,34 +2045,34 @@ button, input, select, textarea { font-family: var(--font-ui); }
 /* ======================= business: inbox ======================= */
 .scroll { padding: 16px 16px 32px; }
 .stats { gap: 10px; }
-.stat { background: var(--surface); border-radius: 20px; padding: 14px 10px; box-shadow: var(--shadow-card); }
+.stat { background: var(--surface); border-radius: var(--r-card); padding: 14px 10px; box-shadow: var(--shadow-card); }
 .stat b { font-family: var(--font-display); font-weight: 800; font-size: 28px; line-height: 1.1; }
 .stat.accent b { color: var(--accent-deep); }
 .stat span { font-size: 12px; }
 .today h2 { font-size: 12px; font-weight: 600; letter-spacing: 1.2px; color: var(--muted); margin: 20px 4px 10px; }
-.booking { background: var(--grad); color: #fff; border: 0; border-radius: 20px; box-shadow: var(--glow); }
+.booking { background: var(--grad); color: #fff; border: 0; border-radius: var(--r-card); box-shadow: var(--glow); }
 .booking .t { color: #fff; font-family: var(--font-display); font-weight: 800; font-size: 22px; }
 .booking .p, .booking .n { color: #fff; }
 .booking .n { opacity: .85; }
 .fchip { font-size: 13.5px; padding: 9px 16px; font-weight: 600; transition: background-color .2s, color .2s; }
 .fchip[aria-pressed="true"] { background: var(--text); border-color: var(--text); color: var(--bg); }
 .fchip .badge { background: var(--urgent); }
-.inq { border-radius: 24px; background: var(--surface); }
-.pic { border-radius: 15px; font-weight: 800; }
+.inq { border-radius: var(--r-card); background: var(--surface); }
+.pic { border-radius: var(--r-tile); font-weight: 800; }
 .inq-id h3 { font-size: 16px; font-weight: 700; }
 .pill.pending { background: var(--urgent-soft) !important; color: var(--urgent) !important; }
 .pill.approved { background: var(--accent-soft); color: var(--accent-deep); }
 .inq-kind svg { color: var(--accent); }
-.inq-note { background: var(--raised); border-radius: 16px; }
-.inq-actions button { border-radius: 16px; padding: 12px; font-weight: 700; }
+.inq-note { background: var(--raised); border-radius: var(--r-field); }
+.inq-actions button { border-radius: var(--r-field); padding: 12px; font-weight: 700; }
 .btn-approve { background: var(--grad) !important; color: #fff !important; box-shadow: var(--glow); }
 .btn-decline { background: var(--surface); color: var(--muted) !important; }
 .btn-alt { background: var(--raised); color: var(--text); }
 .alt-box .send, .reply-row button { background: var(--grad); }
 .sheet-wrap, .overlay { background: var(--scrim); }
-.sheet { background: var(--bg); border-radius: 30px 30px 0 0; }
+.sheet { background: var(--bg); border-radius: var(--r-card-lg) var(--r-card-lg) 0 0; }
 .sheet h2 { font-weight: 800; }
-.reasons button { background: var(--surface); border-radius: 16px; }
+.reasons button { background: var(--surface); border-radius: var(--r-field); }
 .detail { background: var(--bg); }
 .detail-cta .approve { background: var(--grad); color: #fff; }
 .msg.them { background: var(--raised); }
@@ -1927,21 +2080,21 @@ button, input, select, textarea { font-family: var(--font-ui); }
 
 /* ======================= business: broadcast ======================= */
 .bc-scroll { padding: 16px 16px 32px; gap: 16px; }
-.bc-card { border-radius: 24px; padding: 20px 18px; background: var(--surface); }
+.bc-card { border-radius: var(--r-card); padding: 20px 18px; background: var(--surface); }
 .bc-card h2 { font-weight: 800; font-size: 20px; letter-spacing: -.3px; }
 .bc-off .dot { background: var(--faint); }
 .bc-off h2 { font-size: 24px; }
 .bc-off p b { color: var(--urgent); }
 .bc-on { background: var(--grad); box-shadow: var(--glow); }
 .bc-on .what { font-weight: 800; font-size: 24px; }
-.bc-stat { background: rgba(255, 255, 255, .18); border-radius: 16px; }
+.bc-stat { background: rgba(255, 255, 255, .18); border-radius: var(--r-field); }
 .bc-on .acts button.stop { background: #fff; color: color-mix(in srgb, var(--accent) 82%, #000); }
 .bc-chip { font-weight: 600; transition: background-color .2s, color .2s; }
 .bc-chip[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
 .bc-step button { background: var(--raised); border: 0; color: var(--text); }
 .bc-step .n { font-weight: 800; font-size: 34px; }
-.bc-go { background: var(--grad); border-radius: 999px; box-shadow: var(--glow); font-size: 17px; }
-.bc-cell { border-radius: 10px; }
+.bc-go { background: var(--grad); border-radius: var(--r-btn); box-shadow: var(--glow); font-size: 17px; }
+.bc-cell { border-radius: var(--r-tile); }
 .bc-cell.c1 { background: var(--raised); }
 .bc-cell.c2 { background: color-mix(in srgb, var(--accent) 16%, var(--surface)); }
 .bc-cell.c3 { background: color-mix(in srgb, var(--accent) 36%, var(--surface)); }
@@ -1953,20 +2106,20 @@ button, input, select, textarea { font-family: var(--font-ui); }
 
 /* ======================= business: profile editor ======================= */
 .profile-progress { padding: 14px 18px 4px; }
-.progress-track { height: 8px; background: var(--raised); }
+.progress-track { height: 8px; background: var(--raised); border-radius: 999px; }
 .progress-fill { background: var(--grad); }
 .progress-label b { color: var(--accent-deep); }
 .editor { padding: 16px 16px 44px; gap: 16px; }
-.section { border-radius: 24px; padding: 22px 18px; background: var(--surface); }
+.section { border-radius: var(--r-card); padding: 22px 18px; background: var(--surface); }
 .section-head { align-items: center; gap: 10px; }
 .section-head h2 { font-weight: 800; font-size: 20px; letter-spacing: -.3px; }
 .section-head .idx {
-    min-width: 30px; height: 30px; border-radius: 10px; display: grid; place-items: center;
+    min-width: 30px; height: 30px; border-radius: var(--r-tile); display: grid; place-items: center;
     background: var(--accent-soft); color: var(--accent-deep); font-size: 12.5px; font-weight: 800; letter-spacing: 0;
 }
 .field label { color: var(--muted); font-weight: 600; }
 input[type="text"], input[type="tel"], input[type="url"], textarea, select {
-    background-color: var(--raised); border: 1.5px solid transparent; border-radius: 16px; color: var(--text);
+    background-color: var(--raised); border: 1.5px solid transparent; border-radius: var(--r-field); color: var(--text);
 }
 input:focus, textarea:focus, select:focus {
     background-color: var(--surface); border-color: var(--accent);
@@ -1974,17 +2127,17 @@ input:focus, textarea:focus, select:focus {
 }
 .chip { background: var(--surface); border-color: var(--border); color: var(--muted); font-weight: 500; transition: background-color .2s, color .2s, border-color .2s; }
 .chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent-line); color: var(--accent-deep); font-weight: 700; }
-.seg { background: var(--raised); border: 0; border-radius: 16px; transition: background-color .2s, color .2s; }
+.seg { background: var(--raised); border: 0; border-radius: var(--r-field); transition: background-color .2s, color .2s; }
 .seg[aria-pressed="true"] { background: var(--grad); color: #fff; box-shadow: var(--glow); }
-.dish { background: var(--raised); border-radius: 18px; }
+.dish { background: var(--raised); border-radius: var(--r-field); }
 .dish input { background: var(--surface); }
-.add-row { background: var(--accent-soft); color: var(--accent-deep); border: 1.5px dashed var(--accent-line); border-radius: 16px; font-weight: 700; }
+.add-row { background: var(--accent-soft); color: var(--accent-deep); border: 1.5px dashed var(--accent-line); border-radius: var(--r-field); font-weight: 700; }
 .add-photo { background: var(--raised); border-color: var(--accent-line); }
-.photo { border-radius: 18px; }
+.photo { border-radius: var(--r-field); }
 .photo .cover-tag { background: var(--grad); color: #fff; }
 .switch { background: var(--border); }
 .switch[aria-checked="true"] { background: var(--accent); }
-.live-card { background: var(--raised); border: 0; border-radius: 20px; }
+.live-card { background: var(--raised); border: 0; border-radius: var(--r-card); }
 .btn { font-weight: 700; }
 .btn.ghost { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
 .btn.save { background: var(--grad); color: #fff; box-shadow: var(--glow); }
@@ -2003,20 +2156,14 @@ input:focus, textarea:focus, select:focus {
 <body>
 <div id="app" lang="he" dir="rtl">
     <header class="appbar">
-        <div class="brand">
+        <div class="brand" title="בזלת קפה · (מ)טעים לי לעסקים">
             <div class="avatar">ב</div>
-            <div class="who">
-                <b>בזלת קפה</b>
-                <span>לב תל אביב · (מ)טעים לי לעסקים</span>
-            </div>
         </div>
+        <div class="appbar-title" id="appbarTitle" aria-hidden="true">פניות</div>
         <div class="appbar-slot">
-            <div data-slot="inbox broadcast">
-                <div class="live-toggle on" id="liveToggle"><i></i><span id="liveLabel">משדר · 4 מקומות</span></div>
-            </div>
             <div data-slot="profile" hidden>
                 <button class="btn ghost icon tap" id="previewBtn" type="button" aria-label="תצוגה מקדימה" title="תצוגה מקדימה"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
-                <button class="btn save tap" id="saveBtn" type="button">שמירה</button>
+                <button class="btn save tap" id="saveBtn" type="button" hidden>שמירה</button>
             </div>
             <button class="su-open tap" type="button" data-su-open></button>
         </div>
@@ -2025,6 +2172,7 @@ input:focus, textarea:focus, select:focus {
     <div class="views">
         <section class="view active" id="viewInbox">
         <div class="scroll" id="scroll">
+            <header class="lt"><h1>פניות</h1><p>בזלת קפה · מי רוצה לשבת אצלכם היום.</p><div class="live-toggle on js-live"><i></i><span>משדר · 4 מקומות</span></div></header>
                 <div class="stats" id="stats"></div>
         
                 <div class="today">
@@ -2040,6 +2188,7 @@ input:focus, textarea:focus, select:focus {
 
         <section class="view" id="viewBroadcast">
         <div class="bc-scroll" id="bcScroll">
+            <header class="lt"><h1>שידור</h1><p>מוכרים את השעות המתות — בלחיצה אחת.</p><div class="live-toggle on js-live"><i></i><span>משדר · 4 מקומות</span></div></header>
                 <div id="bcHero"></div>
         
                 <section class="bc-card" id="bcComposer">
@@ -2094,11 +2243,25 @@ input:focus, textarea:focus, select:focus {
         </section>
 
         <section class="view" id="viewProfile">
-            <div class="profile-progress">
-                <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-                <div class="progress-label">הפרופיל <b id="progressPct">0%</b> מוכן</div>
-            </div>
         <main class="editor" id="editor">
+            <header class="lt ph">
+                <div class="ph-avatar">
+                    <svg class="ph-ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="trk" cx="60" cy="60" r="56"/><circle class="arc" id="phArc" cx="60" cy="60" r="56" pathLength="100"/></svg>
+                    <span class="ph-face">ב</span>
+                    <i class="ph-badge" id="phBadge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></i>
+                </div>
+                <h1 id="phName">בזלת קפה</h1>
+                <p id="phSub">@bazelet.cafe · בית קפה</p>
+                <div class="ph-stats">
+                    <div><b id="phPct">0%</b><span>מוכן לפרסום</span></div>
+                    <div><b id="phPhotos">0</b><span>תמונות</span></div>
+                    <div><b id="phDishes">0</b><span>מנות בתפריט</span></div>
+                </div>
+                <div class="profile-progress" hidden>
+                    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+                    <div class="progress-label">הפרופיל <b id="progressPct">0%</b> מוכן</div>
+                </div>
+            </header>
         
                 <section class="section">
                     <div class="section-head"><span class="idx">01</span><h2>פרטי העסק</h2></div>
@@ -2270,6 +2433,24 @@ input:focus, textarea:focus, select:focus {
     <div class="detail-cta" id="detailCta"></div>
 </div>
 
+<div class="su-pending above-nav" id="profBar">
+    <i class="dot"></i><span class="n" id="profN"></span>
+    <button class="discard" id="profDiscard" type="button">ביטול</button>
+    <button class="review" id="profReview" type="button">סקירה</button>
+</div>
+
+<div class="su-wrap" id="profSheet" aria-hidden="true">
+    <div class="su-sheet" role="dialog" aria-modal="true" aria-label="לפני שמפרסמים">
+        <div class="su-grip"></div>
+        <div class="su-head"><div><h2>לפני שמפרסמים</h2><p>כל מה שהשתנה בפרופיל — במקום אחד.</p></div>
+            <button class="su-x" id="profClose" type="button" aria-label="סגירה"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+        <div class="su-label">השינויים <span id="profCount"></span></div>
+        <div class="su-card su-list" id="profList"></div>
+        <button class="su-primary" id="profPublish" type="button">פרסום השינויים</button>
+        <button class="su-secondary" id="profBack" type="button">חזרה לעריכה</button>
+    </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -2281,12 +2462,45 @@ input:focus, textarea:focus, select:focus {
         profile: document.getElementById('viewProfile')
     };
     var btns = document.querySelectorAll('.navbtn');
+    var TITLES = { inbox: 'פניות', broadcast: 'שידור', profile: 'הפרופיל' };
+    var scrollers = {
+        inbox: document.getElementById('scroll'),
+        broadcast: document.getElementById('bcScroll'),
+        profile: document.getElementById('editor')
+    };
+    var appbar = document.querySelector('.appbar');
+    var appTitle = document.getElementById('appbarTitle');
+    var current = 'inbox';
+
+    /* large title -> compact title, tied to the first 60px of scroll */
+    function onScroll() {
+        var s = scrollers[current]; if (!s) return;
+        var k = Math.max(0, Math.min(1, s.scrollTop / 60));
+        var lt = views[current].querySelector('.lt');
+        if (lt) Array.prototype.forEach.call(lt.querySelectorAll('h1, p'), function (el) {
+            el.style.opacity = 1 - k; el.style.transform = 'translateY(' + (-6 * k) + 'px)';
+        });
+        appTitle.style.opacity = k;
+        appbar.classList.toggle('scrolled', k > 0.02);
+    }
+    Object.keys(scrollers).forEach(function (k) {
+        if (scrollers[k]) scrollers[k].addEventListener('scroll', function () { if (k === current) onScroll(); }, { passive: true });
+    });
+
     function show(v) {
-        Object.keys(views).forEach(function (k) { views[k].classList.toggle('active', k === v); });
+        current = v;
+        appTitle.textContent = TITLES[v];
+        Object.keys(views).forEach(function (k) {
+            var on = k === v, el = views[k];
+            el.classList.toggle('active', on);
+            if (on) { el.classList.remove('enter'); void el.offsetWidth; el.classList.add('enter'); }
+        });
         Array.prototype.forEach.call(btns, function (b) { b.classList.toggle('active', b.getAttribute('data-view') === v); });
         Array.prototype.forEach.call(slots, function (s) {
             s.hidden = s.getAttribute('data-slot').split(' ').indexOf(v) === -1;
         });
+        onScroll();
+        refreshBar();
     }
     Array.prototype.forEach.call(btns, function (b) {
         b.addEventListener('click', function () { show(b.getAttribute('data-view')); });
@@ -2301,12 +2515,80 @@ input:focus, textarea:focus, select:focus {
     };
     window.addEventListener('bis-live', function (e) {
         var d = e.detail || {};
-        var t = document.getElementById('liveToggle');
-        if (!t) return;
-        t.classList.toggle('on', !!d.on);
-        document.getElementById('liveLabel').textContent = d.on
-            ? ('משדר · ' + (d.seats || '0') + ' מקומות') : 'שידור כבוי';
+        Array.prototype.forEach.call(document.querySelectorAll('.js-live'), function (t) {
+            t.classList.toggle('on', !!d.on);
+            t.querySelector('span').textContent = d.on ? ('משדר · ' + (d.seats || '0') + ' מקומות') : 'שידור כבוי';
+        });
+        setTimeout(recount, 0);
     });
+
+    /* ---------- staged profile changes ----------
+       The editor autosaves its draft; "published" is a separate snapshot that only
+       moves when the owner reviews and publishes. The bar counts fields that differ. */
+    var DRAFT = 'bis-business-profile-v1', PUB = 'bis-business-profile-published';
+    var LABELS = {
+        name: 'שם העסק', category: 'קטגוריה', area: 'שכונה', tagline: 'משפט פתיחה', about: 'קצת עלינו',
+        photos: 'תמונות', tags: 'תגיות', price: 'רמת מחיר', dishes: 'מנות', hours: 'שעות פתיחה',
+        address: 'כתובת', phone: 'טלפון', instagram: 'אינסטגרם', website: 'אתר',
+        liveOn: 'שידור מקומות', liveSeats: 'מקומות פנויים', liveUntil: 'שידור עד'
+    };
+    var PEN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>';
+    var pub = null, diff = [];
+    function get(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
+    function put(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+    function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function fmt(k, v) {
+        if (v == null || v === '') return '—';
+        if (k === 'hours') return v.filter(function (h) { return !h.closed; }).length + ' ימים פתוחים';
+        if (Array.isArray(v)) return v.length + ' ' + ({ photos: 'תמונות', dishes: 'מנות', tags: 'תגיות' }[k] || 'פריטים');
+        if (typeof v === 'boolean') return v ? 'פעיל' : 'כבוי';
+        if (typeof v === 'object') return 'עודכן';
+        v = String(v); return v.length > 22 ? v.slice(0, 21) + '…' : v;
+    }
+    function recount() {
+        var d = get(DRAFT); if (!d) return;
+        if (!pub) { pub = get(PUB); if (!pub) { pub = d; put(PUB, d); } }
+        diff = Object.keys(LABELS).filter(function (k) { return JSON.stringify(d[k]) !== JSON.stringify(pub[k]); });
+        document.getElementById('profN').textContent = diff.length === 1 ? 'שינוי אחד' : diff.length + ' שינויים';
+        refreshBar();
+        /* profile header reflects the draft live */
+        var pct = parseInt(document.getElementById('progressPct').textContent, 10) || 0;
+        document.getElementById('phName').textContent = d.name || 'העסק שלי';
+        document.getElementById('phSub').textContent = [d.instagram, d.category].filter(Boolean).join(' · ');
+        document.getElementById('phPct').textContent = pct + '%';
+        document.getElementById('phPhotos').textContent = (d.photos || []).length;
+        document.getElementById('phDishes').textContent = (d.dishes || []).length;
+        document.getElementById('phArc').style.strokeDashoffset = 100 - pct;
+        document.getElementById('phBadge').classList.toggle('show', pct >= 100);
+    }
+    var bar = document.getElementById('profBar'), sheet = document.getElementById('profSheet');
+    function refreshBar() {
+        if (!bar) return;
+        bar.classList.toggle('show', current === 'profile' && diff.length > 0 && !sheet.classList.contains('show'));
+    }
+    function openReview() {
+        var d = get(DRAFT) || {};
+        document.getElementById('profCount').textContent = diff.length === 1 ? 'שינוי אחד' : diff.length + ' שינויים';
+        document.getElementById('profList').innerHTML = diff.map(function (k) {
+            return '<div class="su-row"><span class="su-tile">' + PEN + '</span><div class="su-txt"><b>' + LABELS[k] + '</b>' +
+                '<small><s>' + esc(fmt(k, pub[k])) + '</s> ← <em>' + esc(fmt(k, d[k])) + '</em></small></div></div>';
+        }).join('');
+        sheet.classList.add('show'); sheet.setAttribute('aria-hidden', 'false'); refreshBar();
+    }
+    function closeReview() { sheet.classList.remove('show'); sheet.setAttribute('aria-hidden', 'true'); refreshBar(); }
+    document.getElementById('profReview').addEventListener('click', openReview);
+    document.getElementById('profClose').addEventListener('click', closeReview);
+    document.getElementById('profBack').addEventListener('click', closeReview);
+    sheet.addEventListener('click', function (e) { if (e.target === sheet) closeReview(); });
+    document.getElementById('profDiscard').addEventListener('click', function () {
+        if (window.__editorRestore && pub) window.__editorRestore(pub);
+    });
+    document.getElementById('profPublish').addEventListener('click', function () {
+        pub = get(DRAFT); put(PUB, pub);
+        document.getElementById('saveBtn').click();
+        closeReview(); recount();
+    });
+
     show('inbox');
 })();
 </script>
@@ -3336,6 +3618,16 @@ input:focus, textarea:focus, select:focus {
     renderHours();
     renderLive();
     sync();
+    /* merged app: lets the staged-changes bar roll the editor back to the published profile */
+    window.__editorRestore = function (s) {
+        state = JSON.parse(JSON.stringify(s));
+        document.querySelectorAll('[data-key]').forEach(function (el) {
+            var k = el.getAttribute('data-key');
+            if (k in state) el.value = state[k] == null ? '' : state[k];
+        });
+        ['bizTagline', 'bizAbout'].forEach(function (id) { var e = $(id); if (e) e.dispatchEvent(new Event('input')); });
+        renderPhotos(); renderTags(); renderPrice(); renderDishes(); renderHours(); renderLive(); sync();
+    };
 })();
 </script>
 <!--SUPER:sheet-->
@@ -3349,6 +3641,14 @@ input:focus, textarea:focus, select:focus {
         { hex: '#7B3FE4', name: 'חציל' },
         { hex: '#2F5BEA', name: 'אוכמניות' }
     ];
+    var SIZES = [
+        { v: 0.9, name: 'קטן', px: 12 }, { v: 1, name: 'רגיל', px: 15 },
+        { v: 1.12, name: 'גדול', px: 18 }, { v: 1.25, name: 'ענק', px: 21 }
+    ];
+    var STYLES = [
+        { v: 'rounded', name: 'מעוגל', r: 12 }, { v: 'soft', name: 'רך', r: 7 }, { v: 'crisp', name: 'חד', r: 2 }
+    ];
+    var FIELDS = { mode: 'מצב תצוגה', accent: 'צבע הטעם', ts: 'גודל טקסט', ui: 'סגנון' };
     var root = document.documentElement;
     var mq = window.matchMedia ? matchMedia('(prefers-color-scheme: dark)') : null;
 
@@ -3357,78 +3657,116 @@ input:focus, textarea:focus, select:focus {
     function effective(s) {
         return {
             mode: s.mode || (mq && mq.matches ? 'dark' : 'light'),
-            accent: (s.accent || ACCENTS[0].hex).toUpperCase()
+            accent: (s.accent || ACCENTS[0].hex).toUpperCase(),
+            ts: +s.ts || 1,
+            ui: s.ui || 'rounded'
         };
     }
-    function accentName(hex) {
-        for (var i = 0; i < ACCENTS.length; i++) if (ACCENTS[i].hex.toUpperCase() === hex) return ACCENTS[i].name;
-        return ACCENTS[0].name;
+    function copy(v) { return { mode: v.mode, accent: v.accent, ts: v.ts, ui: v.ui }; }
+    function pick(list, key, v) { for (var i = 0; i < list.length; i++) if (String(list[i][key]).toUpperCase() === String(v).toUpperCase()) return list[i]; return list[0]; }
+    function label(k, v) {
+        if (k === 'mode') return v === 'dark' ? 'כהה' : 'בהיר';
+        if (k === 'accent') return pick(ACCENTS, 'hex', v).name;
+        if (k === 'ts') return pick(SIZES, 'v', v).name;
+        return pick(STYLES, 'v', v).name;
     }
     function apply(v) {
         root.setAttribute('data-theme', v.mode);
         root.style.setProperty('--accent', v.accent);
+        root.style.setProperty('--ts', v.ts);
+        if (v.ui === 'rounded') root.removeAttribute('data-ui'); else root.setAttribute('data-ui', v.ui);
         var m = document.querySelector('meta[name="theme-color"]');
         if (m) m.setAttribute('content', v.mode === 'dark' ? '#140E0C' : '#FFF7F2');
     }
 
     var saved = effective(read());
-    var draft = { mode: saved.mode, accent: saved.accent };
+    var draft = copy(saved);
     apply(saved);
     if (mq && mq.addEventListener) mq.addEventListener('change', function () {
         if (read().mode) return;
-        saved = effective(read()); draft = { mode: saved.mode, accent: saved.accent }; apply(saved); sync();
+        saved.mode = effective(read()).mode; draft.mode = saved.mode; apply(draft); sync();
     });
 
     var SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/></svg>';
     var MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>';
     var DROP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.4 6 11a6 6 0 0 1-12 0c0-4.6 6-11 6-11z"/></svg>';
+    var TYPE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V5h11v2M9.5 5v14M7 19h5"/><path d="M14 12v-1h6v1M17 11v8M15.5 19h3"/></svg>';
+    var SHAPE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="5"/></svg>';
     var CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
     var PALETTE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 0 0 0 18c1.4 0 2-.9 2-1.8 0-1.3-1-1.6-1-2.7 0-1 .8-1.5 1.8-1.5H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.2" fill="currentColor"/><circle cx="10.5" cy="7.2" r="1.2" fill="currentColor"/><circle cx="15.2" cy="7.6" r="1.2" fill="currentColor"/></svg>';
     var X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+    var BACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>';
+    var ICONS = { mode: SUN, accent: DROP, ts: TYPE, ui: SHAPE };
 
     var wrap = document.createElement('div');
     wrap.className = 'su-wrap'; wrap.setAttribute('aria-hidden', 'true');
     wrap.innerHTML =
         '<div class="su-sheet" role="dialog" aria-modal="true" aria-label="המראה שלך">' +
-            '<div class="su-grip"></div>' +
-            '<div class="su-head"><div><h2>המראה שלך</h2><p>שיהיה טעים גם לעיניים.</p></div>' +
-                '<button class="su-x" type="button" aria-label="סגירה">' + X + '</button></div>' +
-            '<div class="su-card su-preview" aria-hidden="true">' +
-                '<div class="su-pv-media"></div>' +
-                '<div class="su-pv-body">' +
-                    '<span class="su-pv-chip">⏱ 12:40</span>' +
-                    '<b>קפה שני על הבית</b><small>בזלת קפה · 4 דק׳ הליכה</small>' +
-                    '<div class="su-pv-row"><span class="su-pv-tag">2 מקומות</span><span class="su-pv-cta">תופס!</span></div>' +
-                '</div>' +
-            '</div>' +
-            '<div class="su-label">מצב תצוגה <span data-su="modeVal"></span></div>' +
-            '<div class="su-card"><div class="su-row">' +
-                '<span class="su-tile" data-su="modeIco"></span>' +
-                '<div class="su-txt"><b data-su="modeTitle"></b><small data-su="modeSub"></small></div>' +
-                '<button class="su-daynight" type="button" role="switch" aria-label="מצב כהה" data-su="mode">' +
-                    '<span class="stars"><i></i><i></i><i></i></span><i class="thumb"></i></button>' +
+            '<div class="su-top"><div class="su-grip"></div><div class="su-bar">' +
+                '<button class="su-x" type="button" data-su="back" aria-label="חזרה" hidden>' + BACK + '</button>' +
+                '<span class="su-compact" data-su="compact">המראה שלך</span>' +
+                '<button class="su-x" type="button" data-su="close" aria-label="סגירה" style="margin-inline-start:auto">' + X + '</button>' +
             '</div></div>' +
-            '<div class="su-label">צבע הטעם <span data-su="accentVal"></span></div>' +
-            '<div class="su-card">' +
-                '<div class="su-swatches" role="radiogroup" aria-label="צבע">' +
-                    ACCENTS.map(function (a) {
-                        return '<button class="su-sw" type="button" role="radio" aria-label="' + a.name + '" data-hex="' + a.hex.toUpperCase() +
-                            '" style="background:' + a.hex + ';--sw:' + a.hex + '">' + CHECK + '</button>';
+
+            '<div class="su-panel" data-su="edit">' +
+                '<div class="su-head"><div><h2>המראה שלך</h2><p>שיהיה טעים גם לעיניים.</p></div></div>' +
+                '<div class="su-card su-preview" aria-hidden="true">' +
+                    '<div class="su-pv-media"></div>' +
+                    '<div class="su-pv-body">' +
+                        '<span class="su-pv-chip">⏱ 12:40</span>' +
+                        '<b>קפה שני על הבית</b><small>בזלת קפה · 4 דק׳ הליכה</small>' +
+                        '<div class="su-pv-row"><span class="su-pv-tag">2 מקומות</span><span class="su-pv-cta">תופס!</span></div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="su-label">מצב תצוגה <span data-su="modeVal"></span></div>' +
+                '<div class="su-card"><div class="su-row">' +
+                    '<span class="su-tile" data-su="modeIco"></span>' +
+                    '<div class="su-txt"><b data-su="modeTitle"></b><small data-su="modeSub"></small></div>' +
+                    '<button class="su-daynight" type="button" role="switch" aria-label="מצב כהה" data-su="mode">' +
+                        '<span class="stars"><i></i><i></i><i></i></span><i class="thumb"></i></button>' +
+                '</div></div>' +
+                '<div class="su-label">צבע הטעם <span data-su="accentVal"></span></div>' +
+                '<div class="su-card">' +
+                    '<div class="su-swatches" role="radiogroup" aria-label="צבע">' +
+                        ACCENTS.map(function (a) {
+                            return '<button class="su-sw" type="button" role="radio" aria-label="' + a.name + '" data-hex="' + a.hex.toUpperCase() +
+                                '" style="background:' + a.hex + ';--sw:' + a.hex + '">' + CHECK + '</button>';
+                        }).join('') +
+                    '</div>' +
+                    '<div class="su-sw-names">' + ACCENTS.map(function (a) { return '<span data-hex="' + a.hex.toUpperCase() + '">' + a.name + '</span>'; }).join('') + '</div>' +
+                '</div>' +
+                '<div class="su-label">גודל טקסט <span data-su="tsVal"></span></div>' +
+                '<div class="su-card su-opts four" role="radiogroup" aria-label="גודל טקסט">' +
+                    SIZES.map(function (s) {
+                        return '<button class="su-opt" type="button" role="radio" data-ts="' + s.v + '"><span class="aa" style="font-size:' + s.px + 'px">Aa</span><small>' + s.name + '</small></button>';
                     }).join('') +
                 '</div>' +
-                '<div class="su-sw-names">' + ACCENTS.map(function (a) { return '<span data-hex="' + a.hex.toUpperCase() + '">' + a.name + '</span>'; }).join('') + '</div>' +
+                '<div class="su-label">סגנון <span data-su="uiVal"></span></div>' +
+                '<div class="su-card su-opts three" role="radiogroup" aria-label="סגנון">' +
+                    STYLES.map(function (s) {
+                        return '<button class="su-opt" type="button" role="radio" data-ui="' + s.v + '"><span class="su-thumb" style="border-radius:' + s.r + 'px"><i style="border-radius:' + Math.max(2, s.r / 2) + 'px"></i></span><small>' + s.name + '</small></button>';
+                    }).join('') +
+                '</div>' +
+                '<div class="su-label">חל על</div>' +
+                '<div class="su-card"><div class="su-row">' +
+                    '<span class="su-tile">' + DROP + '</span>' +
+                    '<div class="su-txt"><b>כל המסכים</b><small data-su="summary"></small></div>' +
+                '</div></div>' +
             '</div>' +
-            '<div class="su-label">מה זה משנה</div>' +
-            '<div class="su-card"><div class="su-row">' +
-                '<span class="su-tile">' + DROP + '</span>' +
-                '<div class="su-txt"><b>בכל המסכים</b><small>צד הלקוח, צד העסק ומסמך המיקוד — יחד.</small></div>' +
-            '</div></div>' +
+
+            '<div class="su-panel" data-su="review" hidden>' +
+                '<div class="su-head"><div><h2>החוויה שלך</h2><p>רואים הכול יחד לפני ששומרים.</p></div></div>' +
+                '<div class="su-label">השינויים <span data-su="reviewN"></span></div>' +
+                '<div class="su-card su-list" data-su="reviewList"></div>' +
+                '<button class="su-primary" type="button" data-su="commit">שמירת השינויים</button>' +
+                '<button class="su-secondary" type="button" data-su="backBtn">חזרה לעריכה</button>' +
+            '</div>' +
         '</div>';
 
     var bar = document.createElement('div');
     bar.className = 'su-pending';
     bar.innerHTML = '<i class="dot"></i><span class="n" data-su="n"></span>' +
-        '<button class="discard" type="button">ביטול</button><button class="review" type="button">שמירה</button>';
+        '<button class="discard" type="button">ביטול</button><button class="review" type="button">סקירה</button>';
 
     var toast = document.createElement('div');
     toast.className = 'su-toast';
@@ -3437,26 +3775,39 @@ input:focus, textarea:focus, select:focus {
     document.body.appendChild(bar);
     document.body.appendChild(toast);
 
+    var sheet = wrap.querySelector('.su-sheet');
+    var top = wrap.querySelector('.su-top');
     function q(k) { return wrap.querySelector('[data-su="' + k + '"]'); }
-    function changes() { return (draft.mode !== saved.mode ? 1 : 0) + (draft.accent !== saved.accent ? 1 : 0); }
+    function changed() { return Object.keys(FIELDS).filter(function (k) { return String(draft[k]) !== String(saved[k]); }); }
+    function countText(n) { return n === 1 ? 'שינוי אחד' : n + ' שינויים'; }
+    var reviewing = false;
 
+    function radios(sel, attr, val) {
+        Array.prototype.forEach.call(wrap.querySelectorAll(sel), function (b) {
+            b.setAttribute('aria-checked', String(b.getAttribute(attr)).toUpperCase() === String(val).toUpperCase() ? 'true' : 'false');
+        });
+    }
     function sync() {
         var dark = draft.mode === 'dark';
         q('mode').setAttribute('aria-checked', dark ? 'true' : 'false');
         q('modeIco').innerHTML = dark ? MOON : SUN;
         q('modeTitle').textContent = dark ? 'מצב כהה' : 'מצב בהיר';
         q('modeSub').textContent = dark ? 'הקישו בשביל אור יום' : 'הקישו כדי להחשיך';
-        q('modeVal').textContent = dark ? 'כהה' : 'בהיר';
-        q('accentVal').textContent = accentName(draft.accent);
-        Array.prototype.forEach.call(wrap.querySelectorAll('.su-sw'), function (b) {
-            b.setAttribute('aria-checked', b.getAttribute('data-hex') === draft.accent ? 'true' : 'false');
-        });
+        q('modeVal').textContent = label('mode', draft.mode);
+        q('accentVal').textContent = label('accent', draft.accent);
+        q('tsVal').textContent = label('ts', draft.ts);
+        q('uiVal').textContent = label('ui', draft.ui);
+        q('summary').textContent = [label('accent', draft.accent), 'טקסט ' + label('ts', draft.ts), label('ui', draft.ui)].join(' · ');
+        radios('.su-sw', 'data-hex', draft.accent);
+        radios('[data-ts]', 'data-ts', draft.ts);
+        radios('.su-opt[data-ui]', 'data-ui', draft.ui);
         Array.prototype.forEach.call(wrap.querySelectorAll('.su-sw-names span'), function (s) {
             s.classList.toggle('on', s.getAttribute('data-hex') === draft.accent);
         });
-        var n = changes();
-        bar.querySelector('[data-su="n"]').textContent = n === 1 ? 'שינוי אחד' : n + ' שינויים';
-        bar.classList.toggle('show', n > 0 && wrap.classList.contains('show'));
+        var n = changed().length;
+        bar.querySelector('[data-su="n"]').textContent = countText(n);
+        bar.classList.toggle('show', n > 0 && wrap.classList.contains('show') && !reviewing);
+        if (!n && reviewing) panel(false);
     }
     function setDraft(k, v) {
         draft[k] = v;
@@ -3467,24 +3818,64 @@ input:focus, textarea:focus, select:focus {
         toast.textContent = t; toast.classList.add('show');
         clearTimeout(flash.t); flash.t = setTimeout(function () { toast.classList.remove('show'); }, 1800);
     }
-    function open() { wrap.classList.add('show'); wrap.setAttribute('aria-hidden', 'false'); sync(); }
-    function discard() { draft = { mode: saved.mode, accent: saved.accent }; apply(saved); sync(); }
-    function close() { if (changes()) discard(); wrap.classList.remove('show'); wrap.setAttribute('aria-hidden', 'true'); sync(); }
+    function onScroll() {
+        var k = Math.max(0, Math.min(1, sheet.scrollTop / 60));
+        Array.prototype.forEach.call(wrap.querySelectorAll('.su-panel:not([hidden]) .su-head'), function (h) {
+            h.style.opacity = 1 - k; h.style.transform = 'translateY(' + (-6 * k) + 'px)';
+        });
+        q('compact').style.opacity = k;
+        top.classList.toggle('scrolled', k > 0.02);
+    }
+    function panel(review) {
+        reviewing = review;
+        q('edit').hidden = review; q('review').hidden = !review;
+        q('back').hidden = !review;
+        q('compact').textContent = review ? 'החוויה שלך' : 'המראה שלך';
+        if (review) {
+            var list = changed();
+            q('reviewN').textContent = countText(list.length);
+            q('reviewList').innerHTML = list.map(function (k) {
+                return '<div class="su-row"><span class="su-tile">' + ICONS[k] + '</span><div class="su-txt"><b>' + FIELDS[k] + '</b>' +
+                    '<small><s>' + label(k, saved[k]) + '</s> ← <em>' + label(k, draft[k]) + '</em></small></div></div>';
+            }).join('');
+        }
+        sheet.scrollTop = 0; onScroll(); sync();
+    }
+    function open() {
+        document.body.classList.add('su-sheet-open');
+        wrap.classList.add('show'); wrap.setAttribute('aria-hidden', 'false'); panel(false);
+    }
+    function discard() { draft = copy(saved); apply(saved); sync(); }
+    function hide() {
+        wrap.classList.remove('show'); wrap.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('su-sheet-open'); bar.classList.remove('show');
+    }
+    function close() { if (changed().length) discard(); hide(); }
     function commit() {
-        saved = { mode: draft.mode, accent: draft.accent };
-        write({ mode: saved.mode, accent: saved.accent });
-        sync(); wrap.classList.remove('show'); wrap.setAttribute('aria-hidden', 'true'); bar.classList.remove('show');
-        flash('המראה נשמר · ' + accentName(saved.accent));
+        saved = copy(draft);
+        write(saved);
+        hide(); reviewing = false; sync();
+        flash('המראה נשמר · ' + label('accent', saved.accent));
     }
 
+    sheet.addEventListener('scroll', onScroll, { passive: true });
     q('mode').addEventListener('click', function () { setDraft('mode', draft.mode === 'dark' ? 'light' : 'dark'); });
     Array.prototype.forEach.call(wrap.querySelectorAll('.su-sw'), function (b) {
         b.addEventListener('click', function () { setDraft('accent', b.getAttribute('data-hex')); });
     });
-    wrap.querySelector('.su-x').addEventListener('click', close);
+    Array.prototype.forEach.call(wrap.querySelectorAll('[data-ts]'), function (b) {
+        b.addEventListener('click', function () { setDraft('ts', +b.getAttribute('data-ts')); });
+    });
+    Array.prototype.forEach.call(wrap.querySelectorAll('.su-opt[data-ui]'), function (b) {
+        b.addEventListener('click', function () { setDraft('ui', b.getAttribute('data-ui')); });
+    });
+    q('close').addEventListener('click', close);
+    q('back').addEventListener('click', function () { panel(false); });
+    q('backBtn').addEventListener('click', function () { panel(false); });
+    q('commit').addEventListener('click', commit);
     wrap.addEventListener('click', function (e) { if (e.target === wrap) close(); });
     bar.querySelector('.discard').addEventListener('click', discard);
-    bar.querySelector('.review').addEventListener('click', commit);
+    bar.querySelector('.review').addEventListener('click', function () { panel(true); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && wrap.classList.contains('show')) close(); });
 
     var triggers = document.querySelectorAll('[data-su-open]');

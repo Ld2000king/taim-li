@@ -51,10 +51,53 @@ ibScript = ibScript.replace(renderAllOld,
   `    function renderAll() { renderStats(); renderToday(); renderFilters(); renderList(); if (window.__setInboxBadge) window.__setInboxBadge(pendingCount()); }`);
 
 /* --- editor script: emit shared live state from sync() --- */
+const restoreHook = `
+    /* merged app: lets the staged-changes bar roll the editor back to the published profile */
+    window.__editorRestore = function (s) {
+        state = JSON.parse(JSON.stringify(s));
+        document.querySelectorAll('[data-key]').forEach(function (el) {
+            var k = el.getAttribute('data-key');
+            if (k in state) el.value = state[k] == null ? '' : state[k];
+        });
+        ['bizTagline', 'bizAbout'].forEach(function (id) { var e = $(id); if (e) e.dispatchEvent(new Event('input')); });
+        renderPhotos(); renderTags(); renderPrice(); renderDishes(); renderHours(); renderLive(); sync();
+    };
+})();`;
+if (!edScript.endsWith('})();')) throw new Error('editor script tail anchor not found');
+edScript = edScript.slice(0, -'})();'.length).replace(/\s+$/, '\n') + restoreHook.replace(/^\n/, '');
+
 const syncTail = `        persist();\n    }`;
 if (!edScript.includes(syncTail)) throw new Error('editor sync() anchor not found');
 edScript = edScript.replace(syncTail,
   `        persist();\n        try { window.dispatchEvent(new CustomEvent('bis-live', { detail: { on: state.liveOn, seats: state.liveSeats, until: state.liveUntil } })); } catch (e) {}\n    }`);
+
+const LIVE_PILL = '<div class="live-toggle on js-live"><i></i><span>משדר · 4 מקומות</span></div>';
+function largeTitle(src, name, openTag, html) {
+    if (!src.includes(openTag)) throw new Error(name + ': scroller anchor not found');
+    return src.replace(openTag, openTag + '\n' + html);
+}
+const ibScrollT = largeTitle(ibScroll, 'inbox', '<div class="scroll" id="scroll">',
+    `    <header class="lt"><h1>פניות</h1><p>בזלת קפה · מי רוצה לשבת אצלכם היום.</p>${LIVE_PILL}</header>`);
+const bdContentT = largeTitle(bdContent, 'broadcast', '<div class="bc-scroll" id="bcScroll">',
+    `    <header class="lt"><h1>שידור</h1><p>מוכרים את השעות המתות — בלחיצה אחת.</p>${LIVE_PILL}</header>`);
+const edSectionsT = largeTitle(edSections, 'editor', '<main class="editor" id="editor">', `    <header class="lt ph">
+        <div class="ph-avatar">
+            <svg class="ph-ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="trk" cx="60" cy="60" r="56"/><circle class="arc" id="phArc" cx="60" cy="60" r="56" pathLength="100"/></svg>
+            <span class="ph-face">ב</span>
+            <i class="ph-badge" id="phBadge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></i>
+        </div>
+        <h1 id="phName">בזלת קפה</h1>
+        <p id="phSub">@bazelet.cafe · בית קפה</p>
+        <div class="ph-stats">
+            <div><b id="phPct">0%</b><span>מוכן לפרסום</span></div>
+            <div><b id="phPhotos">0</b><span>תמונות</span></div>
+            <div><b id="phDishes">0</b><span>מנות בתפריט</span></div>
+        </div>
+        <div class="profile-progress" hidden>
+            <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="progress-label">הפרופיל <b id="progressPct">0%</b> מוכן</div>
+        </div>
+    </header>`);
 
 const shellCss = `
 /* ============================================================================
@@ -130,20 +173,14 @@ ${shellCss}
 
 <div id="app" lang="he" dir="rtl">
     <header class="appbar">
-        <div class="brand">
+        <div class="brand" title="בזלת קפה · (מ)טעים לי לעסקים">
             <div class="avatar">ב</div>
-            <div class="who">
-                <b>בזלת קפה</b>
-                <span>לב תל אביב · (מ)טעים לי לעסקים</span>
-            </div>
         </div>
+        <div class="appbar-title" id="appbarTitle" aria-hidden="true">פניות</div>
         <div class="appbar-slot">
-            <div data-slot="inbox broadcast">
-                <div class="live-toggle on" id="liveToggle"><i></i><span id="liveLabel">משדר · 4 מקומות</span></div>
-            </div>
             <div data-slot="profile" hidden>
                 <button class="btn ghost icon tap" id="previewBtn" type="button" aria-label="תצוגה מקדימה" title="תצוגה מקדימה"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
-                <button class="btn save tap" id="saveBtn" type="button">שמירה</button>
+                <button class="btn save tap" id="saveBtn" type="button" hidden>שמירה</button>
             </div>
             <button class="su-open tap" type="button" data-su-open></button>
         </div>
@@ -151,19 +188,15 @@ ${shellCss}
 
     <div class="views">
         <section class="view active" id="viewInbox">
-${ibScroll.split('\n').map(l => '        ' + l).join('\n')}
+${ibScrollT.split('\n').map(l => '        ' + l).join('\n')}
         </section>
 
         <section class="view" id="viewBroadcast">
-${bdContent.split('\n').map(l => '        ' + l).join('\n')}
+${bdContentT.split('\n').map(l => '        ' + l).join('\n')}
         </section>
 
         <section class="view" id="viewProfile">
-            <div class="profile-progress">
-                <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-                <div class="progress-label">הפרופיל <b id="progressPct">0%</b> מוכן</div>
-            </div>
-${edSections.split('\n').map(l => '        ' + l).join('\n')}
+${edSectionsT.split('\n').map(l => '        ' + l).join('\n')}
         </section>
     </div>
 
@@ -187,6 +220,24 @@ ${edOverlay}
 
 ${ibSheets}
 
+<div class="su-pending above-nav" id="profBar">
+    <i class="dot"></i><span class="n" id="profN"></span>
+    <button class="discard" id="profDiscard" type="button">ביטול</button>
+    <button class="review" id="profReview" type="button">סקירה</button>
+</div>
+
+<div class="su-wrap" id="profSheet" aria-hidden="true">
+    <div class="su-sheet" role="dialog" aria-modal="true" aria-label="לפני שמפרסמים">
+        <div class="su-grip"></div>
+        <div class="su-head"><div><h2>לפני שמפרסמים</h2><p>כל מה שהשתנה בפרופיל — במקום אחד.</p></div>
+            <button class="su-x" id="profClose" type="button" aria-label="סגירה"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+        <div class="su-label">השינויים <span id="profCount"></span></div>
+        <div class="su-card su-list" id="profList"></div>
+        <button class="su-primary" id="profPublish" type="button">פרסום השינויים</button>
+        <button class="su-secondary" id="profBack" type="button">חזרה לעריכה</button>
+    </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -198,12 +249,45 @@ ${ibSheets}
         profile: document.getElementById('viewProfile')
     };
     var btns = document.querySelectorAll('.navbtn');
+    var TITLES = { inbox: 'פניות', broadcast: 'שידור', profile: 'הפרופיל' };
+    var scrollers = {
+        inbox: document.getElementById('scroll'),
+        broadcast: document.getElementById('bcScroll'),
+        profile: document.getElementById('editor')
+    };
+    var appbar = document.querySelector('.appbar');
+    var appTitle = document.getElementById('appbarTitle');
+    var current = 'inbox';
+
+    /* large title -> compact title, tied to the first 60px of scroll */
+    function onScroll() {
+        var s = scrollers[current]; if (!s) return;
+        var k = Math.max(0, Math.min(1, s.scrollTop / 60));
+        var lt = views[current].querySelector('.lt');
+        if (lt) Array.prototype.forEach.call(lt.querySelectorAll('h1, p'), function (el) {
+            el.style.opacity = 1 - k; el.style.transform = 'translateY(' + (-6 * k) + 'px)';
+        });
+        appTitle.style.opacity = k;
+        appbar.classList.toggle('scrolled', k > 0.02);
+    }
+    Object.keys(scrollers).forEach(function (k) {
+        if (scrollers[k]) scrollers[k].addEventListener('scroll', function () { if (k === current) onScroll(); }, { passive: true });
+    });
+
     function show(v) {
-        Object.keys(views).forEach(function (k) { views[k].classList.toggle('active', k === v); });
+        current = v;
+        appTitle.textContent = TITLES[v];
+        Object.keys(views).forEach(function (k) {
+            var on = k === v, el = views[k];
+            el.classList.toggle('active', on);
+            if (on) { el.classList.remove('enter'); void el.offsetWidth; el.classList.add('enter'); }
+        });
         Array.prototype.forEach.call(btns, function (b) { b.classList.toggle('active', b.getAttribute('data-view') === v); });
         Array.prototype.forEach.call(slots, function (s) {
             s.hidden = s.getAttribute('data-slot').split(' ').indexOf(v) === -1;
         });
+        onScroll();
+        refreshBar();
     }
     Array.prototype.forEach.call(btns, function (b) {
         b.addEventListener('click', function () { show(b.getAttribute('data-view')); });
@@ -218,12 +302,80 @@ ${ibSheets}
     };
     window.addEventListener('bis-live', function (e) {
         var d = e.detail || {};
-        var t = document.getElementById('liveToggle');
-        if (!t) return;
-        t.classList.toggle('on', !!d.on);
-        document.getElementById('liveLabel').textContent = d.on
-            ? ('משדר · ' + (d.seats || '0') + ' מקומות') : 'שידור כבוי';
+        Array.prototype.forEach.call(document.querySelectorAll('.js-live'), function (t) {
+            t.classList.toggle('on', !!d.on);
+            t.querySelector('span').textContent = d.on ? ('משדר · ' + (d.seats || '0') + ' מקומות') : 'שידור כבוי';
+        });
+        setTimeout(recount, 0);
     });
+
+    /* ---------- staged profile changes ----------
+       The editor autosaves its draft; "published" is a separate snapshot that only
+       moves when the owner reviews and publishes. The bar counts fields that differ. */
+    var DRAFT = 'bis-business-profile-v1', PUB = 'bis-business-profile-published';
+    var LABELS = {
+        name: 'שם העסק', category: 'קטגוריה', area: 'שכונה', tagline: 'משפט פתיחה', about: 'קצת עלינו',
+        photos: 'תמונות', tags: 'תגיות', price: 'רמת מחיר', dishes: 'מנות', hours: 'שעות פתיחה',
+        address: 'כתובת', phone: 'טלפון', instagram: 'אינסטגרם', website: 'אתר',
+        liveOn: 'שידור מקומות', liveSeats: 'מקומות פנויים', liveUntil: 'שידור עד'
+    };
+    var PEN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>';
+    var pub = null, diff = [];
+    function get(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
+    function put(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+    function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function fmt(k, v) {
+        if (v == null || v === '') return '—';
+        if (k === 'hours') return v.filter(function (h) { return !h.closed; }).length + ' ימים פתוחים';
+        if (Array.isArray(v)) return v.length + ' ' + ({ photos: 'תמונות', dishes: 'מנות', tags: 'תגיות' }[k] || 'פריטים');
+        if (typeof v === 'boolean') return v ? 'פעיל' : 'כבוי';
+        if (typeof v === 'object') return 'עודכן';
+        v = String(v); return v.length > 22 ? v.slice(0, 21) + '…' : v;
+    }
+    function recount() {
+        var d = get(DRAFT); if (!d) return;
+        if (!pub) { pub = get(PUB); if (!pub) { pub = d; put(PUB, d); } }
+        diff = Object.keys(LABELS).filter(function (k) { return JSON.stringify(d[k]) !== JSON.stringify(pub[k]); });
+        document.getElementById('profN').textContent = diff.length === 1 ? 'שינוי אחד' : diff.length + ' שינויים';
+        refreshBar();
+        /* profile header reflects the draft live */
+        var pct = parseInt(document.getElementById('progressPct').textContent, 10) || 0;
+        document.getElementById('phName').textContent = d.name || 'העסק שלי';
+        document.getElementById('phSub').textContent = [d.instagram, d.category].filter(Boolean).join(' · ');
+        document.getElementById('phPct').textContent = pct + '%';
+        document.getElementById('phPhotos').textContent = (d.photos || []).length;
+        document.getElementById('phDishes').textContent = (d.dishes || []).length;
+        document.getElementById('phArc').style.strokeDashoffset = 100 - pct;
+        document.getElementById('phBadge').classList.toggle('show', pct >= 100);
+    }
+    var bar = document.getElementById('profBar'), sheet = document.getElementById('profSheet');
+    function refreshBar() {
+        if (!bar) return;
+        bar.classList.toggle('show', current === 'profile' && diff.length > 0 && !sheet.classList.contains('show'));
+    }
+    function openReview() {
+        var d = get(DRAFT) || {};
+        document.getElementById('profCount').textContent = diff.length === 1 ? 'שינוי אחד' : diff.length + ' שינויים';
+        document.getElementById('profList').innerHTML = diff.map(function (k) {
+            return '<div class="su-row"><span class="su-tile">' + PEN + '</span><div class="su-txt"><b>' + LABELS[k] + '</b>' +
+                '<small><s>' + esc(fmt(k, pub[k])) + '</s> ← <em>' + esc(fmt(k, d[k])) + '</em></small></div></div>';
+        }).join('');
+        sheet.classList.add('show'); sheet.setAttribute('aria-hidden', 'false'); refreshBar();
+    }
+    function closeReview() { sheet.classList.remove('show'); sheet.setAttribute('aria-hidden', 'true'); refreshBar(); }
+    document.getElementById('profReview').addEventListener('click', openReview);
+    document.getElementById('profClose').addEventListener('click', closeReview);
+    document.getElementById('profBack').addEventListener('click', closeReview);
+    sheet.addEventListener('click', function (e) { if (e.target === sheet) closeReview(); });
+    document.getElementById('profDiscard').addEventListener('click', function () {
+        if (window.__editorRestore && pub) window.__editorRestore(pub);
+    });
+    document.getElementById('profPublish').addEventListener('click', function () {
+        pub = get(DRAFT); put(PUB, pub);
+        document.getElementById('saveBtn').click();
+        closeReview(); recount();
+    });
+
     show('inbox');
 })();
 </script>

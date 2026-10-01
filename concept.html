@@ -23,6 +23,8 @@
         var r = document.documentElement;
         r.setAttribute('data-theme', dark ? 'dark' : 'light');
         if (s.accent) r.style.setProperty('--accent', s.accent);
+        if (s.ts) r.style.setProperty('--ts', s.ts);
+        if (s.ui && s.ui !== 'rounded') r.setAttribute('data-ui', s.ui);
     } catch (e) {}
 })();
 </script>
@@ -248,8 +250,14 @@ figcaption {
     --font-display: 'Rubik', 'Heebo', system-ui, sans-serif;
     --font-ui: 'Rubik', 'Heebo', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
+    /* ---- UI style: Rounded (default) · Soft · Crisp ---- */
     --r-card: 24px;
+    --r-card-lg: 30px;
     --r-tile: 14px;
+    --r-field: 16px;
+    --r-btn: 999px;
+    --r-chip: 999px;
+    --ts: 1;                           /* text size: .9 · 1 · 1.12 · 1.25 */
 
     /* ---- legacy role names, so every older rule follows the new palette ---- */
     --paper: var(--bg);
@@ -282,15 +290,20 @@ figcaption {
     --shadow-depth-sm: var(--shadow-card);
     --shadow-depth-md: var(--shadow-card);
     --shadow-depth-lg: var(--shadow-pop);
-    --radius-sm: 14px;
-    --radius-tile: 18px;
-    --radius-btn: 999px;
+    --radius-sm: var(--r-field);
+    --radius-tile: var(--r-field);
+    --radius-btn: var(--r-btn);
     --radius-card: var(--r-card);
-    --radius-frame: 32px;
+    --radius-frame: var(--r-card-lg);
 
     color-scheme: light;
     transition: --accent .25s ease-out;
 }
+:root[data-ui="soft"]  { --r-card: 16px; --r-card-lg: 20px; --r-tile: 11px; --r-field: 12px; --r-btn: 14px; --r-chip: 12px; }
+:root[data-ui="crisp"] { --r-card: 10px; --r-card-lg: 12px; --r-tile: 7px;  --r-field: 8px;  --r-btn: 8px;  --r-chip: 6px; }
+/* text size scales the page content; the appearance sheet and its bar stay put */
+body > :not(.su-wrap, .su-pending, .su-toast, .su-open, script, style) { zoom: var(--ts); }
+.su-preview { zoom: var(--ts); }
 @supports (color: oklch(from red l c h)) {
     :root { --accent-hot: oklch(from var(--accent) calc(l + .03) c calc(h - 32)); }
 }
@@ -339,7 +352,7 @@ body { transition: background-color .35s ease, color .35s ease; }
 .su-sheet {
     position: absolute; inset-inline: 0; bottom: 0; margin: 0 auto;
     max-width: 460px; max-height: 92dvh; overflow-y: auto;
-    background: var(--bg); border-radius: 30px 30px 0 0;
+    background: var(--bg); border-radius: var(--r-card-lg) var(--r-card-lg) 0 0;
     padding: 10px 20px calc(110px + env(safe-area-inset-bottom));
     transform: translateY(105%); transition: transform .34s cubic-bezier(.22,1,.36,1), background-color .35s;
 }
@@ -367,7 +380,7 @@ body { transition: background-color .35s ease, color .35s ease; }
 /* live preview: a mini offer card */
 .su-preview { margin-top: 18px; padding: 12px; display: flex; gap: 12px; align-items: stretch; }
 .su-pv-media {
-    width: 96px; flex-shrink: 0; border-radius: 18px; background: var(--grad);
+    width: 96px; flex-shrink: 0; border-radius: var(--r-field); background: var(--grad);
     position: relative; overflow: hidden; min-height: 112px;
 }
 .su-pv-media::before, .su-pv-media::after {
@@ -379,18 +392,18 @@ body { transition: background-color .35s ease, color .35s ease; }
 .su-pv-chip {
     align-self: flex-start; display: inline-flex; align-items: center; gap: 5px;
     background: var(--urgent-soft); color: var(--urgent); font-weight: 700; font-size: 12px;
-    padding: 3px 9px; border-radius: 999px; font-variant-numeric: tabular-nums;
+    padding: 3px 9px; border-radius: var(--r-btn); font-variant-numeric: tabular-nums;
 }
 .su-pv-body b { font-size: 17px; font-weight: 700; margin-top: 4px; }
 .su-pv-body small { font-size: 12.5px; color: var(--muted); }
 .su-pv-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; padding-top: 8px; }
-.su-pv-tag { font-size: 12px; font-weight: 600; color: var(--accent-deep); background: var(--accent-soft); padding: 4px 10px; border-radius: 999px; }
-.su-pv-cta { font-size: 13px; font-weight: 700; color: #fff; background: var(--grad); padding: 7px 14px; border-radius: 999px; box-shadow: var(--glow); }
+.su-pv-tag { font-size: 12px; font-weight: 600; color: var(--accent-deep); background: var(--accent-soft); padding: 4px 10px; border-radius: var(--r-btn); }
+.su-pv-cta { font-size: 13px; font-weight: 700; color: #fff; background: var(--grad); padding: 7px 14px; border-radius: var(--r-btn); box-shadow: var(--glow); }
 
 /* settings row */
 .su-row { display: flex; align-items: center; gap: 12px; padding: 14px 16px; min-height: 68px; }
 .su-tile {
-    width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+    width: 40px; height: 40px; border-radius: var(--r-tile); flex-shrink: 0;
     display: grid; place-items: center; background: var(--accent-soft); color: var(--accent-deep);
     transition: background-color .25s, color .25s;
 }
@@ -401,11 +414,11 @@ body { transition: background-color .35s ease, color .35s ease; }
 
 /* sun / moon toggle — light: sun on sky; dark: moon among stars */
 .su-daynight {
-    position: relative; width: 62px; height: 34px; border-radius: 999px; border: 0; flex-shrink: 0;
+    position: relative; width: 62px; height: 34px; border-radius: var(--r-btn); border: 0; flex-shrink: 0;
     background: #CFE3FF; cursor: pointer; overflow: hidden; transition: background-color .35s ease;
 }
 .su-daynight::before {           /* cloud */
-    content: ''; position: absolute; left: 9px; bottom: 6px; width: 18px; height: 7px; border-radius: 999px;
+    content: ''; position: absolute; left: 9px; bottom: 6px; width: 18px; height: 7px; border-radius: var(--r-btn);
     background: #fff; box-shadow: 5px -4px 0 -1px #fff; transition: opacity .25s, transform .35s;
 }
 .su-daynight .thumb {
@@ -451,26 +464,74 @@ body { transition: background-color .35s ease, color .35s ease; }
     left: 50%; width: min(420px, calc(100% - 40px));
     display: flex; align-items: center; gap: 10px; padding: 10px 10px 10px 10px;
     padding-inline-start: 18px;
-    background: var(--surface); border: 1px solid var(--border); border-radius: 22px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-card);
     box-shadow: 0 8px 30px rgba(40, 14, 4, .16);
     transform: translate(-50%, 180%); transition: transform .3s cubic-bezier(.22,1,.36,1);
     direction: rtl; font-family: var(--font-ui); color: var(--text);
 }
-.su-pending.show { transform: translate(-50%, 0); }
+.su-pending:not(.show) { opacity: 0; pointer-events: none; transition: transform .3s cubic-bezier(.22,1,.36,1), opacity 0s .3s; }
+.su-pending.show { transform: translate(-50%, 0); opacity: 1; transition: transform .3s cubic-bezier(.22,1,.36,1); }
 .su-pending .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
 .su-pending .n { font-size: 14px; font-weight: 600; flex: 1; }
 .su-pending button { border: 0; cursor: pointer; font-family: inherit; font-weight: 700; font-size: 14px; }
 .su-pending .discard { background: none; color: var(--muted); padding: 10px 8px; }
-.su-pending .review { background: var(--grad); color: #fff; padding: 11px 20px; border-radius: 999px; box-shadow: var(--glow); }
+.su-pending .review { background: var(--grad); color: #fff; padding: 11px 20px; border-radius: var(--r-btn); box-shadow: var(--glow); }
 
 .su-toast {
     position: fixed; z-index: 220; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom));
     transform: translate(-50%, 200%); background: var(--text); color: var(--bg);
+    width: max-content; max-width: calc(100vw - 40px); text-align: center;
     font-family: var(--font-ui); font-weight: 600; font-size: 14px; direction: rtl;
-    padding: 12px 20px; border-radius: 999px; box-shadow: var(--shadow-pop);
+    padding: 12px 20px; border-radius: var(--r-btn); box-shadow: var(--shadow-pop);
     transition: transform .4s cubic-bezier(.34,1.4,.64,1);
 }
 .su-toast.show { transform: translate(-50%, 0); }
+
+/* sticky compact header inside the sheet */
+.su-sheet { padding-top: 0; max-height: calc(92dvh / var(--ts)); }
+.su-top {
+    position: sticky; top: 0; z-index: 3; margin: 0 -20px; padding: 10px 20px 8px;
+    background: var(--bg); transition: box-shadow .2s, background-color .35s;
+}
+.su-top.scrolled { background: var(--topbar); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); box-shadow: 0 1px 0 var(--border); }
+.su-top .su-grip { margin-bottom: 8px; }
+.su-bar { display: flex; align-items: center; position: relative; min-height: 40px; }
+.su-compact { position: absolute; left: 50%; transform: translateX(-50%); font-size: 17px; font-weight: 700; opacity: 0; white-space: nowrap; pointer-events: none; }
+.su-head { margin-top: 4px; }
+.su-x[hidden] { display: none; }
+
+/* text size + UI style option cards */
+.su-opts { display: grid; gap: 10px; padding: 12px; }
+.su-opts.four { grid-template-columns: repeat(4, 1fr); }
+.su-opts.three { grid-template-columns: repeat(3, 1fr); }
+.su-opt {
+    border: 1.5px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer;
+    border-radius: max(6px, calc(var(--r-card) - 8px)); padding: 12px 4px 10px; font-family: inherit;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; min-height: 78px;
+    transition: border-color .2s, color .2s, background-color .2s, transform .18s cubic-bezier(.34,1.56,.64,1);
+}
+.su-opt:active { transform: scale(.95); }
+.su-opt .aa { font-weight: 700; line-height: 1; }
+.su-opt small { font-size: 11.5px; color: var(--muted); font-weight: 500; }
+.su-opt[aria-checked="true"] { border-color: var(--accent); color: var(--accent-deep); background: var(--accent-soft); }
+.su-opt[aria-checked="true"] small { color: var(--accent-deep); font-weight: 700; }
+.su-thumb { width: 56px; height: 38px; background: var(--raised); border: 1px solid var(--border); display: flex; align-items: flex-end; padding: 6px; }
+.su-thumb i { display: block; height: 9px; width: 70%; background: var(--faint); transition: background-color .2s; }
+.su-opt[aria-checked="true"] .su-thumb i { background: var(--accent); }
+
+/* lists, review, buttons */
+.su-list .su-row { position: relative; }
+.su-list .su-row + .su-row::before { content: ''; position: absolute; top: 0; left: 16px; right: 68px; height: 1px; background: var(--border); }
+.su-txt small s { color: var(--faint); }
+.su-txt small em { font-style: normal; color: var(--accent-deep); font-weight: 700; }
+.su-primary, .su-secondary {
+    display: block; width: 100%; border: 0; cursor: pointer; font-family: inherit; font-weight: 700; font-size: 16px;
+    padding: 15px; border-radius: var(--r-btn); margin-top: 18px;
+}
+.su-primary { background: var(--grad); color: #fff; box-shadow: var(--glow); }
+.su-secondary { background: none; color: var(--muted); margin-top: 6px; }
+.su-panel[hidden] { display: none; }
+.su-panel { animation: suRise .3s cubic-bezier(.22,1,.36,1) both; }
 
 /* staggered entrance */
 @keyframes suRise { from { opacity: 0; transform: translateY(12px); } }
@@ -783,6 +844,14 @@ h1 { font-weight: 800; }
         { hex: '#7B3FE4', name: 'חציל' },
         { hex: '#2F5BEA', name: 'אוכמניות' }
     ];
+    var SIZES = [
+        { v: 0.9, name: 'קטן', px: 12 }, { v: 1, name: 'רגיל', px: 15 },
+        { v: 1.12, name: 'גדול', px: 18 }, { v: 1.25, name: 'ענק', px: 21 }
+    ];
+    var STYLES = [
+        { v: 'rounded', name: 'מעוגל', r: 12 }, { v: 'soft', name: 'רך', r: 7 }, { v: 'crisp', name: 'חד', r: 2 }
+    ];
+    var FIELDS = { mode: 'מצב תצוגה', accent: 'צבע הטעם', ts: 'גודל טקסט', ui: 'סגנון' };
     var root = document.documentElement;
     var mq = window.matchMedia ? matchMedia('(prefers-color-scheme: dark)') : null;
 
@@ -791,78 +860,116 @@ h1 { font-weight: 800; }
     function effective(s) {
         return {
             mode: s.mode || (mq && mq.matches ? 'dark' : 'light'),
-            accent: (s.accent || ACCENTS[0].hex).toUpperCase()
+            accent: (s.accent || ACCENTS[0].hex).toUpperCase(),
+            ts: +s.ts || 1,
+            ui: s.ui || 'rounded'
         };
     }
-    function accentName(hex) {
-        for (var i = 0; i < ACCENTS.length; i++) if (ACCENTS[i].hex.toUpperCase() === hex) return ACCENTS[i].name;
-        return ACCENTS[0].name;
+    function copy(v) { return { mode: v.mode, accent: v.accent, ts: v.ts, ui: v.ui }; }
+    function pick(list, key, v) { for (var i = 0; i < list.length; i++) if (String(list[i][key]).toUpperCase() === String(v).toUpperCase()) return list[i]; return list[0]; }
+    function label(k, v) {
+        if (k === 'mode') return v === 'dark' ? 'כהה' : 'בהיר';
+        if (k === 'accent') return pick(ACCENTS, 'hex', v).name;
+        if (k === 'ts') return pick(SIZES, 'v', v).name;
+        return pick(STYLES, 'v', v).name;
     }
     function apply(v) {
         root.setAttribute('data-theme', v.mode);
         root.style.setProperty('--accent', v.accent);
+        root.style.setProperty('--ts', v.ts);
+        if (v.ui === 'rounded') root.removeAttribute('data-ui'); else root.setAttribute('data-ui', v.ui);
         var m = document.querySelector('meta[name="theme-color"]');
         if (m) m.setAttribute('content', v.mode === 'dark' ? '#140E0C' : '#FFF7F2');
     }
 
     var saved = effective(read());
-    var draft = { mode: saved.mode, accent: saved.accent };
+    var draft = copy(saved);
     apply(saved);
     if (mq && mq.addEventListener) mq.addEventListener('change', function () {
         if (read().mode) return;
-        saved = effective(read()); draft = { mode: saved.mode, accent: saved.accent }; apply(saved); sync();
+        saved.mode = effective(read()).mode; draft.mode = saved.mode; apply(draft); sync();
     });
 
     var SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/></svg>';
     var MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>';
     var DROP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.4 6 11a6 6 0 0 1-12 0c0-4.6 6-11 6-11z"/></svg>';
+    var TYPE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V5h11v2M9.5 5v14M7 19h5"/><path d="M14 12v-1h6v1M17 11v8M15.5 19h3"/></svg>';
+    var SHAPE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="5"/></svg>';
     var CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
     var PALETTE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 0 0 0 18c1.4 0 2-.9 2-1.8 0-1.3-1-1.6-1-2.7 0-1 .8-1.5 1.8-1.5H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.2" fill="currentColor"/><circle cx="10.5" cy="7.2" r="1.2" fill="currentColor"/><circle cx="15.2" cy="7.6" r="1.2" fill="currentColor"/></svg>';
     var X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+    var BACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>';
+    var ICONS = { mode: SUN, accent: DROP, ts: TYPE, ui: SHAPE };
 
     var wrap = document.createElement('div');
     wrap.className = 'su-wrap'; wrap.setAttribute('aria-hidden', 'true');
     wrap.innerHTML =
         '<div class="su-sheet" role="dialog" aria-modal="true" aria-label="המראה שלך">' +
-            '<div class="su-grip"></div>' +
-            '<div class="su-head"><div><h2>המראה שלך</h2><p>שיהיה טעים גם לעיניים.</p></div>' +
-                '<button class="su-x" type="button" aria-label="סגירה">' + X + '</button></div>' +
-            '<div class="su-card su-preview" aria-hidden="true">' +
-                '<div class="su-pv-media"></div>' +
-                '<div class="su-pv-body">' +
-                    '<span class="su-pv-chip">⏱ 12:40</span>' +
-                    '<b>קפה שני על הבית</b><small>בזלת קפה · 4 דק׳ הליכה</small>' +
-                    '<div class="su-pv-row"><span class="su-pv-tag">2 מקומות</span><span class="su-pv-cta">תופס!</span></div>' +
-                '</div>' +
-            '</div>' +
-            '<div class="su-label">מצב תצוגה <span data-su="modeVal"></span></div>' +
-            '<div class="su-card"><div class="su-row">' +
-                '<span class="su-tile" data-su="modeIco"></span>' +
-                '<div class="su-txt"><b data-su="modeTitle"></b><small data-su="modeSub"></small></div>' +
-                '<button class="su-daynight" type="button" role="switch" aria-label="מצב כהה" data-su="mode">' +
-                    '<span class="stars"><i></i><i></i><i></i></span><i class="thumb"></i></button>' +
+            '<div class="su-top"><div class="su-grip"></div><div class="su-bar">' +
+                '<button class="su-x" type="button" data-su="back" aria-label="חזרה" hidden>' + BACK + '</button>' +
+                '<span class="su-compact" data-su="compact">המראה שלך</span>' +
+                '<button class="su-x" type="button" data-su="close" aria-label="סגירה" style="margin-inline-start:auto">' + X + '</button>' +
             '</div></div>' +
-            '<div class="su-label">צבע הטעם <span data-su="accentVal"></span></div>' +
-            '<div class="su-card">' +
-                '<div class="su-swatches" role="radiogroup" aria-label="צבע">' +
-                    ACCENTS.map(function (a) {
-                        return '<button class="su-sw" type="button" role="radio" aria-label="' + a.name + '" data-hex="' + a.hex.toUpperCase() +
-                            '" style="background:' + a.hex + ';--sw:' + a.hex + '">' + CHECK + '</button>';
+
+            '<div class="su-panel" data-su="edit">' +
+                '<div class="su-head"><div><h2>המראה שלך</h2><p>שיהיה טעים גם לעיניים.</p></div></div>' +
+                '<div class="su-card su-preview" aria-hidden="true">' +
+                    '<div class="su-pv-media"></div>' +
+                    '<div class="su-pv-body">' +
+                        '<span class="su-pv-chip">⏱ 12:40</span>' +
+                        '<b>קפה שני על הבית</b><small>בזלת קפה · 4 דק׳ הליכה</small>' +
+                        '<div class="su-pv-row"><span class="su-pv-tag">2 מקומות</span><span class="su-pv-cta">תופס!</span></div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="su-label">מצב תצוגה <span data-su="modeVal"></span></div>' +
+                '<div class="su-card"><div class="su-row">' +
+                    '<span class="su-tile" data-su="modeIco"></span>' +
+                    '<div class="su-txt"><b data-su="modeTitle"></b><small data-su="modeSub"></small></div>' +
+                    '<button class="su-daynight" type="button" role="switch" aria-label="מצב כהה" data-su="mode">' +
+                        '<span class="stars"><i></i><i></i><i></i></span><i class="thumb"></i></button>' +
+                '</div></div>' +
+                '<div class="su-label">צבע הטעם <span data-su="accentVal"></span></div>' +
+                '<div class="su-card">' +
+                    '<div class="su-swatches" role="radiogroup" aria-label="צבע">' +
+                        ACCENTS.map(function (a) {
+                            return '<button class="su-sw" type="button" role="radio" aria-label="' + a.name + '" data-hex="' + a.hex.toUpperCase() +
+                                '" style="background:' + a.hex + ';--sw:' + a.hex + '">' + CHECK + '</button>';
+                        }).join('') +
+                    '</div>' +
+                    '<div class="su-sw-names">' + ACCENTS.map(function (a) { return '<span data-hex="' + a.hex.toUpperCase() + '">' + a.name + '</span>'; }).join('') + '</div>' +
+                '</div>' +
+                '<div class="su-label">גודל טקסט <span data-su="tsVal"></span></div>' +
+                '<div class="su-card su-opts four" role="radiogroup" aria-label="גודל טקסט">' +
+                    SIZES.map(function (s) {
+                        return '<button class="su-opt" type="button" role="radio" data-ts="' + s.v + '"><span class="aa" style="font-size:' + s.px + 'px">Aa</span><small>' + s.name + '</small></button>';
                     }).join('') +
                 '</div>' +
-                '<div class="su-sw-names">' + ACCENTS.map(function (a) { return '<span data-hex="' + a.hex.toUpperCase() + '">' + a.name + '</span>'; }).join('') + '</div>' +
+                '<div class="su-label">סגנון <span data-su="uiVal"></span></div>' +
+                '<div class="su-card su-opts three" role="radiogroup" aria-label="סגנון">' +
+                    STYLES.map(function (s) {
+                        return '<button class="su-opt" type="button" role="radio" data-ui="' + s.v + '"><span class="su-thumb" style="border-radius:' + s.r + 'px"><i style="border-radius:' + Math.max(2, s.r / 2) + 'px"></i></span><small>' + s.name + '</small></button>';
+                    }).join('') +
+                '</div>' +
+                '<div class="su-label">חל על</div>' +
+                '<div class="su-card"><div class="su-row">' +
+                    '<span class="su-tile">' + DROP + '</span>' +
+                    '<div class="su-txt"><b>כל המסכים</b><small data-su="summary"></small></div>' +
+                '</div></div>' +
             '</div>' +
-            '<div class="su-label">מה זה משנה</div>' +
-            '<div class="su-card"><div class="su-row">' +
-                '<span class="su-tile">' + DROP + '</span>' +
-                '<div class="su-txt"><b>בכל המסכים</b><small>צד הלקוח, צד העסק ומסמך המיקוד — יחד.</small></div>' +
-            '</div></div>' +
+
+            '<div class="su-panel" data-su="review" hidden>' +
+                '<div class="su-head"><div><h2>החוויה שלך</h2><p>רואים הכול יחד לפני ששומרים.</p></div></div>' +
+                '<div class="su-label">השינויים <span data-su="reviewN"></span></div>' +
+                '<div class="su-card su-list" data-su="reviewList"></div>' +
+                '<button class="su-primary" type="button" data-su="commit">שמירת השינויים</button>' +
+                '<button class="su-secondary" type="button" data-su="backBtn">חזרה לעריכה</button>' +
+            '</div>' +
         '</div>';
 
     var bar = document.createElement('div');
     bar.className = 'su-pending';
     bar.innerHTML = '<i class="dot"></i><span class="n" data-su="n"></span>' +
-        '<button class="discard" type="button">ביטול</button><button class="review" type="button">שמירה</button>';
+        '<button class="discard" type="button">ביטול</button><button class="review" type="button">סקירה</button>';
 
     var toast = document.createElement('div');
     toast.className = 'su-toast';
@@ -871,26 +978,39 @@ h1 { font-weight: 800; }
     document.body.appendChild(bar);
     document.body.appendChild(toast);
 
+    var sheet = wrap.querySelector('.su-sheet');
+    var top = wrap.querySelector('.su-top');
     function q(k) { return wrap.querySelector('[data-su="' + k + '"]'); }
-    function changes() { return (draft.mode !== saved.mode ? 1 : 0) + (draft.accent !== saved.accent ? 1 : 0); }
+    function changed() { return Object.keys(FIELDS).filter(function (k) { return String(draft[k]) !== String(saved[k]); }); }
+    function countText(n) { return n === 1 ? 'שינוי אחד' : n + ' שינויים'; }
+    var reviewing = false;
 
+    function radios(sel, attr, val) {
+        Array.prototype.forEach.call(wrap.querySelectorAll(sel), function (b) {
+            b.setAttribute('aria-checked', String(b.getAttribute(attr)).toUpperCase() === String(val).toUpperCase() ? 'true' : 'false');
+        });
+    }
     function sync() {
         var dark = draft.mode === 'dark';
         q('mode').setAttribute('aria-checked', dark ? 'true' : 'false');
         q('modeIco').innerHTML = dark ? MOON : SUN;
         q('modeTitle').textContent = dark ? 'מצב כהה' : 'מצב בהיר';
         q('modeSub').textContent = dark ? 'הקישו בשביל אור יום' : 'הקישו כדי להחשיך';
-        q('modeVal').textContent = dark ? 'כהה' : 'בהיר';
-        q('accentVal').textContent = accentName(draft.accent);
-        Array.prototype.forEach.call(wrap.querySelectorAll('.su-sw'), function (b) {
-            b.setAttribute('aria-checked', b.getAttribute('data-hex') === draft.accent ? 'true' : 'false');
-        });
+        q('modeVal').textContent = label('mode', draft.mode);
+        q('accentVal').textContent = label('accent', draft.accent);
+        q('tsVal').textContent = label('ts', draft.ts);
+        q('uiVal').textContent = label('ui', draft.ui);
+        q('summary').textContent = [label('accent', draft.accent), 'טקסט ' + label('ts', draft.ts), label('ui', draft.ui)].join(' · ');
+        radios('.su-sw', 'data-hex', draft.accent);
+        radios('[data-ts]', 'data-ts', draft.ts);
+        radios('.su-opt[data-ui]', 'data-ui', draft.ui);
         Array.prototype.forEach.call(wrap.querySelectorAll('.su-sw-names span'), function (s) {
             s.classList.toggle('on', s.getAttribute('data-hex') === draft.accent);
         });
-        var n = changes();
-        bar.querySelector('[data-su="n"]').textContent = n === 1 ? 'שינוי אחד' : n + ' שינויים';
-        bar.classList.toggle('show', n > 0 && wrap.classList.contains('show'));
+        var n = changed().length;
+        bar.querySelector('[data-su="n"]').textContent = countText(n);
+        bar.classList.toggle('show', n > 0 && wrap.classList.contains('show') && !reviewing);
+        if (!n && reviewing) panel(false);
     }
     function setDraft(k, v) {
         draft[k] = v;
@@ -901,24 +1021,64 @@ h1 { font-weight: 800; }
         toast.textContent = t; toast.classList.add('show');
         clearTimeout(flash.t); flash.t = setTimeout(function () { toast.classList.remove('show'); }, 1800);
     }
-    function open() { wrap.classList.add('show'); wrap.setAttribute('aria-hidden', 'false'); sync(); }
-    function discard() { draft = { mode: saved.mode, accent: saved.accent }; apply(saved); sync(); }
-    function close() { if (changes()) discard(); wrap.classList.remove('show'); wrap.setAttribute('aria-hidden', 'true'); sync(); }
+    function onScroll() {
+        var k = Math.max(0, Math.min(1, sheet.scrollTop / 60));
+        Array.prototype.forEach.call(wrap.querySelectorAll('.su-panel:not([hidden]) .su-head'), function (h) {
+            h.style.opacity = 1 - k; h.style.transform = 'translateY(' + (-6 * k) + 'px)';
+        });
+        q('compact').style.opacity = k;
+        top.classList.toggle('scrolled', k > 0.02);
+    }
+    function panel(review) {
+        reviewing = review;
+        q('edit').hidden = review; q('review').hidden = !review;
+        q('back').hidden = !review;
+        q('compact').textContent = review ? 'החוויה שלך' : 'המראה שלך';
+        if (review) {
+            var list = changed();
+            q('reviewN').textContent = countText(list.length);
+            q('reviewList').innerHTML = list.map(function (k) {
+                return '<div class="su-row"><span class="su-tile">' + ICONS[k] + '</span><div class="su-txt"><b>' + FIELDS[k] + '</b>' +
+                    '<small><s>' + label(k, saved[k]) + '</s> ← <em>' + label(k, draft[k]) + '</em></small></div></div>';
+            }).join('');
+        }
+        sheet.scrollTop = 0; onScroll(); sync();
+    }
+    function open() {
+        document.body.classList.add('su-sheet-open');
+        wrap.classList.add('show'); wrap.setAttribute('aria-hidden', 'false'); panel(false);
+    }
+    function discard() { draft = copy(saved); apply(saved); sync(); }
+    function hide() {
+        wrap.classList.remove('show'); wrap.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('su-sheet-open'); bar.classList.remove('show');
+    }
+    function close() { if (changed().length) discard(); hide(); }
     function commit() {
-        saved = { mode: draft.mode, accent: draft.accent };
-        write({ mode: saved.mode, accent: saved.accent });
-        sync(); wrap.classList.remove('show'); wrap.setAttribute('aria-hidden', 'true'); bar.classList.remove('show');
-        flash('המראה נשמר · ' + accentName(saved.accent));
+        saved = copy(draft);
+        write(saved);
+        hide(); reviewing = false; sync();
+        flash('המראה נשמר · ' + label('accent', saved.accent));
     }
 
+    sheet.addEventListener('scroll', onScroll, { passive: true });
     q('mode').addEventListener('click', function () { setDraft('mode', draft.mode === 'dark' ? 'light' : 'dark'); });
     Array.prototype.forEach.call(wrap.querySelectorAll('.su-sw'), function (b) {
         b.addEventListener('click', function () { setDraft('accent', b.getAttribute('data-hex')); });
     });
-    wrap.querySelector('.su-x').addEventListener('click', close);
+    Array.prototype.forEach.call(wrap.querySelectorAll('[data-ts]'), function (b) {
+        b.addEventListener('click', function () { setDraft('ts', +b.getAttribute('data-ts')); });
+    });
+    Array.prototype.forEach.call(wrap.querySelectorAll('.su-opt[data-ui]'), function (b) {
+        b.addEventListener('click', function () { setDraft('ui', b.getAttribute('data-ui')); });
+    });
+    q('close').addEventListener('click', close);
+    q('back').addEventListener('click', function () { panel(false); });
+    q('backBtn').addEventListener('click', function () { panel(false); });
+    q('commit').addEventListener('click', commit);
     wrap.addEventListener('click', function (e) { if (e.target === wrap) close(); });
     bar.querySelector('.discard').addEventListener('click', discard);
-    bar.querySelector('.review').addEventListener('click', commit);
+    bar.querySelector('.review').addEventListener('click', function () { panel(true); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && wrap.classList.contains('show')) close(); });
 
     var triggers = document.querySelectorAll('[data-su-open]');
