@@ -25,6 +25,7 @@
 ├── business.html       ← נבנה מ־src/bis-business-app.html
 ├── concept.html        ← נבנה מ־src/bis-concept.html
 ├── build.mjs           עוטף את קבצי src במסמך HTML שלם
+├── modern.css          שכבת UI מודרנית משותפת לכל מסכי הדמו
 ├── design/             לוח הכיוונים הוויזואליים (Design Components)
 └── src/
     ├── bis-live-customer.html      צד הלקוח
@@ -66,3 +67,7 @@ node build.mjs                       # עוטף את קבצי src לדפים ע�
 ## סטטוס
 
 גרסת דמו לצורך תיקוף הרעיון — לא מוצר. אין בק־אנד, אין משתמשים אמיתיים, ואין תשלומים.
+
+## שכבת העיצוב המודרנית
+
+`modern.css` היא שכבת override משותפת לדפי הדמו: קנבס בהיר ונקי, טיפוגרפיה שחורה חזקה, הדגשה כתומה מרוסנת, כרטיסים עם קווי מתאר במקום glow/gradient, פקדים קומפקטיים, יעדי מגע של 44px ומצבי focus/contrast/reduced-motion נגישים. `build.mjs` מוסיף אותה אוטומטית לדפים שנבנים מ־`src/`.
