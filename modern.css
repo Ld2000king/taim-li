@@ -1,0 +1,665 @@
+/* (מ)טעים לי — Modern Editorial UI
+   Inspired by the supplied references: clean white canvas, strong black type,
+   restrained warm accent, compact controls, hairline borders, minimal shadow.
+   This file intentionally avoids "AI-default" glow/gradient-heavy styling. */
+
+:root {
+  --modern-bg: #f6f6f4;
+  --modern-surface: #ffffff;
+  --modern-soft: #f2f2ef;
+  --modern-text: #111111;
+  --modern-muted: #6c6c68;
+  --modern-line: #e7e7e2;
+  --modern-accent: #f36f45;
+  --modern-accent-soft: #fff0e9;
+  --modern-success: #187a50;
+  --modern-danger: #c53f4b;
+  --modern-radius-sm: 12px;
+  --modern-radius-md: 16px;
+  --modern-radius-lg: 22px;
+  --modern-shadow: 0 14px 34px rgba(17,17,17,.07);
+  --modern-shadow-soft: 0 4px 16px rgba(17,17,17,.045);
+
+  /* Map existing design roles to the new visual language. */
+  --bg: var(--modern-bg);
+  --bg-edge: #ededeb;
+  --surface: var(--modern-surface);
+  --raised: var(--modern-soft);
+  --border: var(--modern-line);
+  --text: var(--modern-text);
+  --muted: var(--modern-muted);
+  --faint: #92928d;
+  --accent: var(--modern-accent);
+  --accent-hot: var(--modern-accent);
+  --accent-deep: #b64221;
+  --accent-soft: var(--modern-accent-soft);
+  --urgent: var(--modern-danger);
+  --grad: var(--modern-accent);
+  --glow: none;
+  --shadow-card: var(--modern-shadow-soft);
+  --shadow-pop: var(--modern-shadow);
+
+  --paper: var(--modern-bg);
+  --paper-edge: #ededeb;
+  --card: var(--modern-surface);
+  --card-2: var(--modern-soft);
+  --line: var(--modern-line);
+  --ink: var(--modern-text);
+  --ink-soft: var(--modern-muted);
+  --ink-faint: #92928d;
+  --teal: var(--modern-accent);
+  --teal-deep: #b64221;
+  --teal-tint: var(--modern-accent-soft);
+  --clay: var(--modern-accent);
+  --clay-deep: #b64221;
+  --clay-tint: var(--modern-accent-soft);
+  --sage: var(--modern-success);
+  --sage-tint: #eaf5ef;
+  --pink: var(--modern-danger);
+  --pink-tint: #fbecee;
+  --honey: var(--modern-accent);
+  --honey-tint: var(--modern-accent-soft);
+  --rose: var(--modern-danger);
+  --rose-tint: #fbecee;
+  --plum: var(--modern-muted);
+  --plum-tint: var(--modern-soft);
+  --plum-line: var(--modern-line);
+
+  --shadow-soft: var(--modern-shadow-soft);
+  --shadow-lift: var(--modern-shadow);
+  --shadow-depth-sm: var(--modern-shadow-soft);
+  --shadow-depth-md: var(--modern-shadow-soft);
+  --shadow-depth-lg: var(--modern-shadow);
+  --glow-green: none;
+  --glow-gold: none;
+
+  --radius-sm: var(--modern-radius-sm);
+  --radius-tile: var(--modern-radius-md);
+  --radius-btn: var(--modern-radius-sm);
+  --radius-card: var(--modern-radius-lg);
+  --radius-frame: 0px;
+  --r-card: var(--modern-radius-lg);
+  --r-card-lg: 26px;
+  --r-tile: var(--modern-radius-md);
+  --r-field: var(--modern-radius-sm);
+  --r-btn: 14px;
+  --r-chip: 999px;
+}
+
+:root[data-theme="dark"] {
+  --modern-bg: #111210;
+  --modern-surface: #191a18;
+  --modern-soft: #222320;
+  --modern-text: #f7f7f3;
+  --modern-muted: #b6b6af;
+  --modern-line: #30312d;
+  --modern-accent-soft: #3b2119;
+  --modern-shadow: 0 16px 42px rgba(0,0,0,.28);
+  --modern-shadow-soft: 0 5px 18px rgba(0,0,0,.18);
+  --bg-edge: #0c0d0b;
+  --paper-edge: #0c0d0b;
+  --faint: #85857e;
+  --ink-faint: #85857e;
+  --sage-tint: #173126;
+  --pink-tint: #391b20;
+  --rose-tint: #391b20;
+}
+
+html {
+  background: var(--bg-edge, var(--modern-bg));
+  color-scheme: light;
+}
+:root[data-theme="dark"] { color-scheme: dark; }
+
+body {
+  background: var(--modern-bg) !important;
+  color: var(--modern-text) !important;
+  letter-spacing: -.01em;
+}
+
+button, input, select, textarea, a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, [role="button"], .tap, a.cta, a.row {
+  min-height: 44px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--modern-accent) 40%, transparent) !important;
+  outline-offset: 2px !important;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--modern-accent) 24%, transparent);
+}
+
+/* App shell: feels like a real mobile product, not a floating demo card. */
+#app {
+  max-width: 480px !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: var(--modern-bg) !important;
+}
+
+@media (min-width: 560px) {
+  #app {
+    margin-block: 20px !important;
+    min-height: calc(100dvh - 40px) !important;
+    height: calc(100dvh - 40px) !important;
+    border-radius: 28px !important;
+    box-shadow: 0 22px 70px rgba(17,17,17,.12) !important;
+    border: 1px solid var(--modern-line);
+  }
+}
+
+/* Typography: strong editorial hierarchy, less decorative. */
+h1, h2, h3, h4, .wordmark, .pick .word, .c-offer,
+.section-head h2, .stat b, .seg-hint b {
+  font-family: 'Rubik', system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+}
+
+h1, .pick h1 {
+  letter-spacing: -.045em !important;
+}
+
+.wordmark {
+  color: var(--modern-text) !important;
+  letter-spacing: -.03em !important;
+  font-weight: 800 !important;
+}
+
+.appbar,
+.top,
+.bar {
+  background: color-mix(in srgb, var(--modern-bg) 92%, transparent) !important;
+  border-color: var(--modern-line) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Cards: one hierarchy, no glow stacks. */
+.section,
+.inq,
+.stat,
+.booking,
+.hold,
+.group,
+.stats,
+.empty,
+.modal,
+.sheet,
+.arrive,
+.dish,
+.today-empty {
+  border: 1px solid var(--modern-line) !important;
+  box-shadow: none !important;
+  background: var(--modern-surface) !important;
+}
+
+.section,
+.inq,
+.group,
+.stats,
+.empty,
+.modal {
+  border-radius: var(--modern-radius-lg) !important;
+}
+
+.section {
+  padding: 20px !important;
+}
+
+.card {
+  border: 1px solid color-mix(in srgb, #fff 34%, transparent) !important;
+  box-shadow: 0 18px 50px rgba(17,17,17,.14) !important;
+  border-radius: 24px !important;
+}
+
+/* Home page / marketing. */
+.hero-wash {
+  background:
+    radial-gradient(50% 38% at 82% 8%, color-mix(in srgb, var(--modern-accent) 16%, transparent), transparent 76%),
+    linear-gradient(to bottom, transparent 58%, var(--modern-bg)) !important;
+}
+
+.brand-chip,
+.live-pill {
+  background: var(--modern-surface) !important;
+  border-color: var(--modern-line) !important;
+  box-shadow: none !important;
+}
+
+.cta {
+  border-radius: 14px !important;
+  min-height: 50px;
+  padding-inline: 20px !important;
+  box-shadow: none !important;
+}
+
+.cta.primary {
+  background: var(--modern-text) !important;
+  color: var(--modern-surface) !important;
+}
+
+.cta.ghost {
+  background: var(--modern-surface) !important;
+  border: 1px solid var(--modern-line) !important;
+}
+
+.mock {
+  border-radius: 26px !important;
+  transform: none !important;
+  background: #20201e !important;
+  box-shadow: 0 22px 60px rgba(17,17,17,.15) !important;
+}
+
+/* Situation picker: visually closer to modern commerce / mobility apps. */
+.pick {
+  padding: 28px 18px 30px !important;
+}
+
+.pick .word {
+  font-size: 18px !important;
+  color: var(--modern-text) !important;
+  margin-bottom: 30px !important;
+}
+
+.pick h1 {
+  font-size: clamp(30px, 8vw, 38px) !important;
+  line-height: 1.06 !important;
+  margin-bottom: 10px !important;
+}
+
+.pick .sub {
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  color: var(--modern-muted) !important;
+  max-width: 34ch;
+}
+
+.sit-grid {
+  gap: 10px !important;
+}
+
+.sit {
+  min-height: 124px !important;
+  border-radius: 18px !important;
+  padding: 16px !important;
+  border: 1px solid var(--modern-line) !important;
+  background: var(--modern-surface) !important;
+  box-shadow: none !important;
+}
+
+.sit:hover,
+.sit:focus-visible {
+  border-color: color-mix(in srgb, var(--modern-accent) 54%, var(--modern-line)) !important;
+}
+
+.sit svg {
+  color: var(--modern-text) !important;
+}
+
+.sit b {
+  font-size: 15.5px !important;
+  letter-spacing: -.02em;
+}
+
+.sit span {
+  color: var(--modern-muted) !important;
+}
+
+/* Compact segmented controls, like the references. */
+.when {
+  background: #e9e9e5 !important;
+  border-radius: 14px !important;
+  padding: 4px !important;
+  margin: 10px 14px !important;
+}
+
+:root[data-theme="dark"] .when { background: #262724 !important; }
+
+.wbtn {
+  min-height: 38px !important;
+  border-radius: 11px !important;
+  padding: 8px 6px !important;
+  font-weight: 600 !important;
+}
+
+.wbtn[aria-pressed="true"] {
+  background: var(--modern-surface) !important;
+  color: var(--modern-text) !important;
+  box-shadow: 0 1px 4px rgba(17,17,17,.10) !important;
+}
+
+/* Pills stay quiet; state is communicated by text + one accent. */
+.sit-chip,
+.holds-pill,
+.chip,
+.fchip,
+.live-toggle,
+.pill,
+.t-chip,
+.s-chip,
+.c-fit,
+.hold .cd,
+.mock .timer,
+.mock .seats {
+  border-radius: 999px !important;
+  box-shadow: none !important;
+}
+
+.sit-chip,
+.holds-pill,
+.chip,
+.fchip,
+.live-toggle {
+  background: var(--modern-surface) !important;
+  border: 1px solid var(--modern-line) !important;
+  color: var(--modern-text) !important;
+}
+
+.chip[aria-pressed="true"],
+.fchip[aria-pressed="true"] {
+  background: var(--modern-text) !important;
+  border-color: var(--modern-text) !important;
+  color: var(--modern-surface) !important;
+}
+
+.t-chip {
+  background: rgba(255,255,255,.96) !important;
+  color: #111 !important;
+}
+
+.t-chip.warn {
+  background: var(--modern-danger) !important;
+  color: #fff !important;
+}
+
+/* Buttons: black primary, white secondary, warm accent only for emphasis. */
+.btn,
+.inq-actions button,
+.detail-cta button,
+.modal-btns button,
+.empty .btn,
+.sheet-cta button,
+.add-row,
+.alt-box .send,
+.reply-row button {
+  border-radius: 13px !important;
+  box-shadow: none !important;
+  min-height: 44px;
+}
+
+.btn.save,
+.btn-approve,
+.detail-cta .approve,
+.modal-btns .primary,
+.empty .btn,
+.sheet-cta .send,
+.alt-box .send,
+.reply-row button {
+  background: var(--modern-text) !important;
+  color: var(--modern-surface) !important;
+}
+
+.btn.ghost,
+.btn-decline,
+.detail-cta .decline,
+.modal-btns .ghost {
+  background: var(--modern-surface) !important;
+  border: 1px solid var(--modern-line) !important;
+}
+
+.add-row {
+  background: var(--modern-accent-soft) !important;
+  color: #9c3f25 !important;
+  border: 1px solid color-mix(in srgb, var(--modern-accent) 28%, var(--modern-line)) !important;
+}
+
+/* Customer swipe actions: one dominant action, two quiet utilities. */
+.acts {
+  gap: 12px !important;
+  padding: 10px 16px calc(14px + env(safe-area-inset-bottom)) !important;
+}
+
+.act {
+  border: 1px solid var(--modern-line) !important;
+  box-shadow: none !important;
+  background: var(--modern-surface) !important;
+}
+
+.act.yes {
+  width: 64px !important;
+  height: 64px !important;
+  background: var(--modern-text) !important;
+  color: var(--modern-surface) !important;
+}
+
+.act.no {
+  color: var(--modern-danger) !important;
+}
+
+.act.info {
+  color: var(--modern-text) !important;
+}
+
+/* Forms: modern high-contrast fields, no colored halo. */
+input[type="text"],
+input[type="tel"],
+input[type="url"],
+input[type="number"],
+input[type="time"],
+input[type="search"],
+textarea,
+select,
+.reply-row input {
+  background: var(--modern-surface) !important;
+  border: 1px solid var(--modern-line) !important;
+  border-radius: 13px !important;
+  color: var(--modern-text) !important;
+  box-shadow: none !important;
+  min-height: 46px;
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+.reply-row input:focus {
+  border-color: var(--modern-text) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--modern-text) 9%, transparent) !important;
+}
+
+/* Business dashboard density: clean grouped-list rhythm. */
+.scroll,
+.editor {
+  padding-inline: 14px !important;
+}
+
+.stats {
+  overflow: hidden;
+  gap: 0 !important;
+}
+
+.stat {
+  border: 0 !important;
+  border-radius: 0 !important;
+}
+
+.stat + .stat {
+  border-inline-start: 1px solid var(--modern-line) !important;
+}
+
+.stat b {
+  font-size: 24px !important;
+  color: var(--modern-text) !important;
+}
+
+.booking {
+  background: var(--modern-accent-soft) !important;
+  border-color: color-mix(in srgb, var(--modern-accent) 28%, var(--modern-line)) !important;
+}
+
+.booking .t {
+  color: #9c3f25 !important;
+}
+
+.inq {
+  padding: 16px !important;
+  margin-bottom: 10px !important;
+}
+
+.inq-note,
+.alt-box,
+.dish {
+  background: var(--modern-soft) !important;
+  border: 0 !important;
+}
+
+.inq-kind svg {
+  color: var(--modern-text) !important;
+}
+
+/* Bottom navigation: dark floating dock, direct visual cue from the references. */
+.bottom-nav,
+.bottom-tabs,
+.tabbar,
+nav.tabs {
+  margin: 8px 12px calc(8px + env(safe-area-inset-bottom)) !important;
+  border-radius: 18px !important;
+  background: #171816 !important;
+  color: #fff !important;
+  border: 0 !important;
+  box-shadow: 0 12px 32px rgba(17,17,17,.16) !important;
+  overflow: hidden;
+}
+
+.bottom-nav button,
+.bottom-tabs button,
+.tabbar button,
+nav.tabs button {
+  min-height: 54px !important;
+  color: rgba(255,255,255,.62) !important;
+}
+
+.bottom-nav button.active,
+.bottom-tabs button.active,
+.tabbar button.active,
+nav.tabs button.active,
+.bottom-nav [aria-selected="true"],
+.bottom-tabs [aria-selected="true"],
+.tabbar [aria-selected="true"],
+nav.tabs [aria-selected="true"] {
+  color: #fff !important;
+}
+
+/* Bottom sheets / detail views. */
+.sheet,
+.tray {
+  border-radius: 24px 24px 0 0 !important;
+  background: var(--modern-bg) !important;
+  border: 1px solid var(--modern-line) !important;
+  border-bottom: 0 !important;
+  box-shadow: 0 -18px 50px rgba(17,17,17,.12) !important;
+}
+
+.sheet-wrap,
+.tray-wrap,
+.modal-wrap {
+  background: rgba(17,17,17,.42) !important;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.grip {
+  background: #c8c8c2 !important;
+}
+
+/* Remove decorative color washes from most utility surfaces. */
+.progress-fill {
+  background: var(--modern-text) !important;
+}
+
+.seg[aria-pressed="true"] {
+  background: var(--modern-text) !important;
+  color: var(--modern-surface) !important;
+  border-color: var(--modern-text) !important;
+  box-shadow: none !important;
+}
+
+.photo,
+.pbtn {
+  box-shadow: none !important;
+}
+
+.photo {
+  border: 1px solid var(--modern-line);
+}
+
+.add-photo {
+  background: transparent !important;
+  border-color: #c9c9c3 !important;
+}
+
+/* Home stats / rows: closer to high-end marketplace UI. */
+.stats b,
+.row .txt b {
+  color: var(--modern-text) !important;
+}
+
+.tile {
+  background: var(--modern-soft) !important;
+  color: var(--modern-text) !important;
+}
+
+a.row {
+  min-height: 76px !important;
+}
+
+a.row:hover {
+  background: var(--modern-soft) !important;
+}
+
+/* Accessibility: never rely on animation; keep usable zoom/text. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --modern-line: #bdbdb7;
+    --modern-muted: #4f4f4b;
+  }
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline-width: 4px !important;
+  }
+}
+
+/* Do not make desktop cards comically wide. */
+@media (min-width: 900px) {
+  .wrap { max-width: 900px !important; }
+}
+
+/* Keep tiny screens practical. */
+@media (max-width: 370px) {
+  .sit-grid { grid-template-columns: 1fr !important; }
+  .grid-2 { grid-template-columns: 1fr !important; }
+  .pick { padding-inline: 14px !important; }
+}
