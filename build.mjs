@@ -41,6 +41,7 @@ function standalone(srcPath) {
 <meta name="theme-color" content="#FCFBF9" />
 ${RESET}
 ${head}
+<link rel="stylesheet" href="modern.css" />
 </head>
 <body>
 ${body}
